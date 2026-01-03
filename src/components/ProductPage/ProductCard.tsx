@@ -93,9 +93,7 @@ export const ProductCard = ({
                 <img
                   src={
                     checkImageUrl(
-                      product.images?.[0] ||
-                        product.variants?.[0]?.images?.[0]?.imageUrl ||
-                        product.variants?.[0]?.images?.[0]
+                      product.images?.[0] || product.variants?.[0]?.images?.[0]
                     ) || "/placeholder.svg"
                   }
                   alt={product.productDisplayName || product.name}

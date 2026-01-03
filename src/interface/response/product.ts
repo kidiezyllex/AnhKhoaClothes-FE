@@ -34,52 +34,50 @@ export interface IProductImage {
 }
 
 export interface IPopulatedProductVariant {
-  id: string;
-  colorId: string;
-  sizeId: string;
-  color: IColor;
-  size: ISize;
-  price: number;
+  _id: string;
+  id: number;
   stock: number;
-  images: IProductImage[];
+  color: string;
+  size: string;
+  price: number;
+  images: string[];
 }
 
 export interface IProduct {
-  id: string | number;
-  code: string;
-  name: string;
-  brand: string | IBrand;
-  category: string | ICategory;
-  material: string | IMaterial;
-  description: string;
-  weight: number;
+  id: number;
+  gender: string;
+  masterCategory: string;
+  subCategory: string;
+  articleType: string;
+  baseColour: string;
+  season: string;
+  year: number;
+  usage: string;
+  productDisplayName: string;
+  images: string[];
+  rating: number;
+  sale: number;
+  reviews: any[];
   variants: IPopulatedProductVariant[];
-  status: 'ACTIVE' | 'INACTIVE';
-  createdAt: string;
-  updatedAt: string;
-  price: number;
-  // New fields from API
-  gender?: string;
-  masterCategory?: string;
-  subCategory?: string;
-  articleType?: string;
-  baseColour?: string;
-  season?: string;
-  year?: number;
-  usage?: string;
-  productDisplayName?: string;
-  images?: string[];
-  rating?: number;
-  sale?: number;
-  reviews?: any[];
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
+  brand?: string | IBrand;
+  category?: string | ICategory;
+  material?: string | IMaterial;
+  name?: string;
+  code?: string;
+  weight?: number;
+  description?: string;
+  isNew?: boolean;
 }
 
 export interface IProductResponse {
   status: string;
   message: string;
-  data: IProduct;
+  data: {
+    product: IProduct;
+    variants?: IPopulatedProductVariant[]; // Optional if variants are separate
+  };
 }
 
 export interface IProductsResponse {

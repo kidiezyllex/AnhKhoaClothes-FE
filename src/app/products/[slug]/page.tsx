@@ -76,7 +76,10 @@ import {
   mdiMagnify,
   mdiTagOutline,
   mdiAutoFix,
+  mdiEye,
 } from "@mdi/js";
+import { IPromotionsResponse } from "@/interface/response/promotion";
+import { ProductWithDiscount } from "@/lib/promotions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -288,8 +291,8 @@ const SimilarProductCard = ({
   product,
   promotionsData,
 }: {
-  product: any;
-  promotionsData?: any;
+  product: IProduct;
+  promotionsData?: IPromotionsResponse;
 }) => {
   const { addToCart } = useCartStore();
   const [isHovered, setIsHovered] = useState(false);
@@ -311,19 +314,18 @@ const SimilarProductCard = ({
       return;
     }
 
-    // Calculate discount from promotions data if available
-    let finalPrice = firstVariant.price;
-    let originalPrice = undefined;
-    let discountPercent = 0;
-    let hasDiscount = false;
+    // Calculate discount - prioritize product.sale, fallback to promotions
+    let discountPercent = product.sale || 0;
+    let finalPrice = firstVariant.price * (1 - discountPercent / 100);
+    let originalPrice = discountPercent > 0 ? firstVariant.price : undefined;
+    let hasDiscount = discountPercent > 0;
 
-    // Check if promotions data is available and calculate discount
-    if (promotionsData?.data?.promotions) {
+    if (discountPercent === 0 && promotionsData?.data?.promotions) {
       const activePromotions = filterActivePromotions(
         promotionsData.data.promotions
       );
       const discount = calculateProductDiscount(
-        product.id,
+        String(product.id),
         firstVariant.price,
         activePromotions
       );
@@ -337,33 +339,29 @@ const SimilarProductCard = ({
     }
 
     const cartItem = {
-      id: firstVariant.id, // Use variant ID as main ID
-      productId: product.id, // Separate product ID
+      id: firstVariant._id || firstVariant.id,
+      productId: product.id,
       name: product.productDisplayName || product.name,
       price: finalPrice,
       originalPrice: originalPrice,
       discountPercent: discountPercent,
       hasDiscount: hasDiscount,
       image:
-        checkImageUrl(
-          product.images?.[0] ||
-            firstVariant.images?.[0]?.imageUrl ||
-            firstVariant.images?.[0]
-        ) || "",
+        checkImageUrl(product.images?.[0] || firstVariant.images?.[0] || "") ||
+        "/placeholder.svg",
       quantity: 1,
-      slug: product.code,
+      slug: product.id.toString(),
       brand:
-        typeof product.brand === "string" ? product.brand : product.brand?.name,
-      size: firstVariant.sizeId?.code,
-      colors: [firstVariant.colorId?.name || "Default"],
+        typeof product.brand === "string"
+          ? product.brand
+          : product.brand?.name || "No Brand",
+      size: String(firstVariant.size || ""),
+      colors: [String(firstVariant.color || "")],
       stock: firstVariant.stock,
-      // New variant information
-      colorId: firstVariant.colorId?.id || "",
-      sizeId: firstVariant.sizeId?.id || "",
-      colorName: firstVariant.colorId?.name || "Default",
-      sizeName: firstVariant.sizeId?.value
-        ? getSizeLabel(firstVariant.sizeId.value)
-        : firstVariant.sizeId?.name || firstVariant.sizeId?.code || "",
+      colorId: String(firstVariant.color || ""),
+      sizeId: String(firstVariant.size || ""),
+      colorName: String(firstVariant.color || ""),
+      sizeName: String(firstVariant.size || ""),
     };
 
     addToCart(cartItem, 1);
@@ -371,7 +369,11 @@ const SimilarProductCard = ({
   };
 
   const handleQuickView = () => {
-    window.location.href = `/products/${product.name
+    window.location.href = `/products/${(
+      product.productDisplayName ||
+      product.name ||
+      "product"
+    )
       .toLowerCase()
       .replace(/\s+/g, "-")}-${product.id}`;
   };
@@ -406,9 +408,7 @@ const SimilarProductCard = ({
                 <img
                   src={
                     checkImageUrl(
-                      product.images?.[0] ||
-                        product.variants?.[0]?.images?.[0]?.imageUrl ||
-                        product.variants?.[0]?.images?.[0]
+                      product.images?.[0] || product.variants?.[0]?.images?.[0]
                     ) || "/placeholder.svg"
                   }
                   alt={product.productDisplayName || product.name}
@@ -422,7 +422,7 @@ const SimilarProductCard = ({
 
           {/* Enhanced badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
-            {product.isNew && (
+            {product?.isNew && (
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -441,7 +441,7 @@ const SimilarProductCard = ({
                   promotionsData.data.promotions
                 );
                 const discount = calculateProductDiscount(
-                  product.id,
+                  String(product.id),
                   product.variants[0].price,
                   activePromotions
                 );
@@ -543,9 +543,7 @@ const SimilarProductCard = ({
           <div className="text-xs text-primary/80 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-pink-400 animate-pulse"></div>
             <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent">
-              {typeof product.brand === "string"
-                ? product.brand
-                : product.brand?.name}
+              {product.masterCategory || "No Category"}
             </span>
           </div>
 
@@ -575,7 +573,7 @@ const SimilarProductCard = ({
                     product.variants?.[0]
                   ) {
                     const discount = calculateProductDiscount(
-                      product.id,
+                      String(product.id),
                       product.variants[0].price,
                       promotionsData.data.promotions
                     );
@@ -595,7 +593,7 @@ const SimilarProductCard = ({
                 // Show original price if there's a discount
                 if (promotionsData?.data?.promotions && product.variants?.[0]) {
                   const discount = calculateProductDiscount(
-                    product.id,
+                    String(product.id),
                     product.variants[0].price,
                     promotionsData.data.promotions
                   );
@@ -622,38 +620,24 @@ const SimilarProductCard = ({
                   <div className="flex gap-1 text-sm">
                     {Array.from(
                       new Set(
-                        product.variants
-                          .map((v: any) => v.colorId?.id)
-                          .filter(Boolean)
+                        product.variants.map((v) => v.color).filter(Boolean)
                       )
                     )
                       .slice(0, 4)
-                      .map((colorId: unknown, index: number) => {
-                        const variant = product.variants.find(
-                          (v: any) => v.colorId?.id === colorId
-                        );
-                        const color = variant?.colorId || {
-                          code: "#000000",
-                          name: "Default",
-                        };
-
-                        return (
-                          <motion.div
-                            key={index}
-                            className="w-4 h-4 rounded-full border-2 border-white shadow-sm ring-2 ring-gray-200 cursor-pointer"
-                            style={{ backgroundColor: color.code }}
-                            title={color.name}
-                            whileHover={{ scale: 1.3, rotate: 360 }}
-                            transition={{ duration: 0.3 }}
-                          />
-                        );
-                      })}
+                      .map((colorValue: any, index: number) => (
+                        <motion.div
+                          key={index}
+                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm ring-2 ring-gray-200 cursor-pointer"
+                          style={{ backgroundColor: colorValue }}
+                          title={colorValue}
+                          whileHover={{ scale: 1.3, rotate: 360 }}
+                          transition={{ duration: 0.3 }}
+                        />
+                      ))}
 
                     {Array.from(
                       new Set(
-                        product.variants
-                          .map((v: any) => v.colorId?.id)
-                          .filter(Boolean)
+                        product.variants.map((v) => v.color).filter(Boolean)
                       )
                     ).length > 4 && (
                       <motion.span
@@ -663,9 +647,7 @@ const SimilarProductCard = ({
                         +
                         {Array.from(
                           new Set(
-                            product.variants
-                              .map((v: any) => v.colorId?.id)
-                              .filter(Boolean)
+                            product.variants.map((v) => v.color).filter(Boolean)
                           )
                         ).length - 4}
                       </motion.span>
@@ -678,13 +660,7 @@ const SimilarProductCard = ({
                   </span>
                   <div className="flex gap-1 text-maintext text-sm">
                     {Array.from(
-                      new Set(
-                        product.variants.map((v: any) =>
-                          typeof v.sizeId === "object"
-                            ? getSizeLabel(v.sizeId.value)
-                            : getSizeLabel(v.sizeId)
-                        )
-                      )
+                      new Set(product.variants.map((v) => String(v.size)))
                     ).join(", ")}
                   </div>
                 </div>
@@ -717,7 +693,8 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [productDiscount, setProductDiscount] = useState<any>(null);
+  const [productDiscount, setProductDiscount] =
+    useState<ProductWithDiscount | null>(null);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -737,53 +714,45 @@ export default function ProductDetail() {
 
   // Cập nhật variant được chọn khi có dữ liệu sản phẩm
   useEffect(() => {
-    if (
-      productData?.data?.variants?.length &&
-      productData.data.variants.length > 0
-    ) {
-      const firstVariant = productData.data.variants[0];
+    const product = productData?.data?.product;
+    if (product?.variants?.length && product.variants.length > 0) {
+      const firstVariant = product.variants[0];
       setSelectedVariant(firstVariant);
-      setSelectedColor(
-        String(firstVariant.color?.id || firstVariant.colorId || "")
-      );
-      setSelectedSize(
-        String(firstVariant.size?.id || firstVariant.sizeId || "")
-      );
+      setSelectedColor(String(firstVariant.color || ""));
+      setSelectedSize(String(firstVariant.size || ""));
       setCurrentImageIndex(0);
     }
   }, [productData]);
 
   // Calculate product discount when promotions data is available
   useEffect(() => {
-    if (
-      productData?.data &&
-      selectedVariant &&
-      promotionsData?.data?.promotions
-    ) {
+    const product = productData?.data?.product;
+    if (product && selectedVariant && promotionsData?.data?.promotions) {
       const activePromotions = filterActivePromotions(
         promotionsData.data.promotions
       );
       const discount = calculateProductDiscount(
-        productData.data.id,
+        String(product.id),
         selectedVariant.price,
         activePromotions
       );
       setProductDiscount(discount);
     } else {
-      // Reset discount if no promotions or variant
       setProductDiscount(null);
     }
   }, [productData, selectedVariant, promotionsData]);
 
   // Xử lý chọn màu sắc
-  const handleColorSelect = (colorId: string) => {
-    setSelectedColor(colorId);
+  const handleColorSelect = (colorValue: string) => {
+    setSelectedColor(colorValue);
+    const product = productData?.data?.product;
+    if (!product) return;
 
     // Try to find a variant with the selected color and current size
-    const matchingVariant = productData?.data?.variants.find(
+    const matchingVariant = product.variants.find(
       (v) =>
-        String(v.color?.id || v.colorId) === String(colorId) &&
-        String(v.size?.id || v.sizeId) === String(selectedSize)
+        String(v.color) === String(colorValue) &&
+        String(v.size) === String(selectedSize)
     );
 
     if (matchingVariant) {
@@ -791,29 +760,27 @@ export default function ProductDetail() {
       setCurrentImageIndex(0);
     } else {
       // If no exact match, find first variant with the selected color
-      const firstVariantWithColor = productData?.data?.variants.find(
-        (v) => String(v.color?.id || v.colorId) === String(colorId)
+      const firstVariantWithColor = product.variants.find(
+        (v) => String(v.color) === String(colorValue)
       );
       if (firstVariantWithColor) {
         setSelectedVariant(firstVariantWithColor);
-        setSelectedSize(
-          String(
-            firstVariantWithColor.size?.id || firstVariantWithColor.sizeId || ""
-          )
-        );
+        setSelectedSize(String(firstVariantWithColor.size || ""));
         setCurrentImageIndex(0);
       }
     }
   };
 
   // Xử lý chọn kích thước
-  const handleSizeSelect = (sizeId: string) => {
-    setSelectedSize(sizeId);
+  const handleSizeSelect = (sizeValue: string) => {
+    setSelectedSize(sizeValue);
+    const product = productData?.data?.product;
+    if (!product) return;
 
-    const matchingVariant = productData?.data?.variants.find(
+    const matchingVariant = product.variants.find(
       (v) =>
-        String(v.color?.id || v.colorId) === String(selectedColor) &&
-        String(v.size?.id || v.sizeId) === String(sizeId)
+        String(v.color) === String(selectedColor) &&
+        String(v.size) === String(sizeValue)
     );
 
     if (matchingVariant) {
@@ -823,7 +790,8 @@ export default function ProductDetail() {
 
   // Xử lý thêm vào giỏ hàng
   const handleAddToCart = () => {
-    if (!selectedVariant || !productData?.data) return;
+    const product = productData?.data?.product;
+    if (!selectedVariant || !product) return;
 
     // Check stock availability
     if (selectedVariant.stock === 0) {
@@ -839,55 +807,49 @@ export default function ProductDetail() {
     const finalPrice =
       productDiscount && productDiscount.discountPercent > 0
         ? productDiscount.discountedPrice
+        : product.sale
+        ? selectedVariant.price * (1 - product.sale / 100)
         : selectedVariant.price;
 
     const originalPrice =
       productDiscount && productDiscount.discountPercent > 0
         ? productDiscount.originalPrice
+        : product.sale
+        ? selectedVariant.price
         : undefined;
 
     const cartItem = {
-      id: selectedVariant.id, // Use variant ID as main ID
-      productId: productData.data.id, // Separate product ID
-      name: productData.data.productDisplayName || productData.data.name,
+      id: selectedVariant._id || selectedVariant.id, // Use _id or id
+      productId: product.id,
+      name: product.productDisplayName || product.name,
       price: finalPrice,
       originalPrice: originalPrice,
-      discountPercent: productDiscount?.discountPercent || 0,
+      discountPercent: productDiscount?.discountPercent || product.sale || 0,
       hasDiscount: Boolean(
-        productDiscount && productDiscount.discountPercent > 0
+        (productDiscount && productDiscount.discountPercent > 0) ||
+          (product.sale && product.sale > 0)
       ),
       image:
         checkImageUrl(
-          productData.data.images?.[0] ||
-            selectedVariant.images?.[0]?.imageUrl ||
-            selectedVariant.images?.[0]
-        ) || "",
+          product.images?.[0] || (selectedVariant.images as string[])?.[0] || ""
+        ) || "/placeholder.svg",
       quantity: quantity,
-      slug: productData.data.code,
+      slug: product.id.toString(),
       brand:
-        typeof productData.data.brand === "string"
-          ? productData.data.brand
-          : productData.data.brand.name,
-      size: String(selectedVariant.size?.value || selectedVariant.sizeId || ""),
-      colors: [selectedVariant.color?.name || "Default"],
+        typeof product.brand === "string"
+          ? product.brand
+          : product.brand?.name || "No Brand",
+      size: String(selectedVariant.size || ""),
+      colors: [String(selectedVariant.color || "")],
       stock: selectedVariant.stock,
-      // New variant information
-      colorId: String(
-        selectedVariant.color?.id || selectedVariant.colorId || ""
-      ),
-      sizeId: String(selectedVariant.size?.id || selectedVariant.sizeId || ""),
-      colorName: selectedVariant.color?.name || "Default",
-      sizeName: selectedVariant.size?.value
-        ? getSizeLabel(selectedVariant.size.value)
-        : String(selectedVariant.sizeId || ""),
+      colorId: String(selectedVariant.color || ""),
+      sizeId: String(selectedVariant.size || ""),
+      colorName: String(selectedVariant.color || ""),
+      sizeName: String(selectedVariant.size || ""),
     };
 
     addToCart(cartItem, quantity);
-    toast.success(
-      `Đã thêm ${quantity} sản phẩm vào giỏ hàng${
-        originalPrice ? " với giá ưu đãi" : ""
-      }`
-    );
+    toast.success(`Đã thêm ${quantity} sản phẩm vào giỏ hàng`);
   };
 
   // Xử lý chuyển ảnh
@@ -930,7 +892,7 @@ export default function ProductDetail() {
     if (!allProductsData?.data?.products || !productData?.data) return [];
 
     let filteredProducts = allProductsData.data.products
-      .filter((p: IProduct) => p.id !== productData.data.id)
+      .filter((p: IProduct) => p.id !== productData.data.product.id)
       .slice(0, 4);
 
     // Apply promotions to similar products - but only active promotions
@@ -989,23 +951,12 @@ export default function ProductDetail() {
     );
   }
 
-  const product = productData?.data;
+  const product = productData?.data?.product;
   if (!product) return null;
 
-  const brandName =
-    typeof product.brand === "string" ? product.brand : product.brand.name;
-  const brandSlug =
-    typeof product.brand === "string"
-      ? product.brand
-      : product.brand.name.toLowerCase().replace(/\s+/g, "-");
-  const categoryName =
-    typeof product.category === "string"
-      ? product.category
-      : product.category.name;
-  const materialName =
-    typeof product.material === "string"
-      ? product.material
-      : product.material.name;
+  // Product metadata - use actual API fields
+  const brandName = product.masterCategory || "No Brand";
+  const categoryName = product.subCategory || "No Category";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50/50 to-white">
@@ -1059,8 +1010,7 @@ export default function ProductDetail() {
                 <>
                   <ImageZoom
                     src={checkImageUrl(
-                      selectedVariant?.images?.[currentImageIndex]?.imageUrl ||
-                        selectedVariant?.images?.[currentImageIndex] ||
+                      selectedVariant?.images?.[currentImageIndex] ||
                         product.images?.[currentImageIndex]
                     )}
                     alt={product.productDisplayName || product.name}
@@ -1119,7 +1069,7 @@ export default function ProductDetail() {
                       whileTap={{ scale: 0.98 }}
                     >
                       <img
-                        src={checkImageUrl(image?.imageUrl || image)}
+                        src={checkImageUrl(image)}
                         alt={`${product.productDisplayName || product.name} - ${
                           index + 1
                         }`}
@@ -1144,16 +1094,16 @@ export default function ProductDetail() {
             <div className="space-y-3">
               <div className="flex items-center gap-4">
                 <div className="font-mono border h-[22px] bg-gray-100 px-3 flex items-center justify-center text-primary text-sm font-medium rounded-full">
-                  {product.code}
+                  #{product.id}
                 </div>
                 <Badge
                   variant="secondary"
                   className="bg-primary/10 text-primary border-primary/20"
                 >
-                  {brandName}
+                  {product.masterCategory}
                 </Badge>
                 <Badge variant="outline" className="!text-maintext">
-                  {categoryName}
+                  {product.articleType}
                 </Badge>
               </div>
 
@@ -1167,14 +1117,23 @@ export default function ProductDetail() {
                   {[...Array(5)].map((_, i) => (
                     <Icon
                       key={i}
-                      path={i < 4 ? mdiStar : mdiStarOutline}
+                      path={
+                        i < Math.floor(product.rating || 4)
+                          ? mdiStar
+                          : mdiStarOutline
+                      }
                       size={0.7}
-                      className={i < 4 ? "text-yellow-400" : "text-gray-300"}
+                      className={
+                        i < Math.floor(product.rating || 4)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }
                     />
                   ))}
                 </div>
                 <span className="text-sm !text-maintext">
-                  (4.0) • 128 đánh giá
+                  ({product.rating || "4.0"}) •{" "}
+                  {(product.reviews?.length || 0) + 128} đánh giá
                 </span>
               </div>
             </div>
@@ -1257,60 +1216,43 @@ export default function ProductDetail() {
                 </div>
                 {selectedColor && (
                   <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {(() => {
-                      const colorVariant = product.variants.find(
-                        (v) =>
-                          String(v.color?.id || v.colorId) ===
-                          String(selectedColor)
-                      );
-                      return colorVariant?.color?.name || "Màu sắc đã chọn";
-                    })()}
+                    {selectedColor}
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-4">
                 {product.variants
                   .filter((variant, index, self) => {
-                    const colorId = variant.color?.id || variant.colorId;
+                    const colorValue = variant.color;
                     return (
-                      colorId &&
-                      index ===
-                        self.findIndex(
-                          (v) => (v.color?.id || v.colorId) === colorId
-                        )
+                      colorValue &&
+                      index === self.findIndex((v) => v.color === colorValue)
                     );
                   })
                   .map((variant) => (
                     <motion.button
-                      key={variant.color?.id || variant.colorId}
-                      onClick={() =>
-                        handleColorSelect(
-                          String(variant.color?.id || variant.colorId)
-                        )
-                      }
+                      key={variant.color}
+                      onClick={() => handleColorSelect(String(variant.color))}
                       className={`
                         relative group flex items-center justify-center w-10 h-10 rounded-full
                         transition-all duration-300 border-2
                         ${
-                          String(selectedColor) ===
-                          String(variant.color?.id || variant.colorId)
+                          String(selectedColor) === String(variant.color)
                             ? "border-primary ring-4 ring-primary/20 scale-110"
                             : "border-gray-200 hover:border-gray-300 hover:scale-105"
                         }
                       `}
-                      style={{ backgroundColor: variant.color?.code }}
-                      title={variant.color?.name}
+                      style={{ backgroundColor: variant.color as string }}
+                      title={variant.color as string}
                       whileHover={{
                         scale:
-                          String(selectedColor) ===
-                          String(variant.color?.id || variant.colorId)
+                          String(selectedColor) === String(variant.color)
                             ? 1.1
                             : 1.05,
                       }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      {String(selectedColor) ===
-                        String(variant.color?.id || variant.colorId) && (
+                      {String(selectedColor) === String(variant.color) && (
                         <Icon
                           path={mdiCheck}
                           size={1}
@@ -1333,37 +1275,23 @@ export default function ProductDetail() {
                 </div>
                 {selectedSize && (
                   <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {(() => {
-                      const sizeVariant = product.variants.find(
-                        (v) =>
-                          String(v.size?.id || v.sizeId) ===
-                          String(selectedSize)
-                      );
-                      return sizeVariant?.size?.value
-                        ? getSizeLabel(sizeVariant.size.value)
-                        : sizeVariant?.size?.name ||
-                            sizeVariant?.size?.code ||
-                            "Size đã chọn";
-                    })()}
+                    {selectedSize}
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap gap-4">
                 {Array.from(
                   new Set(
-                    product.variants
-                      .map((v) => String(v.size?.id || v.sizeId))
-                      .filter(Boolean)
+                    product.variants.map((v) => String(v.size)).filter(Boolean)
                   )
-                ).map((sizeId) => {
+                ).map((sizeValue) => {
                   const sizeVariant = product.variants.find(
-                    (v) => String(v.size?.id || v.sizeId) === sizeId
+                    (v) => String(v.size) === sizeValue
                   );
                   const variantForColorAndSize = product.variants.find(
                     (v) =>
-                      String(v.color?.id || v.colorId) ===
-                        String(selectedColor) &&
-                      String(v.size?.id || v.sizeId) === sizeId
+                      String(v.color) === String(selectedColor) &&
+                      String(v.size) === sizeValue
                   );
                   const isAvailable =
                     !!variantForColorAndSize &&
@@ -1372,18 +1300,20 @@ export default function ProductDetail() {
                   return (
                     <Button
                       variant={
-                        String(selectedSize) === sizeId ? "default" : "outline"
+                        String(selectedSize) === sizeValue
+                          ? "default"
+                          : "outline"
                       }
                       size="icon"
-                      key={sizeId}
-                      onClick={() => handleSizeSelect(sizeId)}
+                      key={sizeValue}
+                      onClick={() => handleSizeSelect(sizeValue)}
                       disabled={!isAvailable}
                       className={
                         !isAvailable ? "opacity-50 cursor-not-allowed" : ""
                       }
                       title={!isAvailable ? "Không có sẵn cho màu này" : ""}
                     >
-                      {getSizeLabel(sizeVariant?.size?.value || 0)}
+                      {sizeValue}
                     </Button>
                   );
                 })}
@@ -1517,33 +1447,59 @@ export default function ProductDetail() {
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Thương hiệu</span>
-                  <span className="font-medium text-maintext">{brandName}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Danh mục</span>
+                  <span className="!text-maintext">Phân loại chính</span>
                   <span className="font-medium text-maintext">
-                    {categoryName}
+                    {product.masterCategory}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Chất liệu</span>
+                  <span className="!text-maintext">Phân loại phụ</span>
                   <span className="font-medium text-maintext">
-                    {materialName}
+                    {product.subCategory}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="!text-maintext">Trọng lượng</span>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext">Kiểu dáng</span>
                   <span className="font-medium text-maintext">
-                    {product.weight}g
+                    {product.articleType}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext">Màu cơ bản</span>
+                  <span className="font-medium text-maintext">
+                    {product.baseColour}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="!text-maintext">Mã sản phẩm</span>
                   <span className="font-mono font-medium text-primary">
-                    {product.code}
+                    {product.id}
                   </span>
                 </div>
+                {product.gender && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext">Giới tính</span>
+                    <span className="font-medium text-maintext">
+                      {product.gender}
+                    </span>
+                  </div>
+                )}
+                {product.usage && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext">Dịp sử dụng</span>
+                    <span className="font-medium text-maintext">
+                      {product.usage}
+                    </span>
+                  </div>
+                )}
+                {product.season && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext">Mùa</span>
+                    <span className="font-medium text-maintext">
+                      {product.season} ({product.year})
+                    </span>
+                  </div>
+                )}
                 {selectedVariant && (
                   <div className="flex justify-between items-center py-2">
                     <span className="!text-maintext">Giá hiện tại</span>
@@ -1591,10 +1547,20 @@ export default function ProductDetail() {
             <TabsContent value="description" className="mt-8">
               <Card className="p-8">
                 <div className="prose max-w-none">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                    className="text-maintext leading-relaxed"
-                  />
+                  <div className="text-maintext leading-relaxed">
+                    <p>Tên sản phẩm: {product.productDisplayName}</p>
+                    <p>Giới tính: {product.gender}</p>
+                    <p>
+                      Phân loại: {product.masterCategory} -{" "}
+                      {product.subCategory}
+                    </p>
+                    <p>Kiểu dáng: {product.articleType}</p>
+                    <p>Màu sắc: {product.baseColour}</p>
+                    <p>
+                      Mùa: {product.season} {product.year}
+                    </p>
+                    <p>Dịp sử dụng: {product.usage}</p>
+                  </div>
                 </div>
               </Card>
             </TabsContent>
@@ -1608,20 +1574,42 @@ export default function ProductDetail() {
                     </h4>
                     <div className="space-y-3">
                       <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Thương hiệu</span>
-                        <span className="font-medium">{brandName}</span>
+                        <span className="!text-maintext">Giới tính</span>
+                        <span className="font-medium">{product.gender}</span>
                       </div>
                       <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Danh mục</span>
-                        <span className="font-medium">{categoryName}</span>
+                        <span className="!text-maintext">Phân loại chính</span>
+                        <span className="font-medium">
+                          {product.masterCategory}
+                        </span>
                       </div>
                       <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Chất liệu</span>
-                        <span className="font-medium">{materialName}</span>
+                        <span className="!text-maintext">Phân loại phụ</span>
+                        <span className="font-medium">
+                          {product.subCategory}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="!text-maintext">Kiểu dáng</span>
+                        <span className="font-medium">
+                          {product.articleType}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="!text-maintext">Màu cơ bản</span>
+                        <span className="font-medium">
+                          {product.baseColour}
+                        </span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="!text-maintext">Mùa</span>
+                        <span className="font-medium">
+                          {product.season} ({product.year})
+                        </span>
                       </div>
                       <div className="flex justify-between py-2">
-                        <span className="!text-maintext">Trọng lượng</span>
-                        <span className="font-medium">{product.weight}g</span>
+                        <span className="!text-maintext">Dịp sử dụng</span>
+                        <span className="font-medium">{product.usage}</span>
                       </div>
                     </div>
                   </div>
@@ -1637,7 +1625,8 @@ export default function ProductDetail() {
                             Array.from(
                               new Set(
                                 product.variants.map(
-                                  (v) => v.color?.id || v.colorId
+                                  (v) =>
+                                    (v.color as any)?.id || (v as any)?.colorId
                                 )
                               )
                             ).length
@@ -1652,7 +1641,8 @@ export default function ProductDetail() {
                             Array.from(
                               new Set(
                                 product.variants.map(
-                                  (v) => v.size?.id || v.sizeId
+                                  (v) =>
+                                    (v.size as any)?.id || (v as any)?.sizeId
                                 )
                               )
                             ).length
