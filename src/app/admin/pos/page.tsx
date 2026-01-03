@@ -1569,7 +1569,7 @@ export default function POSPage() {
                   />
                   <span className="text-sm font-medium truncate">
                     {cart.name}{" "}
-                    <span className="text-sm text-maintext/70 font-semibold">
+                    <span className="text-sm text-maintext font-semibold">
                       (
                       {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
                       )
@@ -2009,14 +2009,14 @@ export default function POSPage() {
                   <TabsList>
                     <TabsTrigger
                       value="grid"
-                      className="flex items-center gap-1 text-maintext/70"
+                      className="flex items-center gap-1 text-maintext"
                     >
                       <Icon path={mdiViewGridOutline} size={0.8} />
                       Lưới
                     </TabsTrigger>
                     <TabsTrigger
                       value="table"
-                      className="flex items-center gap-1 text-maintext/70"
+                      className="flex items-center gap-1 text-maintext"
                     >
                       <Icon path={mdiTableLarge} size={0.8} />
                       Bảng

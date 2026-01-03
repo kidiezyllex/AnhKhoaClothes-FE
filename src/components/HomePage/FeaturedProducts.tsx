@@ -1,8 +1,15 @@
 import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@mdi/react";
-import { mdiCartOutline, mdiHeartOutline, mdiArrowRight } from "@mdi/js";
+import {
+  mdiCartOutline,
+  mdiHeartOutline,
+  mdiArrowRight,
+  mdiShareVariantOutline,
+  mdiTagOutline,
+} from "@mdi/js";
 import { useRef } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const featuredProducts = [
   {
@@ -87,13 +94,11 @@ const ProductCard = ({
         </div>
 
         {product.discount > 0 && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute top-3 left-3 bg-extra text-white text-sm font-semibold px-3 py-1.5 rounded-full shadow-sm"
-          >
-            -{product.discount}%
-          </motion.div>
+          <div className="absolute top-3 left-3 z-10">
+            <Badge variant="promotion" className="flex items-center gap-1">
+              <Icon path={mdiTagOutline} size={0.6} />-{product.discount}%
+            </Badge>
+          </div>
         )}
 
         <div className="absolute top-3 right-3 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">

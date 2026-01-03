@@ -84,7 +84,7 @@ export const HotDeals = () => {
           {/* Right Column - Content */}
           <motion.div className="w-full md:w-1/2 flex flex-col space-y-4">
             <motion.div>
-              <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-[#F2A024] uppercase bg-amber-100 dark:bg-amber-900/30 rounded-full">
+              <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-wider text-[#F2A024] uppercase bg-amber-100 dark:bg-amber-900/30 rounded-full">
                 Ưu đãi hấp dẫn
               </span>
               <h2 className="text-3xl md:text-4xl font-bold uppercase mb-2 bg-gradient-to-r from-[#2C8B3D] via-[#88C140] to-[#F2A024] bg-clip-text text-transparent drop-shadow-sm">

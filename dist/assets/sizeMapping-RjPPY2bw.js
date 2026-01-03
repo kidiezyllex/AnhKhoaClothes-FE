@@ -1,1 +1,0 @@
-const n=[{value:34,label:"XS"},{value:36,label:"S"},{value:38,label:"M"},{value:40,label:"L"},{value:42,label:"XL"},{value:44,label:"XXL"}],t=e=>{const l=n.find(a=>Math.abs(a.value-e)<.001);return l?l.label:`Size ${e}`},u=e=>{const l=n.find(a=>a.label===e);return l?l.value:null};export{n as S,u as a,t as g};

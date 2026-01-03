@@ -74,7 +74,8 @@ import {
   mdiInformation,
   mdiCartPlus,
   mdiMagnify,
-  mdiEye,
+  mdiTagOutline,
+  mdiAutoFix,
 } from "@mdi/js";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -426,9 +427,11 @@ const SimilarProductCard = ({
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="bg-gradient-to-r from-emerald-500 to-teal-400 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm border-2 border-white/50 backdrop-blur-sm"
               >
-                ✨ Mới
+                <Badge variant="new" className="flex items-center gap-1">
+                  <Icon path={mdiAutoFix} size={0.6} />
+                  Mới
+                </Badge>
               </motion.div>
             )}
             {(() => {
@@ -449,12 +452,16 @@ const SimilarProductCard = ({
                       initial={{ scale: 0, rotate: 180 }}
                       animate={{ scale: 1, rotate: 0 }}
                       transition={{ duration: 0.5, delay: 0.3 }}
-                      className="bg-gradient-to-r from-green-500 via-emerald-500 to-lime-500 text-white text-xs font-bold px-3 rounded-full shadow-sm border border-white/50 backdrop-blur-sm animate-pulse flex-shrink-0 w-fit flex items-center justify-center gap-1"
                     >
-                      💥
-                      <span className="text-base">
-                        -{discount.discountPercent}%
-                      </span>
+                      <Badge
+                        variant="promotion"
+                        className="flex items-center gap-1"
+                      >
+                        <Icon path={mdiTagOutline} size={0.6} />
+                        <span className="text-base">
+                          -{discount.discountPercent}%
+                        </span>
+                      </Badge>
                     </motion.div>
                   );
                 }
@@ -609,7 +616,7 @@ const SimilarProductCard = ({
             {product.variants && product.variants.length > 0 && (
               <div className="flex flex-col gap-1 items-start justify-start">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-maintext/70 font-semibold">
+                  <span className="text-sm text-maintext font-semibold">
                     Màu sắc:
                   </span>
                   <div className="flex gap-1 text-sm">
@@ -666,7 +673,7 @@ const SimilarProductCard = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-maintext/70 font-semibold">
+                  <span className="text-sm text-maintext font-semibold">
                     Kích thước:
                   </span>
                   <div className="flex gap-1 text-maintext text-sm">

@@ -9,9 +9,17 @@ import { useReturnableOrders, useMyReturns } from "@/hooks/return";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Icon } from "@mdi/react";
-import CreateReturnRequestModal from "@/components/returns/CreateReturnRequestModal";
-import ReturnDetailModal from "@/components/returns/ReturnDetailModal";
+import CreateReturnRequestModal from "@/components/Returns/CreateReturnRequestModal";
+import ReturnDetailModal from "@/components/Returns/ReturnDetailModal";
 import { IReturnableOrder, IReturn } from "@/interface/response/return";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { mdiCalendar, mdiCurrencyUsd, mdiPackageVariant } from "@mdi/js";
 
 export default function CustomerReturnsPage() {
   const [selectedTab, setSelectedTab] = useState("returnable");

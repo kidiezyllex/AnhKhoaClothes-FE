@@ -15,10 +15,10 @@ import {
   mdiPackageVariant,
   mdiEye,
 } from "@mdi/js";
-import CreateReturnRequestModal from "@/components/returns/CreateReturnRequestModal";
-import ReturnDetailModal from "@/components/returns/ReturnDetailModal";
 import { IReturnableOrder, IReturn } from "@/interface/response/return";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import CreateReturnRequestModal from "@/components/Returns/CreateReturnRequestModal";
+import ReturnDetailModal from "@/components/Returns/ReturnDetailModal";
 
 const ReturnsPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState("returnable");

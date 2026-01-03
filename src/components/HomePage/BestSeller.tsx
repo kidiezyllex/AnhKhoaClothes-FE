@@ -9,8 +9,11 @@ import {
   mdiEye,
   mdiArrowRight,
   mdiArrowLeft,
+  mdiTagOutline,
+  mdiCrown,
 } from "@mdi/js";
 import { InteractiveHoverButton } from "../Common/InteractiveHoverButton";
+import { Badge } from "@/components/ui/badge";
 
 const bestSellerData = [
   {
@@ -163,27 +166,7 @@ const RatingStars = ({ rating }: { rating: number }) => {
   );
 };
 
-//                                                                                                                     Component thẻ giảm giá
-const DiscountBadge = ({ discount }: { discount: number }) => {
-  if (!discount) return null;
-
-  return (
-    <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-none font-medium text-xs text-white bg-gradient-to-r from-red-500 to-amber-500">
-      -{discount}%
-    </div>
-  );
-};
-
-//                                                                                                                     Component thẻ best seller
-const BestSellerBadge = ({ isBestSeller }: { isBestSeller: boolean }) => {
-  if (!isBestSeller) return null;
-
-  return (
-    <div className="absolute top-3 left-3 z-10 px-2 py-1 rounded-none font-medium text-xs text-white bg-gradient-to-r from-[#2C8B3D] to-[#88C140]">
-      Best Seller
-    </div>
-  );
-};
+// Product badges are now handled directly in ProductCard using the Badge component variants.
 
 //                                                                                                                     Component hiển thị màu sắc
 const ColorOptions = ({ colors }: { colors: string[] }) => {
@@ -260,12 +243,19 @@ const ProductCard = ({
         className="block relative overflow-hidden"
       >
         <div className="relative aspect-square w-full overflow-hidden">
-          {product.discount > 0 && (
-            <DiscountBadge discount={product.discount} />
-          )}
-          {product.isBestSeller && (
-            <BestSellerBadge isBestSeller={product.isBestSeller} />
-          )}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+            {product.discount > 0 && (
+              <Badge variant="promotion" className="flex items-center gap-1">
+                <Icon path={mdiTagOutline} size={0.6} />-{product.discount}%
+              </Badge>
+            )}
+            {product.isBestSeller && (
+              <Badge variant="bestSeller" className="flex items-center gap-1">
+                <Icon path={mdiCrown} size={0.6} />
+                Best Seller
+              </Badge>
+            )}
+          </div>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
 
@@ -380,7 +370,7 @@ export const BestSeller = () => {
           animate={isHeaderInView ? "visible" : "hidden"}
           className="text-center mb-12"
         >
-          <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-[#2C8B3D] uppercase bg-[#E9F5E2] rounded-full">
+          <span className="inline-block px-4 py-1 mb-4 text-xs font-semibold tracking-wider text-[#2C8B3D] uppercase bg-[#E9F5E2] rounded-full">
             Bán chạy nhất
           </span>
           <h2 className="text-3xl font-bold text-center mb-4 relative">

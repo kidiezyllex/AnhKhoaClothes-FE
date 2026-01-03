@@ -4,19 +4,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex !text-white items-center rounded-full border !px-2.5 py-0.5 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center justify-center rounded-full border-[2px] border-white/50 px-2 py-0.5 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 whitespace-nowrap shadow-sm backdrop-blur-md text-white",
   {
     variants: {
       variant: {
-        default:
-          "border-transparent !bg-primary -foreground shadow hover:bg-primary/80",
-        secondary:
-          "border-transparent !bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent !bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
-        outline: "!text-white !bg-amber-500",
-        success: "!bg-green-50 !border-green-300 !text-green-600",
-        warning: "!bg-amber-50 !border-amber-300 !text-amber-600",
+        default: "bg-gradient-to-r from-slate-700 to-slate-900",
+        secondary: "bg-gradient-to-r from-gray-400 to-gray-600",
+        destructive: "bg-gradient-to-r from-red-600 to-rose-700",
+        outline: "bg-gradient-to-r from-amber-400 to-orange-500",
+        success: "bg-gradient-to-r from-emerald-500 to-teal-600",
+        warning: "bg-gradient-to-r from-yellow-500 to-orange-500",
+        promotion: "bg-gradient-to-r from-rose-500 via-pink-500 to-orange-500",
+        danger: "bg-gradient-to-r from-red-500 to-red-700",
+        lowStock: "bg-gradient-to-r from-orange-400 to-red-500",
+        new: "bg-gradient-to-r from-cyan-400 to-blue-500",
+        bestSeller: "bg-gradient-to-r from-[#2C8B3D] to-[#88C140]",
       },
     },
     defaultVariants: {
