@@ -1,0 +1,1 @@
+import{aN as t,aO as o}from"./index-Dpx_4rWJ.js";const n=async e=>await t("/upload/image",e),s=()=>o({mutationFn:e=>n(e)}),p=e=>{const a=new FormData;return a.append("file",e),a.append("upload_preset","ml_default"),a.append("cloud_name","dv4iqmqrm"),a.append("folder","clothes"),a};export{p as c,s as u};
