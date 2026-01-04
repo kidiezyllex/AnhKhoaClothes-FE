@@ -4,6 +4,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import CartIcon from "@/components/ui/CartIcon";
 import { useNavigate } from "react-router-dom";
 import { ProductCard } from "@/components/ProductPage/ProductCard";
+import CompleteTheLookModal from "@/components/ProductPage/CompleteTheLookModal";
+import { useHybridModelRecommendations } from "@/hooks/useRecommend";
+import { useAuth } from "@/hooks/useAuth";
 
 // Add custom styles for zoom cursor
 const zoomStyles = `
@@ -306,6 +309,10 @@ export default function ProductDetail() {
   const { data: allProductsData } = useProducts({ limit: 8 });
   const { data: promotionsData } = usePromotions({ status: "ACTIVE" });
   const { addToCart } = useCartStore();
+  const { user } = useAuth();
+
+  const [outfitModalOpen, setOutfitModalOpen] = useState(false);
+  const getHybridRecommendations = useHybridModelRecommendations();
 
   const [selectedVariant, setSelectedVariant] =
     useState<IPopulatedProductVariant | null>(null);
@@ -1042,15 +1049,15 @@ export default function ProductDetail() {
                             : "outline"
                         }
                         size="icon"
-                        key={sizeValue}
-                        onClick={() => handleSizeSelect(sizeValue)}
+                        key={sizeValue as any}
+                        onClick={() => handleSizeSelect(sizeValue as any)}
                         disabled={!isAvailable}
                         className={
                           !isAvailable ? "opacity-50 cursor-not-allowed" : ""
                         }
                         title={!isAvailable ? "Không có sẵn cho màu này" : ""}
                       >
-                        {sizeValue}
+                        {sizeValue as any}
                       </Button>
                     );
                   })}
@@ -1112,9 +1119,19 @@ export default function ProductDetail() {
                 <Button
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white shadow-sm hover:shadow-sm"
                   size="lg"
-                  onClick={() =>
-                    toast.success("Đã thêm vào danh sách yêu thích")
-                  }
+                  onClick={() => {
+                    if (!user) {
+                      toast.info("Vui lòng đăng nhập để xem gợi ý");
+                      return;
+                    }
+                    setOutfitModalOpen(true);
+                    if (productId && user.id) {
+                      getHybridRecommendations.mutate({
+                        user_id: user.id,
+                        current_product_id: productId,
+                      });
+                    }
+                  }}
                 >
                   <Icon path={mdiAlphaSBox} size={1} />
                   <strong>Gợi ý sản phẩm</strong>
@@ -1318,6 +1335,17 @@ export default function ProductDetail() {
       <div className="fixed bottom-6 right-6 z-50 shadow-sm rounded-full bg-primary p-2 hover:bg-primary/80 transition-all duration-300">
         <CartIcon className="text-white" />
       </div>
+
+      <CompleteTheLookModal
+        open={outfitModalOpen}
+        onClose={() => setOutfitModalOpen(false)}
+        userId={user?.id || ""}
+        productId={productId}
+        user={user}
+        recommendationData={getHybridRecommendations.data}
+        isLoading={getHybridRecommendations.isPending}
+        error={getHybridRecommendations.error}
+      />
     </div>
   );
 }
