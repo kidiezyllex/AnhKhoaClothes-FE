@@ -14,11 +14,12 @@ const badgeVariants = cva(
         outline: "bg-gradient-to-r from-amber-400 to-orange-500",
         success: "bg-gradient-to-r from-emerald-500 to-teal-600",
         warning: "bg-gradient-to-r from-yellow-500 to-orange-500",
-        promotion: "bg-gradient-to-r from-rose-500 via-pink-500 to-orange-500",
+        promotion: "bg-gradient-to-r from-rose-500 to-pink-500",
         danger: "bg-gradient-to-r from-red-500 to-red-700",
         lowStock: "bg-gradient-to-r from-orange-400 to-red-500",
         new: "bg-gradient-to-r from-cyan-400 to-blue-500",
         bestSeller: "bg-gradient-to-r from-[#2C8B3D] to-[#88C140]",
+        teal: "bg-gradient-to-r from-[#3F6844] to-[#3F6844]",
       },
     },
     defaultVariants: {

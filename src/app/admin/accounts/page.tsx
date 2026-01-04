@@ -19,7 +19,7 @@ import {
   mdiLockReset,
   mdiEmail,
   mdiPhone,
-  mdiFilterOutline,
+  mdiFilterMultiple,
   mdiLoading,
   mdiDotsVertical,
 } from "@mdi/js";
@@ -320,7 +320,7 @@ export default function AccountsPage() {
               className="flex items-center"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Icon path={mdiFilterOutline} size={0.7} className="mr-2" />
+              <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
               {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
             </Button>
           </div>

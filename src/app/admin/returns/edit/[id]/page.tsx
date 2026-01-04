@@ -1,22 +1,42 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
- 
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { useReturnDetail, useUpdateReturn } from '@/hooks/return';
-import { IReturnUpdate } from '@/interface/request/return';
-import { toast } from 'react-toastify';
-import { Icon } from '@mdi/react';
-import { mdiArrowLeft, mdiPlus, mdiMinus, mdiContentSave, mdiCancel } from '@mdi/js';
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { useState, useEffect } from "react";
+
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { useReturnDetail, useUpdateReturn } from "@/hooks/return";
+import { IReturnUpdate } from "@/interface/request/return";
+import { toast } from "react-toastify";
+import { Icon } from "@mdi/react";
+import {
+  mdiArrowLeft,
+  mdiPlus,
+  mdiMinus,
+  mdiContentSave,
+  mdiCancel,
+} from "@mdi/js";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 interface EditReturnPageProps {
   params: {
@@ -44,7 +64,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
   const { id } = params;
   const [editableItems, setEditableItems] = useState<EditableItem[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { data: returnData, isLoading, isError } = useReturnDetail(id);
   const updateReturn = useUpdateReturn();
   const navigate = useNavigate();
@@ -52,86 +72,125 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
   useEffect(() => {
     if (returnData?.data) {
       const items = returnData.data.items.map((item: any) => ({
-        product: typeof item.product === 'string' ? item.product : item.product.id,
+        product:
+          typeof item.product === "string" ? item.product : item.product.id,
         variant: item.variant,
         quantity: item.quantity,
         price: item.price,
-        reason: item.reason || '',
+        reason: item.reason || "",
         maxQuantity: item.quantity + 5, // Mock max quantity
-        productName: typeof item.product === 'string' ? 'Sản phẩm' : item.product.name,
-        productCode: typeof item.product === 'string' ? item.product : item.product.code,
-        productImage: typeof item.product === 'string' ? '/placeholder.jpg' : (item.product.images?.[0] || '/placeholder.jpg'),
-        variantInfo: `${item.variant?.color?.name || 'N/A'} - ${item.variant?.size?.name || 'N/A'}`
+        productName:
+          typeof item.product === "string" ? "Sản phẩm" : item.product.name,
+        productCode:
+          typeof item.product === "string" ? item.product : item.product.code,
+        productImage:
+          typeof item.product === "string"
+            ? "/placeholder.jpg"
+            : item.product.images?.[0] || "/placeholder.jpg",
+        variantInfo: `${item.variant?.color?.name || "N/A"} - ${
+          item.variant?.size?.name || "N/A"
+        }`,
       }));
       setEditableItems(items);
     }
   }, [returnData]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd/MM/yyyy HH:mm', { locale: vi });
+    return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi });
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'CHO_XU_LY':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">Chờ xử lý</Badge>;
-      case 'DA_HOAN_TIEN':
-        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Đã hoàn tiền</Badge>;
-      case 'DA_HUY':
-        return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Đã hủy</Badge>;
+      case "CHO_XU_LY":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-50 text-yellow-600 border-yellow-200"
+          >
+            Chờ xử lý
+          </Badge>
+        );
+      case "DA_HOAN_TIEN":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-[#EAEBF2] text-green-600 border-green-200"
+          >
+            Đã hoàn tiền
+          </Badge>
+        );
+      case "DA_HUY":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-red-50 text-red-600 border-red-200"
+          >
+            Đã hủy
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Không xác định</Badge>;
     }
   };
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
-    setEditableItems(prev => prev.map((item, i) => 
-      i === index ? { ...item, quantity: Math.max(1, Math.min(newQuantity, item.maxQuantity)) } : item
-    ));
+    setEditableItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              quantity: Math.max(1, Math.min(newQuantity, item.maxQuantity)),
+            }
+          : item
+      )
+    );
   };
 
   const handleReasonChange = (index: number, reason: string) => {
-    setEditableItems(prev => prev.map((item, i) => 
-      i === index ? { ...item, reason } : item
-    ));
+    setEditableItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, reason } : item))
+    );
   };
 
   const getTotalRefund = () => {
-    return editableItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return editableItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const handleSubmit = async () => {
     if (editableItems.length === 0) {
-      toast.error('Phải có ít nhất một sản phẩm trong yêu cầu trả hàng');
+      toast.error("Phải có ít nhất một sản phẩm trong yêu cầu trả hàng");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const payload: IReturnUpdate = {
-        items: editableItems.map(item => ({
+        items: editableItems.map((item) => ({
           product: item.product,
           variant: item.variant,
           quantity: item.quantity,
           price: item.price,
-          reason: item.reason
+          reason: item.reason,
         })),
-        totalRefund: getTotalRefund()
+        totalRefund: getTotalRefund(),
       };
 
       await updateReturn.mutateAsync({ returnId: id, payload });
-      toast.success('Cập nhật yêu cầu trả hàng thành công');
-      navigate('/admin/returns');
+      toast.success("Cập nhật yêu cầu trả hàng thành công");
+      navigate("/admin/returns");
     } catch (error) {
-      toast.error('Cập nhật yêu cầu trả hàng thất bại');
+      toast.error("Cập nhật yêu cầu trả hàng thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -159,27 +218,33 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
   }
 
   const returnInfo = returnData.data;
-  const customer = typeof returnInfo.customer === 'string' 
-    ? { fullName: 'Không có thông tin', email: '', phoneNumber: '' }
-    : returnInfo.customer;
-  const order = typeof returnInfo.originalOrder === 'string'
-    ? { code: returnInfo.originalOrder }
-    : returnInfo.originalOrder;
+  const customer =
+    typeof returnInfo.customer === "string"
+      ? { fullName: "Không có thông tin", email: "", phoneNumber: "" }
+      : returnInfo.customer;
+  const order =
+    typeof returnInfo.originalOrder === "string"
+      ? { code: returnInfo.originalOrder }
+      : returnInfo.originalOrder;
 
   // Only allow editing if status is CHO_XU_LY
-  const canEdit = returnInfo.status === 'CHO_XU_LY';
+  const canEdit = returnInfo.status === "CHO_XU_LY";
 
   return (
     <div className="space-y-4">
-      <div className='flex justify-between items-start'>
+      <div className="flex justify-between items-start">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/statistics">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/statistics">
+                Dashboard
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/returns">Quản lý trả hàng</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/returns">
+                Quản lý trả hàng
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -201,7 +266,8 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
             <div className="flex items-center gap-2 text-orange-700">
               <Icon path={mdiCancel} size={0.8} />
               <p className="font-medium">
-                Không thể chỉnh sửa yêu cầu trả hàng này vì trạng thái không phải "Chờ xử lý"
+                Không thể chỉnh sửa yêu cầu trả hàng này vì trạng thái không
+                phải "Chờ xử lý"
               </p>
             </div>
           </CardContent>
@@ -227,7 +293,9 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                 </div>
                 <div>
                   <span className="text-maintext">Ngày tạo:</span>
-                  <span className="ml-2 font-medium">{formatDate(returnInfo.createdAt)}</span>
+                  <span className="ml-2 font-medium">
+                    {formatDate(returnInfo.createdAt)}
+                  </span>
                 </div>
                 <div>
                   <span className="text-maintext">Đơn hàng gốc:</span>
@@ -235,7 +303,9 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                 </div>
                 <div>
                   <span className="text-maintext">Tổng tiền hiện tại:</span>
-                  <span className="ml-2 font-medium text-primary">{formatCurrency(returnInfo.totalRefund)}</span>
+                  <span className="ml-2 font-medium text-primary">
+                    {formatCurrency(returnInfo.totalRefund)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -249,11 +319,15 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                 </div>
                 <div>
                   <span className="text-maintext">Email:</span>
-                  <span className="ml-2 font-medium">{customer.email || 'Không có'}</span>
+                  <span className="ml-2 font-medium">
+                    {customer.email || "Không có"}
+                  </span>
                 </div>
                 <div>
                   <span className="text-maintext">Số điện thoại:</span>
-                  <span className="ml-2 font-medium">{customer.phoneNumber || 'Không có'}</span>
+                  <span className="ml-2 font-medium">
+                    {customer.phoneNumber || "Không có"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -285,11 +359,15 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium">{item.productName}</h4>
-                    <p className="text-sm text-maintext">SKU: {item.productCode}</p>
+                    <p className="text-sm text-maintext">
+                      SKU: {item.productCode}
+                    </p>
                     <p className="text-sm text-maintext">{item.variantInfo}</p>
-                    <p className="text-sm text-maintext">Giá: {formatCurrency(item.price)}</p>
+                    <p className="text-sm text-maintext">
+                      Giá: {formatCurrency(item.price)}
+                    </p>
                   </div>
-                  
+
                   {canEdit && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">Số lượng:</span>
@@ -297,7 +375,9 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleQuantityChange(index, item.quantity - 1)}
+                          onClick={() =>
+                            handleQuantityChange(index, item.quantity - 1)
+                          }
                           disabled={item.quantity <= 1}
                         >
                           <Icon path={mdiMinus} size={0.7} />
@@ -307,13 +387,20 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                           min="1"
                           max={item.maxQuantity}
                           value={item.quantity}
-                          onChange={(e) => handleQuantityChange(index, parseInt(e.target.value) || 1)}
+                          onChange={(e) =>
+                            handleQuantityChange(
+                              index,
+                              parseInt(e.target.value) || 1
+                            )
+                          }
                           className="w-20 text-center"
                         />
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleQuantityChange(index, item.quantity + 1)}
+                          onClick={() =>
+                            handleQuantityChange(index, item.quantity + 1)
+                          }
                           disabled={item.quantity >= item.maxQuantity}
                         >
                           <Icon path={mdiPlus} size={0.7} />
@@ -321,7 +408,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                       </div>
                     </div>
                   )}
-                  
+
                   {!canEdit && (
                     <div className="text-right">
                       <p className="text-sm text-maintext">Số lượng</p>
@@ -329,30 +416,40 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                     </div>
                   )}
                 </div>
-                
+
                 {canEdit && (
                   <div className="mt-4">
-                    <label className="text-sm font-medium mb-1 block">Lý do trả hàng</label>
+                    <label className="text-sm font-medium mb-1 block">
+                      Lý do trả hàng
+                    </label>
                     <Textarea
                       placeholder="Nhập lý do trả hàng..."
-                      value={item.reason || ''}
-                      onChange={(e) => handleReasonChange(index, e.target.value)}
+                      value={item.reason || ""}
+                      onChange={(e) =>
+                        handleReasonChange(index, e.target.value)
+                      }
                       rows={2}
                     />
                   </div>
                 )}
-                
+
                 {!canEdit && item.reason && (
                   <div className="mt-4">
-                    <label className="text-sm font-medium mb-1 block">Lý do trả hàng</label>
-                    <p className="text-sm text-maintext p-2 bg-gray-50 rounded">{item.reason}</p>
+                    <label className="text-sm font-medium mb-1 block">
+                      Lý do trả hàng
+                    </label>
+                    <p className="text-sm text-maintext p-2 bg-gray-50 rounded">
+                      {item.reason}
+                    </p>
                   </div>
                 )}
-                
+
                 <div className="mt-2 pt-2 border-t">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-maintext">Thành tiền:</span>
-                    <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(item.price * item.quantity)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -382,21 +479,27 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                   <TableCell>
                     <div>
                       <p className="font-medium">{item.productName}</p>
-                      <p className="text-sm text-maintext">{item.variantInfo}</p>
+                      <p className="text-sm text-maintext">
+                        {item.variantInfo}
+                      </p>
                     </div>
                   </TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{formatCurrency(item.price)}</TableCell>
-                  <TableCell>{formatCurrency(item.price * item.quantity)}</TableCell>
+                  <TableCell>
+                    {formatCurrency(item.price * item.quantity)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          
+
           <div className="border-t pt-4 mt-4">
             <div className="flex justify-between items-center text-lg font-semibold">
               <span>Tổng tiền hoàn trả mới:</span>
-              <span className="text-primary">{formatCurrency(getTotalRefund())}</span>
+              <span className="text-primary">
+                {formatCurrency(getTotalRefund())}
+              </span>
             </div>
             {getTotalRefund() !== returnInfo.totalRefund && (
               <div className="flex justify-between items-center text-sm text-maintext mt-1">
@@ -416,15 +519,15 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
               Hủy
             </Button>
           </a>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             disabled={isSubmitting || editableItems.length === 0}
           >
             <Icon path={mdiContentSave} size={0.7} className="mr-2" />
-            {isSubmitting ? 'Đang lưu...' : 'Lưu thay đổi'}
+            {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
         </div>
       )}
     </div>
   );
-} 
+}

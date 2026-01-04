@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@mdi/react";
 import {
-  mdiCartOutline,
-  mdiHeartOutline,
+  mdiCartArrowRight,
+  mdiHeartCircle,
   mdiEye,
-  mdiTagOutline,
+  mdiTagMultiple,
   mdiPackageVariantClosed,
-  mdiAlertOutline,
+  mdiAlertOctagon,
 } from "@mdi/js";
-import { checkImageUrl } from "@/lib/utils";
+import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
 import { calculateProductDiscount } from "@/lib/promotions";
 
 interface ProductCardProps {
@@ -35,14 +35,14 @@ export const ProductCard = ({
   const [isHovered, setIsHovered] = useState(false);
 
   // Extract data from the first variant as requested
-  const firstVariant = product.variants?.[0];
+  const firstVariant = (product as any)?.variants?.[0];
   const basePrice = firstVariant?.price || 0;
   const currentStock = firstVariant?.stock || 0;
 
-  // Calculate discount - prioritize product.sale from JSON, fallback to promotionsData
+  // Calculate discount - prioritize (product as any)?.sale from JSON, fallback to promotionsData
   const getDiscountInfo = () => {
-    let discountPercent = product.sale || 0;
-    let discountedPrice = basePrice * (1 - discountPercent / 100);
+    let discountPercent = (product as any)?.sale || 0;
+    let discountedPrice = calculateDiscountedPrice(basePrice, discountPercent);
 
     // If no direct sale on product, check promotionsData
     if (
@@ -51,7 +51,7 @@ export const ProductCard = ({
       firstVariant
     ) {
       const promoDiscount = calculateProductDiscount(
-        product.id,
+        (product as any)?.id,
         basePrice,
         promotionsData.data.promotions
       );
@@ -78,12 +78,14 @@ export const ProductCard = ({
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
     >
-      <Card className="group overflow-hidden rounded-xl hover:shadow-2xl shadow-sm transition-all duration-500 h-full flex flex-col transform bg-white relative backdrop-blur-sm border-2 border-white hover:border-primary">
+      <Card className="group overflow-hidden rounded-xl hover:shadow-2xl shadow-md transition-all duration-500 h-full flex flex-col transform bg-white relative backdrop-blur-sm border-2 border-transparent hover:border-primary">
         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
 
         <div className="relative bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl overflow-hidden">
           <a
-            href={`/products/${(product.productDisplayName || product.name)
+            href={`/products/${(
+              product.productDisplayName || (product as any)?.name
+            )
               .toLowerCase()
               .replace(/\s+/g, "-")}-${product.id}`}
             className="block"
@@ -93,10 +95,11 @@ export const ProductCard = ({
                 <img
                   src={
                     checkImageUrl(
-                      product.images?.[0] || product.variants?.[0]?.images?.[0]
+                      (product as any)?.images?.[0] ||
+                        (product as any)?.variants?.[0]?.images?.[0]
                     ) || "/placeholder.svg"
                   }
-                  alt={product.productDisplayName || product.name}
+                  alt={product.productDisplayName || (product as any)?.name}
                   className="object-contain w-full h-full drop-shadow-2xl filter group-hover:brightness-110 transition-all duration-500 bg-white"
                 />
               </motion.div>
@@ -106,7 +109,7 @@ export const ProductCard = ({
           {/* Enhanced badges */}
           <div className="absolute top-2 left-2 flex flex-row flex-wrap gap-2 z-20">
             {product.articleType && (
-              <Badge variant="bestSeller">{product.articleType}</Badge>
+              <Badge variant="teal">{product.articleType}</Badge>
             )}
             {discountInfo.isDiscounted && (
               <motion.div
@@ -114,8 +117,8 @@ export const ProductCard = ({
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <Badge variant="promotion" className="flex items-center gap-1">
-                  <Icon path={mdiTagOutline} size={0.6} />-
+                <Badge variant="bestSeller" className="flex items-center gap-1">
+                  <Icon path={mdiTagMultiple} size={0.6} />-
                   {discountInfo.percent}%
                 </Badge>
               </motion.div>
@@ -146,7 +149,7 @@ export const ProductCard = ({
                       variant="lowStock"
                       className="flex items-center gap-1"
                     >
-                      <Icon path={mdiAlertOutline} size={0.6} />
+                      <Icon path={mdiAlertOctagon} size={0.6} />
                       Sắp hết
                     </Badge>
                   </motion.div>
@@ -178,7 +181,7 @@ export const ProductCard = ({
                 aria-label="Thêm vào giỏ hàng"
               >
                 <Icon
-                  path={mdiCartOutline}
+                  path={mdiCartArrowRight}
                   size={0.7}
                   className="group-hover/btn:animate-bounce"
                 />
@@ -197,7 +200,7 @@ export const ProductCard = ({
                 aria-label="Yêu thích"
               >
                 <Icon
-                  path={mdiHeartOutline}
+                  path={mdiHeartCircle}
                   size={0.7}
                   className="group-hover/btn:animate-pulse"
                 />
@@ -225,22 +228,26 @@ export const ProductCard = ({
           </motion.div>
         </div>
 
-        <div className="p-3 flex flex-col flex-grow bg-gray-50 border-t border-gray-200 relative">
+        <div className="p-3 flex flex-col flex-grow bg-green-50 border-t border-gray-200 relative">
           <span className="font-semibold text-base text-primary">
             {product.brand
-              ? typeof product.brand === "string"
-                ? product.brand
-                : product.brand?.name
-              : product.gender || product.masterCategory || "Product"}
+              ? typeof (product as any)?.brand === "string"
+                ? (product as any)?.brand
+                : (product as any)?.brand?.name
+              : (product as any)?.gender ||
+                (product as any)?.masterCategory ||
+                "Product"}
           </span>
           <a
-            href={`/products/${(product.productDisplayName || product.name)
+            href={`/products/${(
+              product.productDisplayName || (product as any)?.name
+            )
               .toLowerCase()
               .replace(/\s+/g, "-")}-${product.id}`}
             className="hover:text-primary transition-colors group/link"
           >
             <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
-              {product.productDisplayName || product.name}
+              {product.productDisplayName || (product as any)?.name}
             </h3>
           </a>
 
@@ -274,7 +281,9 @@ export const ProductCard = ({
                   </span>
                   <div className="flex flex-wrap gap-1 text-sm items-center">
                     {Array.from(
-                      new Set(product.variants.map((v: any) => v.color))
+                      new Set(
+                        (product as any)?.variants.map((v: any) => v.color)
+                      )
                     )
                       .slice(0, 5)
                       .map((color: any, index: number) => (
@@ -287,12 +296,16 @@ export const ProductCard = ({
                         />
                       ))}
                     {Array.from(
-                      new Set(product.variants.map((v: any) => v.color))
+                      new Set(
+                        (product as any)?.variants.map((v: any) => v.color)
+                      )
                     ).length > 5 && (
                       <span className="text-[10px] text-maintext">
                         +
                         {Array.from(
-                          new Set(product.variants.map((v: any) => v.color))
+                          new Set(
+                            (product as any)?.variants.map((v: any) => v.color)
+                          )
                         ).length - 5}
                       </span>
                     )}
@@ -304,7 +317,9 @@ export const ProductCard = ({
                   </span>
                   <div className="flex flex-wrap gap-1 text-xs text-maintext">
                     {Array.from(
-                      new Set(product.variants.map((v: any) => v.size))
+                      new Set(
+                        (product as any)?.variants.map((v: any) => v.size)
+                      )
                     ).join(" , ")}
                   </div>
                 </div>

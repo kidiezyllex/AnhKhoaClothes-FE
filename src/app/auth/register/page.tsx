@@ -252,7 +252,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                   high={80}
                   optimum={100}
                   value={passwordStrength}
-                  className="w-full h-1.5 rounded-full overflow-hidden [&::-webkit-meter-bar]:bg-gray-300 [&::-webkit-meter-optimum-value]:bg-green-500 [&::-webkit-meter-suboptimum-value]:bg-yellow-500 [&::-webkit-meter-even-less-good-value]:bg-red-500 [&::-moz-meter-bar]:bg-gray-300 [&::-moz-meter-optimum]:bg-green-500 [&::-moz-meter-suboptimum]:bg-yellow-500 [&::-moz-meter-border-less-good]:bg-red-500"
+                  className="w-full h-1.5 rounded-full overflow-hidden [&::-webkit-meter-bar]:bg-gray-300 [&::-webkit-meter-optimum-value]:bg-[#EAEBF2]0 [&::-webkit-meter-suboptimum-value]:bg-yellow-500 [&::-webkit-meter-even-less-good-value]:bg-red-500 [&::-moz-meter-bar]:bg-gray-300 [&::-moz-meter-optimum]:bg-[#EAEBF2]0 [&::-moz-meter-suboptimum]:bg-yellow-500 [&::-moz-meter-border-less-good]:bg-red-500"
                 ></meter>
                 <p
                   className="text-xs mt-1"

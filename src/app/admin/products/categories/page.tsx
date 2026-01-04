@@ -1,27 +1,71 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
- 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Icon } from '@mdi/react';
-import { mdiMagnify, mdiPlus, mdiPencilCircle, mdiDeleteCircle, mdiFilterOutline } from '@mdi/js';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useCategories, useDeleteCategory, useCategoryDetail, useUpdateCategory, useCreateCategory } from '@/hooks/attributes';
-import { ICategoryFilter, ICategoryCreate, ICategoryUpdate } from '@/interface/request/attributes';
-import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { useState, useEffect, useMemo } from "react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Icon } from "@mdi/react";
+import {
+  mdiMagnify,
+  mdiPlus,
+  mdiPencilCircle,
+  mdiDeleteCircle,
+  mdiFilterMultiple,
+} from "@mdi/js";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  useCategories,
+  useDeleteCategory,
+  useCategoryDetail,
+  useUpdateCategory,
+  useCreateCategory,
+} from "@/hooks/attributes";
+import {
+  ICategoryFilter,
+  ICategoryCreate,
+  ICategoryUpdate,
+} from "@/interface/request/attributes";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function CategoriesPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ICategoryFilter>({});
   const [showFilters, setShowFilters] = useState(false);
   const { data, isLoading, isError } = useCategories(filters);
@@ -37,13 +81,13 @@ export default function CategoriesPage() {
     if (!data?.data || !searchQuery.trim()) return data?.data;
 
     const query = searchQuery.toLowerCase().trim();
-    return data.data.filter(category =>
+    return data.data.filter((category) =>
       category.name.toLowerCase().includes(query)
     );
   }, [data?.data, searchQuery]);
 
   const handleFilterChange = (key: keyof ICategoryFilter, value: any) => {
-    if (value === 'all' || value === '') {
+    if (value === "all" || value === "") {
       const newFilters = { ...filters };
       delete newFilters[key];
       setFilters(newFilters);
@@ -56,34 +100,38 @@ export default function CategoriesPage() {
     try {
       await deleteCategory.mutateAsync(id, {
         onSuccess: () => {
-          toast.success('Đã xóa danh mục thành công');
-          queryClient.invalidateQueries({ queryKey: ['categories'] });
+          toast.success("Đã xóa danh mục thành công");
+          queryClient.invalidateQueries({ queryKey: ["categories"] });
         },
       });
     } catch (error) {
-      toast.error('Xóa danh mục thất bại');
+      toast.error("Xóa danh mục thất bại");
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     }).format(new Date(dateString));
   };
 
   return (
     <div className="space-y-4">
-      <div className='flex justify-between items-start'>
+      <div className="flex justify-between items-start">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/statistics">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/statistics">
+                Dashboard
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/products">Quản lý sản phẩm</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/products">
+                Quản lý sản phẩm
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -91,7 +139,6 @@ export default function CategoriesPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-
       </div>
 
       <Card className="mb-4">
@@ -111,10 +158,10 @@ export default function CategoriesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className='flex items-center gap-2'>
+            <div className="flex items-center gap-2">
               <Select
-                value={filters.status || 'all'}
-                onValueChange={(value) => handleFilterChange('status', value)}
+                value={filters.status || "all"}
+                onValueChange={(value) => handleFilterChange("status", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tất cả trạng thái" />
@@ -125,7 +172,10 @@ export default function CategoriesPage() {
                   <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
                 </SelectContent>
               </Select>
-              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <Icon path={mdiPlus} size={0.7} />
@@ -139,7 +189,6 @@ export default function CategoriesPage() {
               </Dialog>
             </div>
           </div>
-
         </CardContent>
       </Card>
 
@@ -149,11 +198,21 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">ID</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Tên danh mục</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Trạng thái</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Ngày cập nhật</TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">Thao tác</TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    ID
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Tên danh mục
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Ngày cập nhật
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">
+                    Thao tác
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,11 +244,15 @@ export default function CategoriesPage() {
         </div>
       ) : isError ? (
         <div className="bg-white rounded-[6px] shadow-sm p-4 text-center">
-          <p className="text-red-500">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>
+          <p className="text-red-500">
+            Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.
+          </p>
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['categories'] })}
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["categories"] })
+            }
           >
             Thử lại
           </Button>
@@ -200,29 +263,49 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">ID</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Tên danh mục</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Trạng thái</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Ngày cập nhật</TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">Thao tác</TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    ID
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Tên danh mục
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Ngày cập nhật
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">
+                    Thao tác
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCategories?.length ? (
                   filteredCategories.map((category) => (
-                    <TableRow key={(category as any)?.id} className="hover:bg-gray-50">
+                    <TableRow
+                      key={(category as any)?.id}
+                      className="hover:bg-gray-50"
+                    >
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
                         {(category as any)?.id}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-maintext">{category.name}</div>
+                        <div className="text-sm font-medium text-maintext">
+                          {category.name}
+                        </div>
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs rounded-full ${category.status === 'ACTIVE'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                          }`}>
-                          {category.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            category.status === "ACTIVE"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {category.status === "ACTIVE"
+                            ? "Hoạt động"
+                            : "Không hoạt động"}
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
@@ -230,10 +313,16 @@ export default function CategoriesPage() {
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <Dialog open={isEditDialogOpen && categoryToEdit === (category as any)?.id} onOpenChange={(open) => {
-                            setIsEditDialogOpen(open);
-                            if (!open) setCategoryToEdit(null);
-                          }}>
+                          <Dialog
+                            open={
+                              isEditDialogOpen &&
+                              categoryToEdit === (category as any)?.id
+                            }
+                            onOpenChange={(open) => {
+                              setIsEditDialogOpen(open);
+                              if (!open) setCategoryToEdit(null);
+                            }}
+                          >
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
@@ -258,7 +347,13 @@ export default function CategoriesPage() {
                               />
                             )}
                           </Dialog>
-                          <Dialog open={isDeleteDialogOpen && categoryToDelete === (category as any)?.id} onOpenChange={setIsDeleteDialogOpen}>
+                          <Dialog
+                            open={
+                              isDeleteDialogOpen &&
+                              categoryToDelete === (category as any)?.id
+                            }
+                            onOpenChange={setIsDeleteDialogOpen}
+                          >
                             <DialogTrigger asChild>
                               <Button
                                 variant="outline"
@@ -276,17 +371,29 @@ export default function CategoriesPage() {
                               <DialogHeader>
                                 <DialogTitle>Xác nhận xóa danh mục</DialogTitle>
                               </DialogHeader>
-                              <p>Bạn có chắc chắn muốn xóa danh mục này không?</p>
+                              <p>
+                                Bạn có chắc chắn muốn xóa danh mục này không?
+                              </p>
                               <DialogFooter>
                                 <DialogClose asChild>
-                                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Hủy</Button>
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setIsDeleteDialogOpen(false)}
+                                  >
+                                    Hủy
+                                  </Button>
                                 </DialogClose>
-                                <Button variant="destructive" onClick={() => {
-                                  if (categoryToDelete) {
-                                    handleDeleteCategory(categoryToDelete);
-                                    setIsDeleteDialogOpen(false);
-                                  }
-                                }}>Xóa</Button>
+                                <Button
+                                  variant="destructive"
+                                  onClick={() => {
+                                    if (categoryToDelete) {
+                                      handleDeleteCategory(categoryToDelete);
+                                      setIsDeleteDialogOpen(false);
+                                    }
+                                  }}
+                                >
+                                  Xóa
+                                </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>
@@ -296,7 +403,10 @@ export default function CategoriesPage() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="px-4 py-8 text-center text-maintext">
+                    <TableCell
+                      colSpan={5}
+                      className="px-4 py-8 text-center text-maintext"
+                    >
                       Không tìm thấy danh mục nào
                     </TableCell>
                   </TableRow>
@@ -317,25 +427,33 @@ interface EditCategoryDialogProps {
   onClose: () => void;
 }
 
-function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogProps) {
+function EditCategoryDialog({
+  categoryId,
+  isOpen,
+  onClose,
+}: EditCategoryDialogProps) {
   const queryClient = useQueryClient();
-  const { data: categoryData, isLoading, isError } = useCategoryDetail(categoryId);
+  const {
+    data: categoryData,
+    isLoading,
+    isError,
+  } = useCategoryDetail(categoryId);
   const updateCategory = useUpdateCategory();
 
   const [formData, setFormData] = useState({
-    name: '',
-    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
+    name: "",
+    status: "ACTIVE" as "ACTIVE" | "INACTIVE",
   });
 
   const [errors, setErrors] = useState({
-    name: ''
+    name: "",
   });
 
   useEffect(() => {
     if (categoryData?.data) {
       setFormData({
         name: categoryData.data.name,
-        status: categoryData.data.status
+        status: categoryData.data.status,
       });
     }
   }, [categoryData]);
@@ -346,12 +464,15 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
 
     // Clear error when user types
     if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
+    setFormData((prev) => ({
+      ...prev,
+      status: value as "ACTIVE" | "INACTIVE",
+    }));
   };
 
   const validateForm = () => {
@@ -359,7 +480,7 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
     const newErrors = { ...errors };
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Tên danh mục không được để trống';
+      newErrors.name = "Tên danh mục không được để trống";
       isValid = false;
     }
 
@@ -376,22 +497,24 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
       await updateCategory.mutateAsync(
         {
           categoryId: categoryId,
-          payload: formData
+          payload: formData,
         },
         {
           onSuccess: () => {
-            toast.success('Cập nhật danh mục thành công');
-            queryClient.invalidateQueries({ queryKey: ['category', categoryId] });
-            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            toast.success("Cập nhật danh mục thành công");
+            queryClient.invalidateQueries({
+              queryKey: ["category", categoryId],
+            });
+            queryClient.invalidateQueries({ queryKey: ["categories"] });
             onClose();
           },
           onError: (error) => {
-            toast.error('Cập nhật danh mục thất bại: ' + error.message);
-          }
+            toast.error("Cập nhật danh mục thất bại: " + error.message);
+          },
         }
       );
     } catch (error) {
-      toast.error('Đã xảy ra lỗi khi cập nhật danh mục');
+      toast.error("Đã xảy ra lỗi khi cập nhật danh mục");
     }
   };
 
@@ -399,7 +522,9 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
     return (
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle><Skeleton className="h-8 w-[200px]" /></DialogTitle>
+          <DialogTitle>
+            <Skeleton className="h-8 w-[200px]" />
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">
@@ -426,12 +551,20 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
           <DialogTitle>Lỗi</DialogTitle>
         </DialogHeader>
         <div className="py-4 text-center">
-          <p className="text-red-500 mb-4">Đã xảy ra lỗi khi tải dữ liệu danh mục.</p>
+          <p className="text-red-500 mb-4">
+            Đã xảy ra lỗi khi tải dữ liệu danh mục.
+          </p>
           <div className="flex justify-center space-x-4">
             <Button variant="outline" onClick={onClose}>
               Đóng
             </Button>
-            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['category', categoryId] })}>
+            <Button
+              onClick={() =>
+                queryClient.invalidateQueries({
+                  queryKey: ["category", categoryId],
+                })
+              }
+            >
               Thử lại
             </Button>
           </div>
@@ -454,7 +587,7 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
             placeholder="Nhập tên danh mục"
             value={formData.name}
             onChange={handleInputChange}
-            className={errors.name ? 'border-red-500' : ''}
+            className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
@@ -472,15 +605,11 @@ function EditCategoryDialog({ categoryId, isOpen, onClose }: EditCategoryDialogP
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Hủy
           </Button>
           <Button type="submit" disabled={updateCategory.isPending}>
-            {updateCategory.isPending ? 'Đang xử lý...' : 'Cập nhật danh mục'}
+            {updateCategory.isPending ? "Đang xử lý..." : "Cập nhật danh mục"}
           </Button>
         </DialogFooter>
       </form>
@@ -499,12 +628,12 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
   const createCategory = useCreateCategory();
 
   const [formData, setFormData] = useState({
-    name: '',
-    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
+    name: "",
+    status: "ACTIVE" as "ACTIVE" | "INACTIVE",
   });
 
   const [errors, setErrors] = useState({
-    name: ''
+    name: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -513,12 +642,15 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
 
     // Clear error when user types
     if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleStatusChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, status: value as 'ACTIVE' | 'INACTIVE' }));
+    setFormData((prev) => ({
+      ...prev,
+      status: value as "ACTIVE" | "INACTIVE",
+    }));
   };
 
   const validateForm = () => {
@@ -526,7 +658,7 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
     const newErrors = { ...errors };
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Tên danh mục không được để trống';
+      newErrors.name = "Tên danh mục không được để trống";
       isValid = false;
     }
 
@@ -540,26 +672,25 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
     if (!validateForm()) return;
 
     try {
-      await createCategory.mutateAsync(
-        formData,
-        {
-          onSuccess: () => {
-            toast.success('Thêm danh mục thành công');
-            queryClient.invalidateQueries({ queryKey: ['categories'] });
-            setFormData({
-              name: '',
-              status: 'ACTIVE'
-            });
-            onClose();
-          },
-          onError: (error) => {
-            if (error.message === "Duplicate entry. This record already exists.") {
-            } else {
-              toast.error('Thêm danh mục thất bại: Danh mục đã tồn tại');
-            }
+      await createCategory.mutateAsync(formData, {
+        onSuccess: () => {
+          toast.success("Thêm danh mục thành công");
+          queryClient.invalidateQueries({ queryKey: ["categories"] });
+          setFormData({
+            name: "",
+            status: "ACTIVE",
+          });
+          onClose();
+        },
+        onError: (error) => {
+          if (
+            error.message === "Duplicate entry. This record already exists."
+          ) {
+          } else {
+            toast.error("Thêm danh mục thất bại: Danh mục đã tồn tại");
           }
-        }
-      );
+        },
+      });
     } catch (error) {
       console.error(error);
     }
@@ -579,7 +710,7 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
             placeholder="Nhập tên danh mục"
             value={formData.name}
             onChange={handleInputChange}
-            className={errors.name ? 'border-red-500' : ''}
+            className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
@@ -598,18 +729,14 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Hủy
           </Button>
           <Button type="submit" disabled={createCategory.isPending}>
-            {createCategory.isPending ? 'Đang xử lý...' : 'Thêm danh mục'}
+            {createCategory.isPending ? "Đang xử lý..." : "Thêm danh mục"}
           </Button>
         </DialogFooter>
       </form>
     </DialogContent>
   );
-} 
+}

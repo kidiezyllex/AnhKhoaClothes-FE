@@ -389,32 +389,32 @@ const filterAndSortProducts = (state: FilterState): ProductData[] => {
 
   if (state.selectedBrands.length > 0) {
     filtered = filtered.filter((product) =>
-      state.selectedBrands.includes(product.brand)
+      state.selectedBrands.includes((product as any)?.brand)
     );
   }
 
   if (state.selectedCategories.length > 0) {
     filtered = filtered.filter((product) =>
-      state.selectedCategories.includes(product.category)
+      state.selectedCategories.includes((product as any)?.category)
     );
   }
 
   if (state.selectedColors.length > 0) {
     filtered = filtered.filter((product) =>
-      product.colors.some((color) => state.selectedColors.includes(color))
+      (product as any)?.colors.some((color) => state.selectedColors.includes(color))
     );
   }
 
   if (state.selectedSizes.length > 0) {
     filtered = filtered.filter((product) =>
-      product.sizes.some((size) => state.selectedSizes.includes(size))
+      (product as any)?.sizes.some((size) => state.selectedSizes.includes(size))
     );
   }
 
   filtered = filtered.filter(
     (product) =>
-      product.price >= state.priceRange[0] &&
-      product.price <= state.priceRange[1]
+      (product as any)?.price >= state.priceRange[0] &&
+      (product as any)?.price <= state.priceRange[1]
   );
 
   switch (state.sortOption) {

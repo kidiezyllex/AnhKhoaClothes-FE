@@ -80,7 +80,7 @@ const config: Config = {
         background: '#FDFDFD',                        // Nền trắng
         extra: '#F2A024',                             // Cam phụ
         active: '#F2A024',                            // Cam khi active
-        maintext: '#374151',                          // Màu chữ chính
+        maintext: '#14142B',                          // Màu chữ chính
         'main-dark-blue': '#131921',
         'main-charcoal-blue': '#232F3E',
         'main-gunmetal-blue': '#252C35',

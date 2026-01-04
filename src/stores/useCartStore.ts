@@ -122,7 +122,7 @@ export const useCartStore = create(
       
       addToCart: (product, quantity) => {
         const currentItems = [...get().items];
-        const existingItemIndex = currentItems.findIndex(item => item.id === product.id);
+        const existingItemIndex = currentItems.findIndex(item => item.id === (product as any)?.id);
         
         if (existingItemIndex !== -1) {
           const existingItem = currentItems[existingItemIndex];
@@ -136,29 +136,29 @@ export const useCartStore = create(
           currentItems[existingItemIndex].quantity = newQuantity;
         } else {
           // Check stock for new item
-          if (product.stock && quantity > product.stock) {
+          if ((product as any)?.stock && quantity > (product as any)?.stock) {
             return; // Don't add if exceeds stock
           }
           
           currentItems.push({
-            id: product.id,
-            productId: product.productId || product.id, // Default to id if productId not provided
-            name: product.name,
-            price: product.price,
-            originalPrice: product.originalPrice,
-            discountPercent: product.discountPercent || 0,
-            hasDiscount: Boolean(product.hasDiscount || (product.originalPrice && product.originalPrice > product.price)),
-            image: product.image,
+            id: (product as any)?.id,
+            productId: (product as any)?.productId || (product as any)?.id, // Default to id if productId not provided
+            name: (product as any)?.name,
+            price: (product as any)?.price,
+            originalPrice: (product as any)?.originalPrice,
+            discountPercent: (product as any)?.discountPercent || 0,
+            hasDiscount: Boolean((product as any)?.hasDiscount || ((product as any)?.originalPrice && (product as any)?.originalPrice > (product as any)?.price)),
+            image: (product as any)?.image,
             quantity: quantity,
-            slug: product.slug,
-            brand: product.brand,
-            colors: product.colors,
-            size: product.size,
-            stock: product.stock,
-            colorId: product.colorId || '',
-            sizeId: product.sizeId || '',
-            colorName: product.colorName || '',
-            sizeName: product.sizeName || '',
+            slug: (product as any)?.slug,
+            brand: (product as any)?.brand,
+            colors: (product as any)?.colors,
+            size: (product as any)?.size,
+            stock: (product as any)?.stock,
+            colorId: (product as any)?.colorId || '',
+            sizeId: (product as any)?.sizeId || '',
+            colorName: (product as any)?.colorName || '',
+            sizeName: (product as any)?.sizeName || '',
           });
         }
         

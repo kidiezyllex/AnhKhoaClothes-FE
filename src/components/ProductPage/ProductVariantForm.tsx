@@ -1,18 +1,30 @@
-'use client';
+"use client";
 
-import React, { useRef } from 'react';
- 
-import { IProductVariant } from '@/interface/request/product';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@mdi/react';
-import { mdiUpload, mdiLoading, mdiTrashCanOutline, mdiImageOutline, mdiTransferRight } from '@mdi/js';
-import { checkImageUrl } from '@/lib/utils';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useColors, useSizes } from '@/hooks/attributes';
-import { getSizeLabel } from '@/utils/sizeMapping';
+import React, { useRef } from "react";
+
+import { IProductVariant } from "@/interface/request/product";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@mdi/react";
+import {
+  mdiUpload,
+  mdiLoading,
+  mdiTrashCan,
+  mdiImageMultiple,
+  mdiTransferRight,
+} from "@mdi/js";
+import { checkImageUrl } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useColors, useSizes } from "@/hooks/attributes";
+import { getSizeLabel } from "@/utils/sizeMapping";
 
 interface ProductVariantFormProps {
   variant: IProductVariant;
@@ -27,7 +39,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
   onChange,
   onImageUpload,
   onRemoveImage,
-  uploading
+  uploading,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: colorsData } = useColors();
@@ -35,15 +47,15 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === 'price' || name === 'stock') {
+    if (name === "price" || name === "stock") {
       onChange({
         ...variant,
-        [name]: parseInt(value) || 0
+        [name]: parseInt(value) || 0,
       });
     } else {
       onChange({
         ...variant,
-        [name]: value
+        [name]: value,
       });
     }
   };
@@ -51,14 +63,14 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
   const handleColorChange = (value: string) => {
     onChange({
       ...variant,
-      colorId: value
+      colorId: value,
     });
   };
 
   const handleSizeChange = (value: string) => {
     onChange({
       ...variant,
-      sizeId: value
+      sizeId: value,
     });
   };
 
@@ -69,17 +81,17 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
         await onImageUpload(files[i]);
       }
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
 
   const convertToVND = () => {
     const dollarAmount = variant.price || 0;
-    const vndAmount = Math.round(dollarAmount * 25912.04 / 1000) * 1000; // Làm tròn đến hàng nghìn
+    const vndAmount = Math.round((dollarAmount * 25912.04) / 1000) * 1000; // Làm tròn đến hàng nghìn
     onChange({
       ...variant,
-      price: vndAmount
+      price: vndAmount,
     });
   };
 
@@ -87,7 +99,9 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor={`colorId-${variant.colorId}`}>Màu sắc <span className="text-red-500">*</span></Label>
+          <Label htmlFor={`colorId-${variant.colorId}`}>
+            Màu sắc <span className="text-red-500">*</span>
+          </Label>
           <Select
             value={variant.colorId}
             onValueChange={handleColorChange}
@@ -95,18 +109,20 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
           >
             <SelectTrigger id={`colorId-${variant.colorId}`} className="w-full">
               <SelectValue placeholder="Chọn màu sắc">
-                {variant.colorId 
-                  ? (colorsData?.data || []).find(color => color.id.toString() === variant.colorId?.toString())?.name || 'Chọn màu sắc'
-                  : 'Chọn màu sắc'
-                }
+                {variant.colorId
+                  ? (colorsData?.data || []).find(
+                      (color) =>
+                        color.id.toString() === variant.colorId?.toString()
+                    )?.name || "Chọn màu sắc"
+                  : "Chọn màu sắc"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {(colorsData?.data || []).map(color => (
+              {(colorsData?.data || []).map((color) => (
                 <SelectItem key={color.id} value={color.id.toString()}>
                   <div className="flex items-center justify-between w-full">
                     <span>{color.name}</span>
-                    <div 
+                    <div
                       className="w-4 h-4 rounded-full border border-gray-300 ml-2"
                       style={{ backgroundColor: color.code }}
                     />
@@ -118,7 +134,9 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`sizeId-${variant.sizeId}`}>Kích thước <span className="text-red-500">*</span></Label>
+          <Label htmlFor={`sizeId-${variant.sizeId}`}>
+            Kích thước <span className="text-red-500">*</span>
+          </Label>
           <Select
             value={variant.sizeId}
             onValueChange={handleSizeChange}
@@ -126,17 +144,21 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
           >
             <SelectTrigger id={`sizeId-${variant.sizeId}`} className="w-full">
               <SelectValue placeholder="Chọn kích thước">
-                {variant.sizeId 
+                {variant.sizeId
                   ? (() => {
-                      const foundSize = (sizesData?.data || []).find(size => size.id.toString() === variant.sizeId?.toString());
-                      return foundSize ? getSizeLabel(foundSize.value) : 'Chọn kích thước';
+                      const foundSize = (sizesData?.data || []).find(
+                        (size) =>
+                          size.id.toString() === variant.sizeId?.toString()
+                      );
+                      return foundSize
+                        ? getSizeLabel(foundSize.value)
+                        : "Chọn kích thước";
                     })()
-                  : 'Chọn kích thước'
-                }
+                  : "Chọn kích thước"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {(sizesData?.data || []).map(size => (
+              {(sizesData?.data || []).map((size) => (
                 <SelectItem key={size.id} value={size.id.toString()}>
                   {getSizeLabel(size.value)}
                 </SelectItem>
@@ -146,14 +168,16 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`price-${variant.price}`}>Giá <span className="text-red-500">*</span></Label>
+          <Label htmlFor={`price-${variant.price}`}>
+            Giá <span className="text-red-500">*</span>
+          </Label>
           <div className="flex gap-2">
             <Input
               id={`price-${variant.price}`}
               name="price"
               type="number"
               min="0"
-              value={variant.price || ''}
+              value={variant.price || ""}
               onChange={handleInputChange}
               placeholder="Nhập giá (đơn vị $ hoặc VNĐ)"
               required
@@ -162,11 +186,11 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             <Button
               type="button"
               variant="default"
-              className='gap-1'
+              className="gap-1"
               onClick={convertToVND}
               title="Chuyển đổi từ USD sang VNĐ (1 USD = 25,912.04 VNĐ)"
             >
-              <Icon path={mdiTransferRight} size={0.7} className='text-white'/>
+              <Icon path={mdiTransferRight} size={0.7} className="text-white" />
               Chuyển sang đơn vị VNĐ
             </Button>
           </div>
@@ -179,7 +203,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             name="stock"
             type="number"
             min="0"
-            value={variant.stock || ''}
+            value={variant.stock || ""}
             onChange={handleInputChange}
             placeholder="Nhập số lượng tồn kho"
           />
@@ -230,7 +254,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.2 }}
                     className="relative group rounded-[6px] overflow-hidden border border-gray-200"
-                    style={{ aspectRatio: '1/1' }}
+                    style={{ aspectRatio: "1/1" }}
                   >
                     <img
                       src={checkImageUrl(image)}
@@ -245,7 +269,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => onRemoveImage(index)}
                       >
-                        <Icon path={mdiTrashCanOutline} size={0.7} />
+                        <Icon path={mdiTrashCan} size={0.7} />
                       </Button>
                     </div>
                   </motion.div>
@@ -254,10 +278,10 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             ) : (
               <div
                 className="flex items-center justify-center border border-dashed border-gray-300 rounded-[6px] text-maintext"
-                style={{ aspectRatio: '1/1' }}
+                style={{ aspectRatio: "1/1" }}
               >
                 <div className="flex flex-col items-center p-4">
-                  <Icon path={mdiImageOutline} size={1.5} />
+                  <Icon path={mdiImageMultiple} size={1.5} />
                   <p className="text-xs mt-2">Chưa có hình ảnh</p>
                 </div>
               </div>
@@ -269,4 +293,4 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
   );
 };
 
-export default ProductVariantForm; 
+export default ProductVariantForm;

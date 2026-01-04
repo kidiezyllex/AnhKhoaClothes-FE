@@ -462,10 +462,12 @@ export default function EditPromotionPage() {
                           >
                             <Checkbox
                               id={`product-${product.id}`}
-                              checked={selectedProducts.includes(product.id)}
+                              checked={selectedProducts.includes(
+                                (product as any)?.id
+                              )}
                               onCheckedChange={(checked) =>
                                 handleProductSelection(
-                                  product.id,
+                                  (product as any)?.id,
                                   checked as boolean
                                 )
                               }
@@ -479,9 +481,9 @@ export default function EditPromotionPage() {
                               </Label>
                               <div className="text-xs text-maintext">
                                 Mã: {product.code} | Thương hiệu:{" "}
-                                {typeof product.brand === "string"
-                                  ? product.brand
-                                  : product.brand.name}
+                                {typeof (product as any)?.brand === "string"
+                                  ? (product as any)?.brand
+                                  : (product as any)?.brand.name}
                               </div>
                             </div>
                           </div>

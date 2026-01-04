@@ -182,7 +182,7 @@ export const Newsletter = () => {
                 <motion.div
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-2xl p-8 text-center"
+                  className="bg-[#EAEBF2] dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-2xl p-8 text-center"
                 >
                   <motion.div
                     initial={{ scale: 0 }}

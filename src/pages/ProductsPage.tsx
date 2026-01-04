@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Icon } from "@mdi/react";
-import { mdiFilterOutline, mdiClose, mdiMagnify } from "@mdi/js";
+import { mdiFilterMultiple, mdiClose, mdiMagnify } from "@mdi/js";
 import { useProducts, useSearchProducts } from "@/hooks/product";
 import { usePromotions } from "@/hooks/promotion";
 import {
@@ -153,9 +153,9 @@ export default function ProductsPage() {
         : [filters.brands];
       filteredProducts = filteredProducts.filter((product) => {
         const brandId =
-          typeof product.brand === "object"
-            ? (product.brand as any).id
-            : product.brand;
+          typeof (product as any)?.brand === "object"
+            ? ((product as any)?.brand as any).id
+            : (product as any)?.brand;
         return brandsArray.includes(brandId);
       });
     }
@@ -166,16 +166,16 @@ export default function ProductsPage() {
         : [filters.categories];
       filteredProducts = filteredProducts.filter((product) => {
         const categoryId =
-          typeof product.category === "object"
-            ? (product.category as any).id
-            : product.category;
+          typeof (product as any)?.category === "object"
+            ? ((product as any)?.category as any).id
+            : (product as any)?.category;
         return categoriesArray.includes(categoryId);
       });
     }
 
     if (filters.color) {
       filteredProducts = filteredProducts.filter((product) =>
-        product.variants.some((variant: any) => {
+        (product as any)?.variants.some((variant: any) => {
           const colorId = variant.color?.id || variant.colorId;
           return colorId === filters.color;
         })
@@ -184,7 +184,7 @@ export default function ProductsPage() {
 
     if (filters.size) {
       filteredProducts = filteredProducts.filter((product) =>
-        product.variants.some((variant: any) => {
+        (product as any)?.variants.some((variant: any) => {
           const sizeId = variant.size?.id || variant.sizeId;
           return sizeId === filters.size;
         })
@@ -199,11 +199,11 @@ export default function ProductsPage() {
           : Number.POSITIVE_INFINITY;
 
       filteredProducts = filteredProducts.filter((product: any) => {
-        let price = product.variants[0]?.price || 0;
+        let price = (product as any)?.variants[0]?.price || 0;
 
         if (promotionsData?.data?.promotions) {
           const discount = calculateProductDiscount(
-            product.id,
+            (product as any)?.id,
             price,
             promotionsData.data.promotions
           );
@@ -332,7 +332,7 @@ export default function ProductsPage() {
   const handleAddToCart = (product: any) => {
     if (!product.variants?.[0]) return;
 
-    const firstVariant = product.variants[0];
+    const firstVariant = (product as any)?.variants[0];
 
     if (firstVariant.stock === 0) {
       toast.error("Sản phẩm đã hết hàng");
@@ -346,7 +346,7 @@ export default function ProductsPage() {
 
     if (promotionsData?.data?.promotions) {
       const discount = calculateProductDiscount(
-        product.id,
+        (product as any)?.id,
         firstVariant.price,
         promotionsData.data.promotions
       );
@@ -361,22 +361,24 @@ export default function ProductsPage() {
 
     const cartItem = {
       id: firstVariant.id,
-      productId: product.id,
-      name: product.productDisplayName || product.name,
+      productId: (product as any)?.id,
+      name: (product as any)?.productDisplayName || (product as any)?.name,
       price: finalPrice,
       originalPrice: originalPrice,
       discountPercent: discountPercent,
       hasDiscount: hasDiscount,
       image:
         checkImageUrl(
-          product.images?.[0] ||
+          (product as any)?.images?.[0] ||
             firstVariant.images?.[0]?.imageUrl ||
             firstVariant.images?.[0]
         ) || "",
       quantity: 1,
-      slug: product.code,
+      slug: (product as any)?.code,
       brand:
-        typeof product.brand === "string" ? product.brand : product.brand?.name,
+        typeof (product as any)?.brand === "string"
+          ? (product as any)?.brand
+          : (product as any)?.brand?.name,
       size: firstVariant.size?.code || firstVariant.size?.name,
       colors: [firstVariant.color?.name || "Default"],
       stock: firstVariant.stock,
@@ -422,7 +424,7 @@ export default function ProductsPage() {
   }, [data]);
 
   return (
-    <div className="container mx-auto py-8 relative bg-green-50">
+    <div className="container mx-auto py-8 relative bg-[#EAEBF2]">
       <Breadcrumb className="mb-4">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -483,7 +485,8 @@ export default function ProductsPage() {
             {data && data.data.products && data.data.products.length > 0 && (
               <VoucherForm
                 orderValue={data.data.products.reduce(
-                  (sum, product) => sum + (product.variants[0]?.price || 0),
+                  (sum, product) =>
+                    sum + ((product as any)?.variants[0]?.price || 0),
                   0
                 )}
                 onApplyVoucher={handleApplyVoucher}
@@ -504,7 +507,7 @@ export default function ProductsPage() {
                 onClick={toggleFilter}
                 className="lg:hidden flex items-center gap-2"
               >
-                <Icon path={mdiFilterOutline} size={0.7} />
+                <Icon path={mdiFilterMultiple} size={0.7} />
                 Bộ lọc
               </Button>
               <div className="relative flex-1">
@@ -713,7 +716,8 @@ export default function ProductsPage() {
               <div className="lg:hidden mt-8 bg-white rounded-[6px] shadow-sm border p-4">
                 <VoucherForm
                   orderValue={filteredProducts.reduce(
-                    (sum, product) => sum + (product.variants[0]?.price || 0),
+                    (sum, product) =>
+                      sum + ((product as any)?.variants[0]?.price || 0),
                     0
                   )}
                   onApplyVoucher={handleApplyVoucher}

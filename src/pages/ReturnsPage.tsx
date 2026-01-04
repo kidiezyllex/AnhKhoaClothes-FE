@@ -67,7 +67,7 @@ const ReturnsPage: React.FC = () => {
         return (
           <Badge
             variant="outline"
-            className="bg-green-50 text-green-600 border-green-200"
+            className="bg-[#EAEBF2] text-green-600 border-green-200"
           >
             Đã hoàn tiền
           </Badge>

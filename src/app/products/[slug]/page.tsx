@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import CartIcon from "@/components/ui/CartIcon";
 import { useNavigate } from "react-router-dom";
+import { ProductCard } from "@/components/ProductPage/ProductCard";
 
 // Add custom styles for zoom cursor
 const zoomStyles = `
@@ -56,8 +57,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Icon } from "@mdi/react";
 import {
-  mdiCartOutline,
-  mdiHeartOutline,
+  mdiCartArrowRight,
+  mdiHeartCircle,
   mdiShareVariant,
   mdiCheck,
   mdiChevronLeft,
@@ -74,9 +75,10 @@ import {
   mdiInformation,
   mdiCartPlus,
   mdiMagnify,
-  mdiTagOutline,
+  mdiTagMultiple,
   mdiAutoFix,
   mdiEye,
+  mdiAlphaSBox,
 } from "@mdi/js";
 import { IPromotionsResponse } from "@/interface/response/promotion";
 import { ProductWithDiscount } from "@/lib/promotions";
@@ -93,7 +95,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { checkImageUrl } from "@/lib/utils";
+import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
 import { useCartStore } from "@/stores/useCartStore";
 import {
   IProduct,
@@ -175,7 +177,7 @@ const ImageZoom = ({
     <div className="relative overflow-visible group zoom-container">
       {/* Main Image Container */}
       <div
-        className={`relative ${className} transition-all duration-300 ${
+        className={`relative ${className} transition-all duration-300 p-16 ${
           !isMobile && !isZooming ? "cursor-zoom-in" : ""
         } ${!isMobile && isZooming ? "cursor-none" : ""}`}
         onMouseEnter={handleMouseEnter}
@@ -286,394 +288,12 @@ const ImageZoom = ({
   );
 };
 
-// Similar Products Component
-const SimilarProductCard = ({
-  product,
-  promotionsData,
-}: {
-  product: IProduct;
-  promotionsData?: IPromotionsResponse;
-}) => {
-  const { addToCart } = useCartStore();
-  const [isHovered, setIsHovered] = useState(false);
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
-
-  const handleAddToCart = () => {
-    if (!product.variants?.[0]) return;
-
-    const firstVariant = product.variants[0];
-
-    if (firstVariant.stock === 0) {
-      toast.error("Sản phẩm đã hết hàng");
-      return;
-    }
-
-    // Calculate discount - prioritize product.sale, fallback to promotions
-    let discountPercent = product.sale || 0;
-    let finalPrice = firstVariant.price * (1 - discountPercent / 100);
-    let originalPrice = discountPercent > 0 ? firstVariant.price : undefined;
-    let hasDiscount = discountPercent > 0;
-
-    if (discountPercent === 0 && promotionsData?.data?.promotions) {
-      const activePromotions = filterActivePromotions(
-        promotionsData.data.promotions
-      );
-      const discount = calculateProductDiscount(
-        String(product.id),
-        firstVariant.price,
-        activePromotions
-      );
-
-      if (discount.discountPercent > 0) {
-        finalPrice = discount.discountedPrice;
-        originalPrice = discount.originalPrice;
-        discountPercent = discount.discountPercent;
-        hasDiscount = true;
-      }
-    }
-
-    const cartItem = {
-      id: firstVariant._id || firstVariant.id,
-      productId: product.id,
-      name: product.productDisplayName || product.name,
-      price: finalPrice,
-      originalPrice: originalPrice,
-      discountPercent: discountPercent,
-      hasDiscount: hasDiscount,
-      image:
-        checkImageUrl(product.images?.[0] || firstVariant.images?.[0] || "") ||
-        "/placeholder.svg",
-      quantity: 1,
-      slug: product.id.toString(),
-      brand:
-        typeof product.brand === "string"
-          ? product.brand
-          : product.brand?.name || "No Brand",
-      size: String(firstVariant.size || ""),
-      colors: [String(firstVariant.color || "")],
-      stock: firstVariant.stock,
-      colorId: String(firstVariant.color || ""),
-      sizeId: String(firstVariant.size || ""),
-      colorName: String(firstVariant.color || ""),
-      sizeName: String(firstVariant.size || ""),
-    };
-
-    addToCart(cartItem, 1);
-    toast.success("Đã thêm sản phẩm vào giỏ hàng");
-  };
-
-  const handleQuickView = () => {
-    window.location.href = `/products/${(
-      product.productDisplayName ||
-      product.name ||
-      "product"
-    )
-      .toLowerCase()
-      .replace(/\s+/g, "-")}-${product.id}`;
-  };
-
-  const handleAddToWishlist = () => {
-    toast.success("Đã thêm vào danh sách yêu thích");
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-    >
-      <Card className="group overflow-hidden border rounded-lg hover:shadow-2xl shadow-sm transition-all duration-500 h-full flex flex-col transform hover:-translate-y-3 bg-white relative backdrop-blur-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg z-10 pointer-events-none" />
-        <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-100 rounded-t-2xl">
-          <a
-            href={`/products/${(product.productDisplayName || product.name)
-              .toLowerCase()
-              .replace(/\s+/g, "-")}-${product.id}`}
-            className="block"
-          >
-            <div className="aspect-square overflow-hidden relative flex items-center justify-center">
-              <motion.div
-                className="w-full h-full relative"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                <img
-                  src={
-                    checkImageUrl(
-                      product.images?.[0] || product.variants?.[0]?.images?.[0]
-                    ) || "/placeholder.svg"
-                  }
-                  alt={product.productDisplayName || product.name}
-                  className="object-contain w-full h-full drop-shadow-2xl filter group-hover:brightness-110 transition-all duration-500"
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  draggable="false"
-                />
-              </motion.div>
-            </div>
-          </a>
-
-          {/* Enhanced badges */}
-          <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
-            {product?.isNew && (
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <Badge variant="new" className="flex items-center gap-1">
-                  <Icon path={mdiAutoFix} size={0.6} />
-                  Mới
-                </Badge>
-              </motion.div>
-            )}
-            {(() => {
-              // Calculate discount from promotions data if available
-              if (promotionsData?.data?.promotions && product.variants?.[0]) {
-                const activePromotions = filterActivePromotions(
-                  promotionsData.data.promotions
-                );
-                const discount = calculateProductDiscount(
-                  String(product.id),
-                  product.variants[0].price,
-                  activePromotions
-                );
-
-                if (discount.discountPercent > 0) {
-                  return (
-                    <motion.div
-                      initial={{ scale: 0, rotate: 180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                    >
-                      <Badge
-                        variant="promotion"
-                        className="flex items-center gap-1"
-                      >
-                        <Icon path={mdiTagOutline} size={0.6} />
-                        <span className="text-base">
-                          -{discount.discountPercent}%
-                        </span>
-                      </Badge>
-                    </motion.div>
-                  );
-                }
-              }
-              return null;
-            })()}
-          </div>
-
-          {/* Enhanced quick action buttons */}
-          <motion.div
-            className="absolute right-2 top-2 transform -translate-y-1/2 flex flex-col gap-4 z-30"
-            initial={{ x: 60, opacity: 0 }}
-            animate={{
-              x: isHovered ? 0 : 60,
-              opacity: isHovered ? 1 : 0,
-            }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-primary hover:text-white shadow-sm border-0 hover:shadow-2xl transition-all duration-300 group/btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleAddToCart();
-                }}
-                aria-label="Thêm vào giỏ hàng"
-              >
-                <Icon
-                  path={mdiCartOutline}
-                  size={0.7}
-                  className="group-hover/btn:animate-bounce"
-                />
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-pink-500 hover:text-white shadow-sm border-0 hover:shadow-2xl transition-all duration-300 group/btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleAddToWishlist();
-                }}
-                aria-label="Yêu thích"
-              >
-                <Icon
-                  path={mdiHeartOutline}
-                  size={0.7}
-                  className="group-hover/btn:animate-pulse"
-                />
-              </Button>
-            </motion.div>
-
-            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full h-10 w-10 bg-white/90 backdrop-blur-md hover:!bg-primary hover:text-white shadow-sm border-0 hover:shadow-2xl transition-all duration-300 group/btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleQuickView();
-                }}
-                aria-label="Xem nhanh"
-              >
-                <Icon
-                  path={mdiEye}
-                  size={0.7}
-                  className="group-hover/btn:animate-ping"
-                />
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        <div className="p-4 flex flex-col flex-grow bg-gradient-to-b bg-green-50 border-t border-gray-100/50 rounded-b-2xl relative">
-          <div className="text-xs text-primary/80 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-primary to-pink-400 animate-pulse"></div>
-            <span className="bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent">
-              {product.masterCategory || "No Category"}
-            </span>
-          </div>
-
-          <a
-            href={`/products/${(product.productDisplayName || product.name)
-              .toLowerCase()
-              .replace(/\s+/g, "-")}-${product.id}`}
-            className="hover:text-primary transition-colors group/a"
-          >
-            <h3 className="font-bold text-base mb-3 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
-              {product.productDisplayName || product.name}
-            </h3>
-          </a>
-
-          <div className="mt-auto">
-            {/* Enhanced pricing */}
-            <div className="flex items-center justify-between">
-              <motion.div
-                className="font-extrabold text-lg text-active"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-              >
-                {(() => {
-                  // Calculate discount from promotions data if available
-                  if (
-                    promotionsData?.data?.promotions &&
-                    product.variants?.[0]
-                  ) {
-                    const discount = calculateProductDiscount(
-                      String(product.id),
-                      product.variants[0].price,
-                      promotionsData.data.promotions
-                    );
-
-                    if (discount.discountPercent > 0) {
-                      return formatPrice(discount.discountedPrice);
-                    }
-                  }
-
-                  return (
-                    product.variants?.[0] &&
-                    formatPrice(product.variants[0].price)
-                  );
-                })()}
-              </motion.div>
-              {(() => {
-                // Show original price if there's a discount
-                if (promotionsData?.data?.promotions && product.variants?.[0]) {
-                  const discount = calculateProductDiscount(
-                    String(product.id),
-                    product.variants[0].price,
-                    promotionsData.data.promotions
-                  );
-
-                  if (discount.discountPercent > 0) {
-                    return (
-                      <div className="text-xs text-maintext line-through font-medium bg-gray-100 px-2 py-1 rounded-sm italic">
-                        {formatPrice(discount.originalPrice)}
-                      </div>
-                    );
-                  }
-                }
-                return null;
-              })()}
-            </div>
-
-            {/* Enhanced color variants */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="flex flex-col gap-1 items-start justify-start">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-maintext font-semibold">
-                    Màu sắc:
-                  </span>
-                  <div className="flex gap-1 text-sm">
-                    {Array.from(
-                      new Set(
-                        product.variants.map((v) => v.color).filter(Boolean)
-                      )
-                    )
-                      .slice(0, 4)
-                      .map((colorValue: any, index: number) => (
-                        <motion.div
-                          key={index}
-                          className="w-4 h-4 rounded-full border-2 border-white shadow-sm ring-2 ring-gray-200 cursor-pointer"
-                          style={{ backgroundColor: colorValue }}
-                          title={colorValue}
-                          whileHover={{ scale: 1.3, rotate: 360 }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      ))}
-
-                    {Array.from(
-                      new Set(
-                        product.variants.map((v) => v.color).filter(Boolean)
-                      )
-                    ).length > 4 && (
-                      <motion.span
-                        className="text-xs text-maintext ml-1 bg-gray-100 px-2 py-1 rounded-full font-medium"
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        +
-                        {Array.from(
-                          new Set(
-                            product.variants.map((v) => v.color).filter(Boolean)
-                          )
-                        ).length - 4}
-                      </motion.span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-maintext font-semibold">
-                    Kích thước:
-                  </span>
-                  <div className="flex gap-1 text-maintext text-sm">
-                    {Array.from(
-                      new Set(product.variants.map((v) => String(v.size)))
-                    ).join(", ")}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Decorative bottom border */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-pink-400/20 to-orange-400/20 rounded-b-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-        </div>
-      </Card>
-    </motion.div>
-  );
+// Helper functions for ProductCard
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
 };
 
 import { useParams } from "react-router-dom";
@@ -715,8 +335,8 @@ export default function ProductDetail() {
   // Cập nhật variant được chọn khi có dữ liệu sản phẩm
   useEffect(() => {
     const product = productData?.data?.product;
-    if (product?.variants?.length && product.variants.length > 0) {
-      const firstVariant = product.variants[0];
+    if (product?.variants?.length && (product as any)?.variants.length > 0) {
+      const firstVariant = (product as any)?.variants[0];
       setSelectedVariant(firstVariant);
       setSelectedColor(String(firstVariant.color || ""));
       setSelectedSize(String(firstVariant.size || ""));
@@ -732,7 +352,7 @@ export default function ProductDetail() {
         promotionsData.data.promotions
       );
       const discount = calculateProductDiscount(
-        String(product.id),
+        String((product as any)?.id),
         selectedVariant.price,
         activePromotions
       );
@@ -749,7 +369,7 @@ export default function ProductDetail() {
     if (!product) return;
 
     // Try to find a variant with the selected color and current size
-    const matchingVariant = product.variants.find(
+    const matchingVariant = (product as any)?.variants.find(
       (v) =>
         String(v.color) === String(colorValue) &&
         String(v.size) === String(selectedSize)
@@ -760,7 +380,7 @@ export default function ProductDetail() {
       setCurrentImageIndex(0);
     } else {
       // If no exact match, find first variant with the selected color
-      const firstVariantWithColor = product.variants.find(
+      const firstVariantWithColor = (product as any)?.variants.find(
         (v) => String(v.color) === String(colorValue)
       );
       if (firstVariantWithColor) {
@@ -777,7 +397,7 @@ export default function ProductDetail() {
     const product = productData?.data?.product;
     if (!product) return;
 
-    const matchingVariant = product.variants.find(
+    const matchingVariant = (product as any)?.variants.find(
       (v) =>
         String(v.color) === String(selectedColor) &&
         String(v.size) === String(sizeValue)
@@ -807,38 +427,44 @@ export default function ProductDetail() {
     const finalPrice =
       productDiscount && productDiscount.discountPercent > 0
         ? productDiscount.discountedPrice
-        : product.sale
-        ? selectedVariant.price * (1 - product.sale / 100)
+        : (product as any)?.sale
+        ? calculateDiscountedPrice(
+            selectedVariant.price,
+            (product as any)?.sale
+          )
         : selectedVariant.price;
 
     const originalPrice =
       productDiscount && productDiscount.discountPercent > 0
         ? productDiscount.originalPrice
-        : product.sale
+        : (product as any)?.sale
         ? selectedVariant.price
         : undefined;
 
     const cartItem = {
       id: selectedVariant._id || selectedVariant.id, // Use _id or id
-      productId: product.id,
-      name: product.productDisplayName || product.name,
+      productId: (product as any)?.id,
+      name: (product as any)?.productDisplayName || (product as any)?.name,
       price: finalPrice,
       originalPrice: originalPrice,
-      discountPercent: productDiscount?.discountPercent || product.sale || 0,
+      discountPercent:
+        productDiscount?.discountPercent || (product as any)?.sale || 0,
       hasDiscount: Boolean(
         (productDiscount && productDiscount.discountPercent > 0) ||
-          (product.sale && product.sale > 0)
+          ((product as any)?.sale && (product as any)?.sale > 0)
       ),
       image:
         checkImageUrl(
-          product.images?.[0] || (selectedVariant.images as string[])?.[0] || ""
+          (product as any)?.images?.[0] ||
+            (selectedVariant.images as string[])?.[0] ||
+            ""
         ) || "/placeholder.svg",
       quantity: quantity,
-      slug: product.id.toString(),
+      slug: (product as any)?.id.toString(),
       brand:
-        typeof product.brand === "string"
-          ? product.brand
-          : product.brand?.name || "No Brand",
+        typeof (product as any)?.brand === "string"
+          ? (product as any)?.brand
+          : (product as any)?.brand?.name || "No Brand",
       size: String(selectedVariant.size || ""),
       colors: [String(selectedVariant.color || "")],
       stock: selectedVariant.stock,
@@ -893,7 +519,7 @@ export default function ProductDetail() {
 
     let filteredProducts = allProductsData.data.products
       .filter((p: IProduct) => p.id !== productData.data.product.id)
-      .slice(0, 4);
+      .slice(0, 5);
 
     // Apply promotions to similar products - but only active promotions
     if (promotionsData?.data?.promotions) {
@@ -912,7 +538,7 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="container mx-auto py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-3/5">
             <Skeleton className="aspect-square w-full rounded-xl" />
             <div className="grid grid-cols-5 gap-2 mt-4">
@@ -955,8 +581,8 @@ export default function ProductDetail() {
   if (!product) return null;
 
   // Product metadata - use actual API fields
-  const brandName = product.masterCategory || "No Brand";
-  const categoryName = product.subCategory || "No Category";
+  const brandName = (product as any)?.masterCategory || "No Brand";
+  const categoryName = (product as any)?.subCategory || "No Category";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50/50 to-white">
@@ -989,14 +615,14 @@ export default function ProductDetail() {
               <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
               <BreadcrumbItem>
                 <BreadcrumbPage className="!text-maintext hover:!text-maintext">
-                  {product.productDisplayName || product.name}
+                  {product.productDisplayName || (product as any)?.name}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </motion.div>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6">
           {/* Enhanced Product Images Section */}
           <motion.div
             className="w-full"
@@ -1006,18 +632,19 @@ export default function ProductDetail() {
           >
             {/* Main Image */}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-white border flex items-center justify-center">
-              {selectedVariant?.images?.length || product.images?.length ? (
+              {selectedVariant?.images?.length ||
+              (product as any)?.images?.length ? (
                 <>
                   <ImageZoom
                     src={checkImageUrl(
                       selectedVariant?.images?.[currentImageIndex] ||
-                        product.images?.[currentImageIndex]
+                        (product as any)?.images?.[currentImageIndex]
                     )}
-                    alt={product.productDisplayName || product.name}
+                    alt={product.productDisplayName || (product as any)?.name}
                     className="aspect-square"
                   />
                   {((selectedVariant?.images?.length || 0) > 1 ||
-                    (product.images?.length || 0) > 1) && (
+                    ((product as any)?.images?.length || 0) > 1) && (
                     <>
                       <Button
                         variant="secondary"
@@ -1047,14 +674,17 @@ export default function ProductDetail() {
 
             {/* Thumbnail Images */}
             {((selectedVariant?.images?.length || 0) > 1 ||
-              (product.images?.length || 0) > 1) && (
+              ((product as any)?.images?.length || 0) > 1) && (
               <div className="grid grid-cols-5 gap-4 mt-4">
-                {(selectedVariant?.images || product.images || []).map(
-                  (image: any, index: number) => (
-                    <motion.div
-                      key={index}
-                      onClick={() => handleImageChange(index)}
-                      className={`
+                {(
+                  selectedVariant?.images ||
+                  (product as any)?.images ||
+                  []
+                ).map((image: any, index: number) => (
+                  <motion.div
+                    key={index}
+                    onClick={() => handleImageChange(index)}
+                    className={`
                     relative aspect-square rounded-xl overflow-hidden cursor-pointer
                     border-2 transition-all duration-300 hover:opacity-80
                     ${
@@ -1063,24 +693,96 @@ export default function ProductDetail() {
                         : "border-gray-200 hover:border-gray-300"
                     }
                   `}
-                      whileHover={{
-                        scale: currentImageIndex === index ? 1.05 : 1.02,
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <img
-                        src={checkImageUrl(image)}
-                        alt={`${product.productDisplayName || product.name} - ${
-                          index + 1
-                        }`}
-                        className="object-contain p-2"
-                        sizes="(max-width: 768px) 20vw, 10vw"
-                      />
-                    </motion.div>
-                  )
-                )}
+                    whileHover={{
+                      scale: currentImageIndex === index ? 1.05 : 1.02,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <img
+                      src={checkImageUrl(image)}
+                      alt={`${
+                        product.productDisplayName || (product as any)?.name
+                      } - ${index + 1}`}
+                      className="object-contain p-2"
+                      sizes="(max-width: 768px) 20vw, 10vw"
+                    />
+                  </motion.div>
+                ))}
               </div>
             )}
+            {/* Enhanced Product Information */}
+            <Card className="p-4 border-green-100 mt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext font-semibold">
+                    Phân loại chính
+                  </span>
+                  <span className="font-medium text-maintext">
+                    {product.masterCategory}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext font-semibold">
+                    Phân loại phụ
+                  </span>
+                  <span className="font-medium text-maintext">
+                    {product.subCategory}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext font-semibold">
+                    Kiểu dáng
+                  </span>
+                  <span className="font-medium text-maintext">
+                    {product.articleType}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext font-semibold">
+                    Màu cơ bản
+                  </span>
+                  <span className="font-medium text-maintext">
+                    {product.baseColour}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="!text-maintext font-semibold">
+                    Mã sản phẩm
+                  </span>
+                  <span className="font-mono font-medium text-primary">
+                    {product.id}
+                  </span>
+                </div>
+                {product.gender && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext font-semibold">
+                      Giới tính
+                    </span>
+                    <span className="font-medium text-maintext">
+                      {product.gender}
+                    </span>
+                  </div>
+                )}
+                {product.usage && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext font-semibold">
+                      Dịp sử dụng
+                    </span>
+                    <span className="font-medium text-maintext">
+                      {product.usage}
+                    </span>
+                  </div>
+                )}
+                {product.season && (
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="!text-maintext font-semibold">Mùa</span>
+                    <span className="font-medium text-maintext">
+                      {product.season} ({product.year})
+                    </span>
+                  </div>
+                )}
+              </div>
+            </Card>
           </motion.div>
 
           {/* Enhanced Product Information Section */}
@@ -1092,23 +794,29 @@ export default function ProductDetail() {
           >
             {/* Product Header */}
             <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <div className="font-mono border h-[22px] bg-gray-100 px-3 flex items-center justify-center text-primary text-sm font-medium rounded-full">
-                  #{product.id}
-                </div>
-                <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary border-primary/20"
-                >
-                  {product.masterCategory}
-                </Badge>
-                <Badge variant="outline" className="!text-maintext">
-                  {product.articleType}
-                </Badge>
+              <div className="flex items-center gap-3 flex-wrap">
+                <Badge variant="default">#{product.id}</Badge>
+                <Badge variant="bestSeller">{product.masterCategory}</Badge>
+                <Badge variant="bestSeller">{product.articleType}</Badge>
+                {productDiscount && productDiscount.discountPercent > 0 && (
+                  <Badge variant="promotion">
+                    <Icon path={mdiTagMultiple} size={0.6} className="mr-1" />
+                    {productDiscount.appliedPromotion?.name} -
+                    {productDiscount.discountPercent}%
+                  </Badge>
+                )}
+                {(product as any)?.sale &&
+                  (!productDiscount ||
+                    productDiscount.discountPercent === 0) && (
+                    <Badge variant="danger">
+                      <Icon path={mdiTagMultiple} size={0.6} className="mr-1" />
+                      SALE {(product as any)?.sale}%
+                    </Badge>
+                  )}
               </div>
 
               <h1 className="text-3xl lg:text-4xl font-bold text-maintext leading-tight">
-                {product.productDisplayName || product.name}
+                {product.productDisplayName || (product as any)?.name}
               </h1>
 
               {/* Rating placeholder */}
@@ -1118,13 +826,13 @@ export default function ProductDetail() {
                     <Icon
                       key={i}
                       path={
-                        i < Math.floor(product.rating || 4)
+                        i < Math.floor((product as any)?.rating || 4)
                           ? mdiStar
                           : mdiStarOutline
                       }
                       size={0.7}
                       className={
-                        i < Math.floor(product.rating || 4)
+                        i < Math.floor((product as any)?.rating || 4)
                           ? "text-yellow-400"
                           : "text-gray-300"
                       }
@@ -1133,29 +841,14 @@ export default function ProductDetail() {
                 </div>
                 <span className="text-sm !text-maintext">
                   ({product.rating || "4.0"}) •{" "}
-                  {(product.reviews?.length || 0) + 128} đánh giá
+                  {((product as any)?.reviews?.length || 0) + 128} đánh giá
                 </span>
               </div>
             </div>
 
             {/* Enhanced Pricing */}
-            <Card className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-primary/20">
+            <Card className="p-4 border-green-100">
               <div className="space-y-4">
-                {/* Discount Badge */}
-                {productDiscount && productDiscount.discountPercent > 0 && (
-                  <motion.div
-                    initial={{ scale: 0, rotate: 180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="bg-gradient-to-r from-green-500 via-emerald-500 to-lime-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-sm border border-white/50 backdrop-blur-sm animate-pulse flex-shrink-0 w-fit flex items-center justify-center gap-2"
-                  >
-                    💥
-                    <span className="text-lg">
-                      -{productDiscount.discountPercent}%
-                    </span>
-                  </motion.div>
-                )}
-
                 {/* Price Display */}
                 <div className="flex items-center gap-4">
                   <motion.div
@@ -1163,38 +856,73 @@ export default function ProductDetail() {
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {productDiscount && productDiscount.discountPercent > 0
-                      ? formatPrice(productDiscount.discountedPrice)
-                      : selectedVariant && formatPrice(selectedVariant.price)}
+                    {(() => {
+                      if (
+                        productDiscount &&
+                        productDiscount.discountPercent > 0
+                      ) {
+                        return formatPrice(productDiscount.discountedPrice);
+                      } else if ((product as any)?.sale && selectedVariant) {
+                        const calculatedPrice = calculateDiscountedPrice(
+                          selectedVariant.price,
+                          (product as any)?.sale
+                        );
+                        return formatPrice(calculatedPrice);
+                      } else if (selectedVariant) {
+                        return formatPrice(selectedVariant.price);
+                      }
+                      return "N/A";
+                    })()}
                   </motion.div>
-                  {productDiscount && productDiscount.discountPercent > 0 && (
-                    <div className="text-xl text-maintext line-through font-medium bg-gray-100 px-3 py-2 rounded-lg">
-                      {formatPrice(productDiscount.originalPrice)}
-                    </div>
-                  )}
+                  {((productDiscount && productDiscount.discountPercent > 0) ||
+                    (product as any)?.sale) &&
+                    selectedVariant && (
+                      <div className="text-xl text-maintext line-through font-medium bg-gray-100 px-3 py-2 rounded-lg">
+                        {formatPrice(
+                          productDiscount && productDiscount.discountPercent > 0
+                            ? productDiscount.originalPrice
+                            : selectedVariant.price
+                        )}
+                      </div>
+                    )}
                 </div>
 
                 {/* Price breakdown for clarity */}
                 {productDiscount && productDiscount.discountPercent > 0 && (
-                  <div className="text-sm text-green-600 font-medium space-y-1">
-                    <div>
+                  <Card className="p-4 bg-[#EAEBF2]">
+                    <div className="font-semibold italic mb-3 text-base">
                       🎉 Áp dụng khuyến mãi:{" "}
-                      {productDiscount.appliedPromotion?.name}
+                      <span className="text-primary">
+                        {productDiscount.appliedPromotion?.name}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-maintext">
-                      <span>
-                        Giá gốc:{" "}
-                        <span className="line-through">
+                    <div className="space-y-2">
+                      {/* Step 1: Original Price */}
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-sm font-semibold text-maintext">
+                          Giá gốc:
+                        </span>
+                        <span className="text-sm font-semibold text-maintext">
                           {formatPrice(productDiscount.originalPrice)}
                         </span>
-                      </span>
-                      <span>→</span>
-                      <span className="text-green-600 font-semibold">
-                        Giá sau giảm:{" "}
-                        {formatPrice(productDiscount.discountedPrice)}
-                      </span>
+                      </div>
+
+                      {/* Step 2: Discount Amount */}
+                      <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                        <span className="text-sm font-semibold text-maintext">
+                          Giảm giá ({productDiscount.discountPercent}%):
+                        </span>
+                        <span className="text-sm font-semibold text-red-600">
+                          -{" "}
+                          {formatPrice(
+                            productDiscount.discountAmount ||
+                              productDiscount.originalPrice -
+                                productDiscount.discountedPrice
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  </Card>
                 )}
 
                 {/* Show original price info when no discount */}
@@ -1207,33 +935,38 @@ export default function ProductDetail() {
               </div>
             </Card>
 
-            {/* Enhanced Color Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Icon path={mdiPalette} size={1} className="!text-maintext" />
-                  <span className="font-semibold text-maintext">Màu sắc</span>
+            <Card className="p-4 border-green-100 flex flex-col gap-4">
+              {/* Enhanced Color Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      path={mdiPalette}
+                      size={1}
+                      className="!text-maintext"
+                    />
+                    <span className="font-semibold text-maintext">Màu sắc</span>
+                  </div>
+                  {selectedColor && (
+                    <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
+                      {selectedColor}
+                    </span>
+                  )}
                 </div>
-                {selectedColor && (
-                  <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {selectedColor}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {product.variants
-                  .filter((variant, index, self) => {
-                    const colorValue = variant.color;
-                    return (
-                      colorValue &&
-                      index === self.findIndex((v) => v.color === colorValue)
-                    );
-                  })
-                  .map((variant) => (
-                    <motion.button
-                      key={variant.color}
-                      onClick={() => handleColorSelect(String(variant.color))}
-                      className={`
+                <div className="flex flex-wrap gap-4">
+                  {product.variants
+                    .filter((variant, index, self) => {
+                      const colorValue = variant.color;
+                      return (
+                        colorValue &&
+                        index === self.findIndex((v) => v.color === colorValue)
+                      );
+                    })
+                    .map((variant) => (
+                      <motion.button
+                        key={variant.color}
+                        onClick={() => handleColorSelect(String(variant.color))}
+                        className={`
                         relative group flex items-center justify-center w-10 h-10 rounded-full
                         transition-all duration-300 border-2
                         ${
@@ -1242,153 +975,173 @@ export default function ProductDetail() {
                             : "border-gray-200 hover:border-gray-300 hover:scale-105"
                         }
                       `}
-                      style={{ backgroundColor: variant.color as string }}
-                      title={variant.color as string}
-                      whileHover={{
-                        scale:
-                          String(selectedColor) === String(variant.color)
-                            ? 1.1
-                            : 1.05,
-                      }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {String(selectedColor) === String(variant.color) && (
-                        <Icon
-                          path={mdiCheck}
-                          size={1}
-                          className="text-white drop-shadow-sm"
-                        />
-                      )}
-                    </motion.button>
-                  ))}
+                        style={{ backgroundColor: variant.color as string }}
+                        title={variant.color as string}
+                        whileHover={{
+                          scale:
+                            String(selectedColor) === String(variant.color)
+                              ? 1.1
+                              : 1.05,
+                        }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {String(selectedColor) === String(variant.color) && (
+                          <Icon
+                            path={mdiCheck}
+                            size={1}
+                            className="text-white drop-shadow-sm"
+                          />
+                        )}
+                      </motion.button>
+                    ))}
+                </div>
               </div>
-            </div>
 
-            {/* Enhanced Size Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              {/* Enhanced Size Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Icon path={mdiRuler} size={1} className="!text-maintext" />
+                    <span className="font-semibold text-maintext">
+                      Kích thước
+                    </span>
+                  </div>
+                  {selectedSize && (
+                    <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
+                      {selectedSize}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {Array.from(
+                    new Set(
+                      (product as any)?.variants
+                        .map((v) => String(v.size))
+                        .filter(Boolean)
+                    )
+                  ).map((sizeValue) => {
+                    const sizeVariant = (product as any)?.variants.find(
+                      (v) => String(v.size) === sizeValue
+                    );
+                    const variantForColorAndSize = (
+                      product as any
+                    ).variants.find(
+                      (v) =>
+                        String(v.color) === String(selectedColor) &&
+                        String(v.size) === sizeValue
+                    );
+                    const isAvailable =
+                      !!variantForColorAndSize &&
+                      variantForColorAndSize.stock > 0;
+
+                    return (
+                      <Button
+                        variant={
+                          String(selectedSize) === sizeValue
+                            ? "default"
+                            : "outline"
+                        }
+                        size="icon"
+                        key={sizeValue}
+                        onClick={() => handleSizeSelect(sizeValue)}
+                        disabled={!isAvailable}
+                        className={
+                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                        }
+                        title={!isAvailable ? "Không có sẵn cho màu này" : ""}
+                      >
+                        {sizeValue}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Enhanced Quantity Selection */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Icon
+                      path={mdiCartPlus}
+                      size={1}
+                      className="!text-maintext"
+                    />
+                    <span className="font-semibold text-maintext">
+                      Số lượng
+                    </span>
+                  </div>
+
+                  {selectedVariant && (
+                    <span className="text-sm !text-maintext">
+                      Còn{" "}
+                      <span className="font-semibold text-primary">
+                        {selectedVariant.stock}
+                      </span>{" "}
+                      sản phẩm
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
-                  <Icon path={mdiRuler} size={1} className="!text-maintext" />
-                  <span className="font-semibold text-maintext">
-                    Kích thước
-                  </span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1}
+                  >
+                    -
+                  </Button>
+                  <div className="w-9 h-9 flex items-center justify-center border text-center text-lg font-semibold bg-gray-50 rounded-sm">
+                    {quantity}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    disabled={
+                      !selectedVariant ||
+                      quantity >= (selectedVariant.stock || 0)
+                    }
+                  >
+                    +
+                  </Button>
                 </div>
-                {selectedSize && (
-                  <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
-                    {selectedSize}
-                  </span>
-                )}
               </div>
-              <div className="flex flex-wrap gap-4">
-                {Array.from(
-                  new Set(
-                    product.variants.map((v) => String(v.size)).filter(Boolean)
-                  )
-                ).map((sizeValue) => {
-                  const sizeVariant = product.variants.find(
-                    (v) => String(v.size) === sizeValue
-                  );
-                  const variantForColorAndSize = product.variants.find(
-                    (v) =>
-                      String(v.color) === String(selectedColor) &&
-                      String(v.size) === sizeValue
-                  );
-                  const isAvailable =
-                    !!variantForColorAndSize &&
-                    variantForColorAndSize.stock > 0;
 
-                  return (
-                    <Button
-                      variant={
-                        String(selectedSize) === sizeValue
-                          ? "default"
-                          : "outline"
-                      }
-                      size="icon"
-                      key={sizeValue}
-                      onClick={() => handleSizeSelect(sizeValue)}
-                      disabled={!isAvailable}
-                      className={
-                        !isAvailable ? "opacity-50 cursor-not-allowed" : ""
-                      }
-                      title={!isAvailable ? "Không có sẵn cho màu này" : ""}
-                    >
-                      {sizeValue}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Enhanced Quantity Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Icon
-                    path={mdiCartPlus}
-                    size={1}
-                    className="!text-maintext"
-                  />
-                  <span className="font-semibold text-maintext">Số lượng</span>
-                </div>
-
-                {selectedVariant && (
-                  <span className="text-sm !text-maintext">
-                    Còn{" "}
-                    <span className="font-semibold text-primary">
-                      {selectedVariant.stock}
-                    </span>{" "}
-                    sản phẩm
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
+              {/* Enhanced Action Buttons */}
+              <div className="grid grid-cols-3 gap-4 pt-4">
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleQuantityChange(quantity - 1)}
-                  disabled={quantity <= 1}
-                >
-                  -
-                </Button>
-                <div className="w-9 h-9 flex items-center justify-center border text-center text-lg font-semibold bg-gray-50 rounded-sm">
-                  {quantity}
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleQuantityChange(quantity + 1)}
-                  disabled={
-                    !selectedVariant || quantity >= (selectedVariant.stock || 0)
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white shadow-sm hover:shadow-sm"
+                  size="lg"
+                  onClick={() =>
+                    toast.success("Đã thêm vào danh sách yêu thích")
                   }
                 >
-                  +
+                  <Icon path={mdiAlphaSBox} size={1} />
+                  <strong>Gợi ý sản phẩm</strong>
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-500 text-white shadow-sm hover:shadow-sm"
+                  size="lg"
+                  onClick={() =>
+                    toast.success("Đã thêm vào danh sách yêu thích")
+                  }
+                >
+                  <Icon path={mdiHeartCircle} size={1} />
+                  <strong>Yêu thích</strong>
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  disabled={!selectedVariant || selectedVariant.stock === 0}
+                >
+                  <Icon path={mdiCartArrowRight} size={1} />
+                  <strong>Thêm vào giỏ hàng</strong>
                 </Button>
               </div>
-            </div>
-
-            {/* Enhanced Action Buttons */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => toast.success("Đã thêm vào danh sách yêu thích")}
-              >
-                <Icon path={mdiHeartOutline} size={1} className="mr-2" />
-                Yêu thích
-              </Button>
-              <Button
-                size="lg"
-                onClick={handleAddToCart}
-                disabled={!selectedVariant || selectedVariant.stock === 0}
-              >
-                <Icon path={mdiCartOutline} size={1} className="mr-2" />
-                Thêm vào giỏ hàng
-              </Button>
-            </div>
+            </Card>
 
             {/* Enhanced Product Features */}
-            <Card className="p-4 bg-gray-50/50">
+            <Card className="p-4 border-green-100">
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -1438,255 +1191,8 @@ export default function ProductDetail() {
                 </div>
               </div>
             </Card>
-
-            {/* Enhanced Product Information */}
-            <Card className="p-4">
-              <h3 className="font-semibold text-maintext mb-4 flex items-center gap-2">
-                <Icon path={mdiInformation} size={1} className="text-primary" />
-                Thông tin sản phẩm
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Phân loại chính</span>
-                  <span className="font-medium text-maintext">
-                    {product.masterCategory}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Phân loại phụ</span>
-                  <span className="font-medium text-maintext">
-                    {product.subCategory}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Kiểu dáng</span>
-                  <span className="font-medium text-maintext">
-                    {product.articleType}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Màu cơ bản</span>
-                  <span className="font-medium text-maintext">
-                    {product.baseColour}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext">Mã sản phẩm</span>
-                  <span className="font-mono font-medium text-primary">
-                    {product.id}
-                  </span>
-                </div>
-                {product.gender && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext">Giới tính</span>
-                    <span className="font-medium text-maintext">
-                      {product.gender}
-                    </span>
-                  </div>
-                )}
-                {product.usage && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext">Dịp sử dụng</span>
-                    <span className="font-medium text-maintext">
-                      {product.usage}
-                    </span>
-                  </div>
-                )}
-                {product.season && (
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext">Mùa</span>
-                    <span className="font-medium text-maintext">
-                      {product.season} ({product.year})
-                    </span>
-                  </div>
-                )}
-                {selectedVariant && (
-                  <div className="flex justify-between items-center py-2">
-                    <span className="!text-maintext">Giá hiện tại</span>
-                    <span className="font-medium text-primary">
-                      {productDiscount && productDiscount.discountPercent > 0
-                        ? formatPrice(productDiscount.discountedPrice)
-                        : formatPrice(selectedVariant.price)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </Card>
           </motion.div>
         </div>
-
-        {/* Enhanced Product Details Tabs */}
-        <motion.div
-          className="mt-20"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-        >
-          <Tabs defaultValue="description" className="w-full">
-            <TabsList className="w-full sm:w-auto border-b bg-transparent h-auto p-0 rounded-none">
-              <TabsTrigger
-                value="description"
-                className="flex-1 sm:flex-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-4 font-semibold text-maintext"
-              >
-                Mô tả sản phẩm
-              </TabsTrigger>
-              <TabsTrigger
-                value="specifications"
-                className="flex-1 sm:flex-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-4 font-semibold text-maintext"
-              >
-                Thông số kỹ thuật
-              </TabsTrigger>
-              <TabsTrigger
-                value="reviews"
-                className="flex-1 sm:flex-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none pb-4 font-semibold"
-              >
-                Đánh giá (128)
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="description" className="mt-8">
-              <Card className="p-8">
-                <div className="prose max-w-none">
-                  <div className="text-maintext leading-relaxed">
-                    <p>Tên sản phẩm: {product.productDisplayName}</p>
-                    <p>Giới tính: {product.gender}</p>
-                    <p>
-                      Phân loại: {product.masterCategory} -{" "}
-                      {product.subCategory}
-                    </p>
-                    <p>Kiểu dáng: {product.articleType}</p>
-                    <p>Màu sắc: {product.baseColour}</p>
-                    <p>
-                      Mùa: {product.season} {product.year}
-                    </p>
-                    <p>Dịp sử dụng: {product.usage}</p>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="specifications" className="mt-8">
-              <Card className="p-8">
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-semibold text-lg mb-4 text-maintext">
-                      Thông tin cơ bản
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Giới tính</span>
-                        <span className="font-medium">{product.gender}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Phân loại chính</span>
-                        <span className="font-medium">
-                          {product.masterCategory}
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Phân loại phụ</span>
-                        <span className="font-medium">
-                          {product.subCategory}
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Kiểu dáng</span>
-                        <span className="font-medium">
-                          {product.articleType}
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Màu cơ bản</span>
-                        <span className="font-medium">
-                          {product.baseColour}
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Mùa</span>
-                        <span className="font-medium">
-                          {product.season} ({product.year})
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="!text-maintext">Dịp sử dụng</span>
-                        <span className="font-medium">{product.usage}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-lg mb-4 text-maintext">
-                      Thông tin biến thể
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Số màu sắc</span>
-                        <span className="font-medium">
-                          {
-                            Array.from(
-                              new Set(
-                                product.variants.map(
-                                  (v) =>
-                                    (v.color as any)?.id || (v as any)?.colorId
-                                )
-                              )
-                            ).length
-                          }{" "}
-                          màu
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="!text-maintext">Số kích thước</span>
-                        <span className="font-medium">
-                          {
-                            Array.from(
-                              new Set(
-                                product.variants.map(
-                                  (v) =>
-                                    (v.size as any)?.id || (v as any)?.sizeId
-                                )
-                              )
-                            ).length
-                          }{" "}
-                          size
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="!text-maintext">Tổng tồn kho</span>
-                        <span className="font-medium">
-                          {product.variants.reduce(
-                            (sum, v) => sum + v.stock,
-                            0
-                          )}{" "}
-                          sản phẩm
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reviews" className="mt-8">
-              <Card className="p-8">
-                <div className="text-center py-12">
-                  <Icon
-                    path={mdiStar}
-                    size={3}
-                    className="text-gray-300 mx-auto mb-4"
-                  />
-                  <h3 className="text-xl font-semibold text-maintext mb-2">
-                    Chưa có đánh giá
-                  </h3>
-                  <p className="!text-maintext">
-                    Hãy là người đầu tiên đánh giá sản phẩm này!
-                  </p>
-                  <Button className="mt-4">Viết đánh giá</Button>
-                </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-
         {/* Enhanced Similar Products Section */}
         {similarProducts.length > 0 && (
           <motion.div
@@ -1699,29 +1205,106 @@ export default function ProductDetail() {
               <h2 className="text-3xl font-bold text-maintext mb-4">
                 Sản phẩm tương tự
               </h2>
-              <p className="!text-maintext max-w-2xl mx-auto">
+              <p className="!text-maintext max-w-2xl mx-auto text-lg">
                 Khám phá những sản phẩm tương tự có thể bạn sẽ thích
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <AnimatePresence>
-                {similarProducts.map(
-                  (similarProduct: IProduct, index: number) => (
-                    <motion.div
-                      key={similarProduct.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                      <SimilarProductCard
-                        product={similarProduct}
-                        promotionsData={promotionsData}
-                      />
-                    </motion.div>
-                  )
-                )}
-              </AnimatePresence>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {similarProducts.map(
+                (similarProduct: IProduct, index: number) => (
+                  <ProductCard
+                    key={similarProduct.id}
+                    product={similarProduct}
+                    promotionsData={promotionsData}
+                    formatPrice={formatPrice}
+                    onAddToCart={() => {
+                      const firstVariant = similarProduct.variants?.[0];
+                      if (!firstVariant) return;
+
+                      if (firstVariant.stock === 0) {
+                        toast.error("Sản phẩm đã hết hàng");
+                        return;
+                      }
+
+                      const { addToCart } = useCartStore.getState();
+
+                      let discountPercent = similarProduct.sale || 0;
+                      let finalPrice = calculateDiscountedPrice(
+                        firstVariant.price,
+                        discountPercent
+                      );
+                      let originalPrice =
+                        discountPercent > 0 ? firstVariant.price : undefined;
+
+                      if (
+                        discountPercent === 0 &&
+                        promotionsData?.data?.promotions
+                      ) {
+                        const activePromotions = filterActivePromotions(
+                          promotionsData.data.promotions
+                        );
+                        const discount = calculateProductDiscount(
+                          String(similarProduct.id),
+                          firstVariant.price,
+                          activePromotions
+                        );
+                        if (discount.discountPercent > 0) {
+                          finalPrice = discount.discountedPrice;
+                          originalPrice = discount.originalPrice;
+                          discountPercent = discount.discountPercent;
+                        }
+                      }
+
+                      const cartItem = {
+                        id: firstVariant._id || firstVariant.id,
+                        productId: similarProduct.id,
+                        name:
+                          similarProduct.productDisplayName ||
+                          similarProduct.name,
+                        price: finalPrice,
+                        originalPrice: originalPrice,
+                        discountPercent: discountPercent,
+                        hasDiscount: discountPercent > 0,
+                        image:
+                          checkImageUrl(
+                            similarProduct.images?.[0] ||
+                              firstVariant.images?.[0] ||
+                              ""
+                          ) || "/placeholder.svg",
+                        quantity: 1,
+                        slug: similarProduct.id.toString(),
+                        brand:
+                          typeof similarProduct.brand === "string"
+                            ? similarProduct.brand
+                            : similarProduct.brand?.name || "No Brand",
+                        size: String(firstVariant.size || ""),
+                        colors: [String(firstVariant.color || "")],
+                        stock: firstVariant.stock,
+                        colorId: String(firstVariant.color || ""),
+                        sizeId: String(firstVariant.size || ""),
+                        colorName: String(firstVariant.color || ""),
+                        sizeName: String(firstVariant.size || ""),
+                      };
+
+                      addToCart(cartItem, 1);
+                      toast.success("Đã thêm sản phẩm vào giỏ hàng");
+                    }}
+                    onQuickView={() => {
+                      window.location.href = `/products/${(
+                        similarProduct.productDisplayName ||
+                        similarProduct.name ||
+                        "product"
+                      )
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}-${similarProduct.id}`;
+                    }}
+                    onAddToWishlist={() => {
+                      toast.success("Đã thêm vào danh sách yêu thích");
+                    }}
+                  />
+                )
+              )}
             </div>
 
             <div className="text-center mt-12">

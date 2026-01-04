@@ -13,7 +13,7 @@ import {
   mdiCalendarRange,
   mdiChartBar,
   mdiSync,
-  mdiFilterOutline,
+  mdiFilterMultiple,
   mdiLoading,
   mdiEye,
 } from "@mdi/js";
@@ -464,7 +464,7 @@ export default function StatisticsPage() {
               ))}
             </div>
           ) : statisticsError || revenueError || overviewError ? (
-            <Card className="p-4">
+            <Card className="p-4 border-green-100">
               <p className="text-red-600">Lỗi khi tải dữ liệu thống kê</p>
             </Card>
           ) : (
@@ -866,7 +866,7 @@ export default function StatisticsPage() {
                     sản phẩm
                   </p>
                 </div>
-                <div className="p-4 bg-green-50 rounded-lg">
+                <div className="p-4 bg-[#EAEBF2] rounded-lg">
                   <h4 className="text-lg font-semibold text-green-700 mb-2">
                     Tổng doanh thu
                   </h4>
@@ -1147,7 +1147,7 @@ export default function StatisticsPage() {
                       {statisticsDetailData.data.totalOrders}
                     </p>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="p-4 bg-[#EAEBF2] rounded-lg">
                     <h4 className="text-sm font-medium text-green-700">
                       Doanh thu
                     </h4>

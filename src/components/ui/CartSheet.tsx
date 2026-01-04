@@ -41,11 +41,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Icon } from "@mdi/react";
 import {
-  mdiTicketPercentOutline,
+  mdiTicket,
   mdiContentCopy,
   mdiMinus,
   mdiPlus,
-  mdiTrashCanOutline,
   mdiDelete,
   mdiCheck,
   mdiClose,
@@ -94,11 +93,7 @@ const VouchersListDialog = ({
       <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Icon
-              path={mdiTicketPercentOutline}
-              size={0.8}
-              className="text-primary"
-            />
+            <Icon path={mdiTicket} size={0.8} className="text-primary" />
             Danh sách mã giảm giá
           </DialogTitle>
           <DialogDescription>
@@ -543,7 +538,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
                               onBlur={() => handleQuantityInputBlur(item.id)}
                               className={`w-16 h-8 text-center border-0 focus:ring-0 text-sm ${
                                 item.stock && item.quantity >= item.stock
-                                  ? "bg-green-50 text-green-800"
+                                  ? "bg-[#EAEBF2] text-green-800"
                                   : ""
                               }`}
                               title={
@@ -600,7 +595,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}
-                          className="flex items-center justify-between p-3 border border-green-200 bg-green-50 rounded-lg"
+                          className="flex items-center justify-between p-3 border border-green-200 bg-[#EAEBF2] rounded-lg"
                         >
                           <div className="flex items-center gap-2">
                             <Icon

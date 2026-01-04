@@ -336,7 +336,7 @@ export default function CreateReturnPage() {
         </CardHeader>
         <CardContent>
           {selectedCustomer ? (
-            <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[#EAEBF2] border border-green-200 rounded-lg">
               <div>
                 <h3 className="font-semibold">{selectedCustomer.fullName}</h3>
                 <p className="text-sm text-maintext">
@@ -407,7 +407,7 @@ export default function CreateReturnPage() {
                   </p>
                   <Badge
                     variant="outline"
-                    className="bg-green-50 text-green-600 border-green-200 mt-1"
+                    className="bg-[#EAEBF2] text-green-600 border-green-200 mt-1"
                   >
                     {selectedOrder.status}
                   </Badge>

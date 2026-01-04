@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icon } from "@mdi/react";
 import {
   mdiMagnify,
-  mdiFilterOutline,
+  mdiFilterMultiple,
   mdiEye,
   mdiPencil,
   mdiFileExport,
@@ -521,7 +521,7 @@ export default function OrdersPage() {
                   className="flex items-center"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <Icon path={mdiFilterOutline} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
                   {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
                 </Button>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -963,12 +963,12 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
       case "DA_GIAO_HANG":
         return {
           label: "Đã giao hàng",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       case "HOAN_THANH":
         return {
           label: "Hoàn thành",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       case "DA_HUY":
         return {
@@ -1004,7 +1004,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
       case "PAID":
         return {
           label: "Đã thanh toán",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       default:
         return {

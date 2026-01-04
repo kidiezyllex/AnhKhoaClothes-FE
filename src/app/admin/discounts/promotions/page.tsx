@@ -10,12 +10,9 @@ import {
   mdiPlus,
   mdiPencilCircle,
   mdiDeleteCircle,
-  mdiFilterOutline,
+  mdiFilterMultiple,
   mdiLoading,
-  mdiEmailFast,
-  mdiTagCheckOutline,
-  mdiFilterRemoveOutline,
-  mdiPercent,
+  mdiFilterRemove,
 } from "@mdi/js";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
@@ -228,11 +225,7 @@ export default function PromotionsPage() {
                   className="flex items-center"
                   onClick={handleClearFilters}
                 >
-                  <Icon
-                    path={mdiFilterRemoveOutline}
-                    size={0.7}
-                    className="mr-2"
-                  />
+                  <Icon path={mdiFilterRemove} size={0.7} className="mr-2" />
                   Clear bộ lọc
                 </Button>
               )}
@@ -241,7 +234,7 @@ export default function PromotionsPage() {
                 className="flex items-center"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Icon path={mdiFilterOutline} size={0.7} className="mr-2" />
+                <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
                 {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>

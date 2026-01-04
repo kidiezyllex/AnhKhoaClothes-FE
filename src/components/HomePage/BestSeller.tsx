@@ -3,13 +3,13 @@ import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@mdi/react";
 import {
-  mdiCartOutline,
-  mdiHeartOutline,
+  mdiCartArrowRight,
+  mdiHeartCircle,
   mdiStar,
   mdiEye,
   mdiArrowRight,
   mdiArrowLeft,
-  mdiTagOutline,
+  mdiTagMultiple,
   mdiCrown,
 } from "@mdi/js";
 import { InteractiveHoverButton } from "../Common/InteractiveHoverButton";
@@ -246,7 +246,7 @@ const ProductCard = ({
           <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
             {product.discount > 0 && (
               <Badge variant="promotion" className="flex items-center gap-1">
-                <Icon path={mdiTagOutline} size={0.6} />-{product.discount}%
+                <Icon path={mdiTagMultiple} size={0.6} />-{product.discount}%
               </Badge>
             )}
             {product.isBestSeller && (
@@ -261,9 +261,9 @@ const ProductCard = ({
 
           <img
             src={
-              product.image.startsWith("//")
+              (product as any)?.image.startsWith("//")
                 ? `https:${product.image}`
-                : product.image
+                : (product as any)?.image
             }
             alt={product.name}
             className="object-cover transition-transform duration-700 group-hover:scale-110 w-full h-full"
@@ -290,7 +290,7 @@ const ProductCard = ({
             className="rounded-full w-9 h-9 bg-white/80 hover:bg-white shadow-sm backdrop-blur-sm flex items-center justify-center"
             title="Yêu thích"
           >
-            <Icon path={mdiHeartOutline} size={0.7} className="text-maintext" />
+            <Icon path={mdiHeartCircle} size={0.7} className="text-maintext" />
           </Button>
           <Button
             size="sm"
@@ -298,7 +298,11 @@ const ProductCard = ({
             className="rounded-full w-9 h-9 bg-white/80 hover:bg-white shadow-sm backdrop-blur-sm flex items-center justify-center"
             title="Thêm vào giỏ hàng"
           >
-            <Icon path={mdiCartOutline} size={0.7} className="text-maintext" />
+            <Icon
+              path={mdiCartArrowRight}
+              size={0.7}
+              className="text-maintext"
+            />
           </Button>
         </div>
       </a>
@@ -315,11 +319,11 @@ const ProductCard = ({
         </div>
         <div className="flex items-baseline gap-2 mb-1">
           <span className="font-bold text-lg bg-gradient-to-r from-[#2C8B3D] to-[#88C140] bg-clip-text text-transparent">
-            {formatPrice(product.price)}
+            {formatPrice((product as any)?.price)}
           </span>
           {product.discount > 0 && (
             <span className="text-sm text-maintext line-through">
-              {formatPrice(product.originalPrice)}
+              {formatPrice((product as any)?.originalPrice)}
             </span>
           )}
         </div>

@@ -7,15 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@mdi/react";
 import {
   mdiPrinter,
-  mdiPencil,
-  mdiArrowLeft,
   mdiFileDocument,
   mdiDelete,
   mdiFileSign,
   mdiPackageVariantClosedPlus,
-  mdiTruckDeliveryOutline,
-  mdiMapMarkerCheckOutline,
-  mdiCheckDecagramOutline,
+  mdiTruckFast,
+  mdiMapMarker,
+  mdiCheckDecagram,
 } from "@mdi/js";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -170,7 +168,7 @@ const orderSteps: OrderStep[] = [
   {
     status: "DANG_VAN_CHUYEN",
     label: "Đang giao hàng",
-    icon: mdiTruckDeliveryOutline,
+    icon: mdiTruckFast,
     colors: {
       bgClass: "bg-orange-100 dark:bg-orange-800/30",
       textClass: "text-orange-600 dark:text-orange-400",
@@ -181,7 +179,7 @@ const orderSteps: OrderStep[] = [
   {
     status: "DA_GIAO_HANG",
     label: "Đã giao hàng",
-    icon: mdiMapMarkerCheckOutline,
+    icon: mdiMapMarker,
     colors: {
       bgClass: "bg-teal-100 dark:bg-teal-800/30",
       textClass: "text-teal-600 dark:text-teal-400",
@@ -192,12 +190,12 @@ const orderSteps: OrderStep[] = [
   {
     status: "HOAN_THANH",
     label: "Hoàn thành",
-    icon: mdiCheckDecagramOutline,
+    icon: mdiCheckDecagram,
     colors: {
       bgClass: "bg-green-100 dark:bg-green-800/30",
       textClass: "text-primary dark:text-green-400",
       borderClass: "border-green-500 dark:border-green-500",
-      progressFillClass: "bg-green-500",
+      progressFillClass: "bg-[#EAEBF2]0",
     },
   },
 ];
@@ -315,12 +313,12 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
       case "DA_GIAO_HANG":
         return {
           label: "Đã giao hàng",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       case "HOAN_THANH":
         return {
           label: "Hoàn thành",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       case "DA_HUY":
         return {
@@ -350,7 +348,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
       case "PAID":
         return {
           label: "Đã thanh toán",
-          className: "!bg-green-50 !text-green-500 !border-green-500",
+          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
         };
       default:
         return {

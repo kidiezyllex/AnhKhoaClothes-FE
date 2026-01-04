@@ -15,14 +15,14 @@ import {
   mdiMapMarker,
   mdiCreditCardOutline,
   mdiCashMultiple,
-  mdiAlertCircleOutline,
-  mdiContentSaveOutline,
-  mdiTicketPercentOutline,
+  mdiAlertOctagon,
+  mdiContentSaveCheck,
+  mdiTicket,
   mdiContentCopy,
   mdiTruck,
   mdiPackageVariant,
   mdiCheckCircle,
-  mdiClockOutline,
+  mdiClockTimeFour,
   mdiCancel,
   mdiKeyboardReturn,
   mdiPlus,
@@ -240,7 +240,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
         message:
           "GHN có thông tin chi tiết về gói hàng của bạn và đang chuẩn bị để vận chuyển",
         completed: true,
-        icon: mdiClockOutline,
+        icon: mdiClockTimeFour,
         color: "bg-blue-500",
       },
       {
@@ -262,7 +262,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             title: "Chờ xác nhận",
             message: "Đơn hàng đã được tạo và đang chờ xác nhận từ cửa hàng",
             completed: true,
-            icon: mdiClockOutline,
+            icon: mdiClockTimeFour,
             color: "bg-yellow-500",
           },
         ];
@@ -276,7 +276,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             message: "GHN đã xác nhận gói hàng của bạn bằng cách quét nhãn",
             completed: true,
             icon: mdiCheckCircle,
-            color: "bg-green-500",
+            color: "bg-[#EAEBF2]0",
           },
           {
             time: generateTimestamp(6),
@@ -297,7 +297,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             message: "GHN đã xác nhận gói hàng của bạn bằng cách quét nhãn",
             completed: true,
             icon: mdiCheckCircle,
-            color: "bg-green-500",
+            color: "bg-[#EAEBF2]0",
           },
           {
             time: generateTimestamp(6),
@@ -337,7 +337,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             message: "GHN đã xác nhận gói hàng của bạn bằng cách quét nhãn",
             completed: true,
             icon: mdiCheckCircle,
-            color: "bg-green-500",
+            color: "bg-[#EAEBF2]0",
           },
           {
             time: generateTimestamp(6),
@@ -400,7 +400,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             title: "Đơn hàng được tạo",
             message: "Đơn hàng đã được tạo",
             completed: true,
-            icon: mdiClockOutline,
+            icon: mdiClockTimeFour,
             color: "bg-blue-500",
           },
           {
@@ -833,7 +833,7 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
 
     const existingIndex = selectedItems.findIndex(
       (si) =>
-        si.product === product.id &&
+        si.product === (product as any)?.id &&
         si.variant.colorId === productVariant.colorId &&
         si.variant.sizeId === productVariant.sizeId
     );
@@ -848,14 +848,14 @@ const CreateReturnDialog: React.FC<CreateReturnDialogProps> = ({
       setSelectedItems([
         ...selectedItems,
         {
-          product: product.id,
+          product: (product as any)?.id,
           variant: {
             colorId: productVariant.colorId,
             sizeId: productVariant.sizeId,
           },
           quantity: 1,
           maxQuantity: item.quantity,
-          productName: product.name,
+          productName: (product as any)?.name,
           price: item.price,
         },
       ]);
@@ -1457,7 +1457,7 @@ const ProfileTab = () => {
                 {updateProfileMutation.isPending ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent border-white" />
                 ) : (
-                  <Icon path={mdiContentSaveOutline} size={0.7} />
+                  <Icon path={mdiContentSaveCheck} size={0.7} />
                 )}
                 Lưu thay đổi
               </Button>
@@ -1677,11 +1677,7 @@ const VouchersTab = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icon
-              path={mdiAlertCircleOutline}
-              size={0.7}
-              className="text-primary"
-            />
+            <Icon path={mdiAlertOctagon} size={0.7} className="text-primary" />
             <span>Lỗi tải mã giảm giá</span>
           </CardTitle>
         </CardHeader>
@@ -1701,7 +1697,7 @@ const VouchersTab = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icon path={mdiTicketPercentOutline} size={0.7} />
+            <Icon path={mdiTicket} size={0.7} />
             <span>Mã giảm giá</span>
           </CardTitle>
         </CardHeader>
@@ -1719,11 +1715,7 @@ const VouchersTab = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Icon
-              path={mdiTicketPercentOutline}
-              size={0.7}
-              className="text-primary"
-            />
+            <Icon path={mdiTicket} size={0.7} className="text-primary" />
             <span>Mã giảm giá của bạn</span>
           </CardTitle>
           <CardDescription>
@@ -2141,7 +2133,7 @@ export default function GeneralManagementPage() {
     },
     {
       title: "Mã giảm giá",
-      icon: mdiTicketPercentOutline,
+      icon: mdiTicket,
       value: "vouchers",
     },
   ];

@@ -41,10 +41,40 @@ export const formatDate = (dateString: string | Date): string => {
   
   if (isNaN(date.getTime())) return '';
   
-  //                                                                                                                     Định dạng ngày theo tiếng Việt: DD/MM/YYYY
+  // Định dạng ngày theo tiếng Việt: DD/MM/YYYY
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
   }).format(date);
+};
+
+export const calculateDiscountedPrice = (
+  originalPrice: number,
+  discountPercent: number
+): number => {
+  if (originalPrice <= 0) return 0;
+  if (discountPercent <= 0) return originalPrice;
+  if (discountPercent >= 100) return 0;
+  
+  const discountAmount = originalPrice * (discountPercent / 100);
+  const finalPrice = originalPrice - discountAmount;
+  
+  // Round to nearest integer to avoid floating point issues
+  return Math.round(finalPrice);
+};
+
+/**
+ * Format price to Vietnamese Dong currency format
+ * @param price - The price to format
+ * @returns Formatted price string in VND
+ * @example
+ * formatPriceVND(100000) // Returns "100.000 ₫"
+ * formatPriceVND(1250000) // Returns "1.250.000 ₫"
+ */
+export const formatPriceVND = (price: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(price);
 };

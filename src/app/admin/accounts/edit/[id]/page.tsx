@@ -257,7 +257,7 @@ export default function EditAccountPage() {
               checked={formData.status === "ACTIVE"}
               onCheckedChange={handleToggleStatus}
               id="status"
-              className="data-[state=checked]:bg-green-500"
+              className="data-[state=checked]:bg-[#EAEBF2]0"
             />
             <Label htmlFor="status" className="ml-3 text-sm font-medium">
               {formData.status === "ACTIVE"

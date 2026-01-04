@@ -5,8 +5,8 @@ import {
   mdiMapMarker,
   mdiEmail,
   mdiPhone,
-  mdiClockOutline,
-  mdiHeart,
+  mdiClockTimeFour,
+  mdiHeartCircle,
 } from "@mdi/js";
 import { motion } from "framer-motion";
 
@@ -163,7 +163,7 @@ export const Footer = () => {
 
                 <div className="flex items-center gap-3 p-3 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
                   <Icon
-                    path={mdiClockOutline}
+                    path={mdiClockTimeFour}
                     size={1.2}
                     className="text-primary flex-shrink-0"
                   />
@@ -176,7 +176,7 @@ export const Footer = () => {
 
             {/* Desktop view - Enhanced */}
             <div className="hidden sm:block">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
                 {/* Company Logo */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -244,7 +244,7 @@ export const Footer = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <Icon
-                        path={mdiClockOutline}
+                        path={mdiClockTimeFour}
                         size={1}
                         className="text-primary flex-shrink-0"
                       />
@@ -360,7 +360,11 @@ export const Footer = () => {
 
                   <div className="flex items-center gap-2 text-gray-400 text-sm">
                     <span>©2026 Shop Quần Áo. Made with</span>
-                    <Icon path={mdiHeart} size={0.8} className="text-red-500" />
+                    <Icon
+                      path={mdiHeartCircle}
+                      size={0.8}
+                      className="text-red-500"
+                    />
                     <span>in Vietnam</span>
                   </div>
                 </div>
@@ -404,7 +408,11 @@ export const Footer = () => {
             >
               <p className="text-gray-400 text-xs flex items-center justify-center gap-2">
                 <span>©2026 Shop Quần Áo. Made with</span>
-                <Icon path={mdiHeart} size={0.6} className="text-red-500" />
+                <Icon
+                  path={mdiHeartCircle}
+                  size={0.6}
+                  className="text-red-500"
+                />
                 <span>in Vietnam</span>
               </p>
             </motion.div>

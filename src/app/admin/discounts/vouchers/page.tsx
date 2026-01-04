@@ -1,31 +1,72 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
- 
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Icon } from '@mdi/react';
-import { mdiMagnify, mdiPlus, mdiPencilCircle, mdiDeleteCircle, mdiFilterOutline, mdiLoading, mdiEmailFast, mdiTagCheckOutline, mdiFilterRemoveOutline } from '@mdi/js';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useVouchers, useDeleteVoucher, useNotifyVoucher, useValidateVoucher } from '@/hooks/voucher';
-import { IVoucherFilter } from '@/interface/request/voucher';
-import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { useState, useEffect } from "react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Icon } from "@mdi/react";
+import {
+  mdiMagnify,
+  mdiPlus,
+  mdiPencilCircle,
+  mdiDeleteCircle,
+  mdiFilterMultiple,
+  mdiLoading,
+  mdiEmailFast,
+  mdiFilterRemove,
+} from "@mdi/js";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  useVouchers,
+  useDeleteVoucher,
+  useNotifyVoucher,
+  useValidateVoucher,
+} from "@/hooks/voucher";
+import { IVoucherFilter } from "@/interface/request/voucher";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export default function VouchersPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IVoucherFilter>({
     page: 1,
-    limit: 10
+    limit: 10,
   });
   const [showFilters, setShowFilters] = useState(false);
   const { data, isLoading, isError } = useVouchers(filters);
@@ -37,8 +78,8 @@ export default function VouchersPage() {
   const [isValidateDialogOpen, setIsValidateDialogOpen] = useState(false);
   const [voucherToDelete, setVoucherToDelete] = useState<string | null>(null);
   const [voucherToNotify, setVoucherToNotify] = useState<string | null>(null);
-  const [voucherCodeToValidate, setVoucherCodeToValidate] = useState('');
-  const [orderValueToValidate, setOrderValueToValidate] = useState('');
+  const [voucherCodeToValidate, setVoucherCodeToValidate] = useState("");
+  const [orderValueToValidate, setOrderValueToValidate] = useState("");
   const validateVoucher = useValidateVoucher();
   const [validationResult, setValidationResult] = useState<any>(null);
 
@@ -55,8 +96,11 @@ export default function VouchersPage() {
     return () => clearTimeout(debounce);
   }, [searchQuery]);
 
-  const handleFilterChange = (key: keyof IVoucherFilter, value: string | number | undefined) => {
-    if (value === '') {
+  const handleFilterChange = (
+    key: keyof IVoucherFilter,
+    value: string | number | undefined
+  ) => {
+    if (value === "") {
       const newFilters = { ...filters };
       delete newFilters[key];
       setFilters({ ...newFilters, page: 1 });
@@ -66,7 +110,7 @@ export default function VouchersPage() {
   };
 
   const handleClearFilters = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setFilters({ page: 1, limit: 10 });
   };
 
@@ -74,13 +118,13 @@ export default function VouchersPage() {
     try {
       await deleteVoucher.mutateAsync(id, {
         onSuccess: () => {
-          toast.success('Đã xóa mã giảm giá thành công');
-          queryClient.invalidateQueries({ queryKey: ['vouchers'] });
+          toast.success("Đã xóa mã giảm giá thành công");
+          queryClient.invalidateQueries({ queryKey: ["vouchers"] });
           setIsDeleteDialogOpen(false);
         },
       });
     } catch (error) {
-      toast.error('Xóa mã giảm giá thất bại');
+      toast.error("Xóa mã giảm giá thất bại");
     }
   };
 
@@ -88,12 +132,12 @@ export default function VouchersPage() {
     try {
       await notifyVoucher.mutateAsync(id, {
         onSuccess: () => {
-          toast.success('Đã gửi thông báo mã giảm giá thành công');
+          toast.success("Đã gửi thông báo mã giảm giá thành công");
           setIsNotifyDialogOpen(false);
         },
       });
     } catch (error) {
-      toast.error('Gửi thông báo thất bại');
+      toast.error("Gửi thông báo thất bại");
     }
   };
 
@@ -102,18 +146,18 @@ export default function VouchersPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
       maximumFractionDigits: 0,
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     }).format(new Date(dateString));
   };
 
@@ -121,33 +165,39 @@ export default function VouchersPage() {
     try {
       const result = await validateVoucher.mutateAsync({
         code: voucherCodeToValidate,
-        orderValue: orderValueToValidate ? parseInt(orderValueToValidate) : undefined
+        orderValue: orderValueToValidate
+          ? parseInt(orderValueToValidate)
+          : undefined,
       });
       setValidationResult(result);
     } catch (error) {
-      toast.error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+      toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn");
       setValidationResult(null);
     }
   };
 
   const resetValidateDialog = () => {
-    setVoucherCodeToValidate('');
-    setOrderValueToValidate('');
+    setVoucherCodeToValidate("");
+    setOrderValueToValidate("");
     setValidationResult(null);
     setIsValidateDialogOpen(false);
   };
 
   return (
     <div className="space-y-4">
-      <div className='flex justify-between items-start'>
+      <div className="flex justify-between items-start">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/statistics">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/statistics">
+                Dashboard
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/admin/discounts">Quản lý khuyến mãi</BreadcrumbLink>
+              <BreadcrumbLink href="/admin/discounts">
+                Quản lý khuyến mãi
+              </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -164,7 +214,10 @@ export default function VouchersPage() {
             <Icon path={mdiTagCheckOutline} size={0.7} />
             Kiểm tra mã
           </Button> */}
-          <a href="/admin/discounts/vouchers/create" className="flex items-center gap-2">
+          <a
+            href="/admin/discounts/vouchers/create"
+            className="flex items-center gap-2"
+          >
             <Button className="flex items-center gap-2">
               <Icon path={mdiPlus} size={0.7} />
               Thêm mã giảm giá mới
@@ -191,13 +244,17 @@ export default function VouchersPage() {
               />
             </div>
             <div className="flex space-x-2">
-              {(showFilters || searchQuery || Object.keys(filters).filter(k => k !== 'page' && k !== 'limit').length > 0) && (
+              {(showFilters ||
+                searchQuery ||
+                Object.keys(filters).filter(
+                  (k) => k !== "page" && k !== "limit"
+                ).length > 0) && (
                 <Button
                   variant="outline"
                   className="flex items-center"
                   onClick={handleClearFilters}
                 >
-                  <Icon path={mdiFilterRemoveOutline} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterRemove} size={0.7} className="mr-2" />
                   Clear bộ lọc
                 </Button>
               )}
@@ -206,8 +263,8 @@ export default function VouchersPage() {
                 className="flex items-center"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Icon path={mdiFilterOutline} size={0.7} className="mr-2" />
-                {showFilters ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+                <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+                {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>
           </div>
@@ -216,7 +273,7 @@ export default function VouchersPage() {
             {showFilters && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="mt-4 pt-4 border-t"
@@ -228,8 +285,10 @@ export default function VouchersPage() {
                     </label>
                     <Input
                       type="text"
-                      value={filters.code || ''}
-                      onChange={(e) => handleFilterChange('code', e.target.value)}
+                      value={filters.code || ""}
+                      onChange={(e) =>
+                        handleFilterChange("code", e.target.value)
+                      }
                       placeholder="Nhập mã voucher"
                       className="w-full"
                     />
@@ -238,14 +297,24 @@ export default function VouchersPage() {
                     <label className="block text-sm text-maintext mb-2 font-semibold">
                       Trạng thái
                     </label>
-                    <Select value={filters.status || ''} onValueChange={(value) => handleFilterChange('status', value === 'all' ? undefined : value)}>
+                    <Select
+                      value={filters.status || ""}
+                      onValueChange={(value) =>
+                        handleFilterChange(
+                          "status",
+                          value === "all" ? undefined : value
+                        )
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Tất cả trạng thái" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Tất cả trạng thái</SelectItem>
                         <SelectItem value="ACTIVE">Hoạt động</SelectItem>
-                        <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
+                        <SelectItem value="INACTIVE">
+                          Không hoạt động
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -257,8 +326,10 @@ export default function VouchersPage() {
                       <div>
                         <Input
                           type="date"
-                          value={filters.startDate || ''}
-                          onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                          value={filters.startDate || ""}
+                          onChange={(e) =>
+                            handleFilterChange("startDate", e.target.value)
+                          }
                           className="w-full"
                           placeholder="Từ ngày"
                         />
@@ -266,8 +337,10 @@ export default function VouchersPage() {
                       <div>
                         <Input
                           type="date"
-                          value={filters.endDate || ''}
-                          onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                          value={filters.endDate || ""}
+                          onChange={(e) =>
+                            handleFilterChange("endDate", e.target.value)
+                          }
                           className="w-full"
                           placeholder="Đến ngày"
                         />
@@ -295,11 +368,15 @@ export default function VouchersPage() {
         </div>
       ) : isError ? (
         <div className="bg-white rounded-[6px] shadow-sm p-4 text-center">
-          <p className="text-red-500">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>
+          <p className="text-red-500">
+            Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.
+          </p>
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['vouchers'] })}
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: ["vouchers"] })
+            }
           >
             Thử lại
           </Button>
@@ -310,40 +387,71 @@ export default function VouchersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Mã</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Tên</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Loại</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Giá trị</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Sử dụng</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Thời gian</TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">Trạng thái</TableHead>
-                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-maintext">Thao tác</TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Mã
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Tên
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Loại
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Giá trị
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Sử dụng
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Thời gian
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                    Trạng thái
+                  </TableHead>
+                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-maintext">
+                    Thao tác
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data?.data?.vouchers?.map((voucher) => (
                   <TableRow key={(voucher as any).id}>
                     <TableCell className="px-4 py-4 text-sm">
-                      <span className="font-mono font-medium">{voucher.code}</span>
+                      <span className="font-mono font-medium">
+                        {voucher.code}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-sm font-medium">{voucher.name}</TableCell>
-                    <TableCell className="px-4 py-4 text-sm">
-                      {(voucher as any)?.type === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
+                    <TableCell className="px-4 py-4 text-sm font-medium">
+                      {voucher.name}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
-                      {(voucher as any)?.type === 'PERCENTAGE' ? `${(voucher as any)?.value}%` : formatCurrency((voucher as any)?.value)}
+                      {(voucher as any)?.type === "PERCENTAGE"
+                        ? "Phần trăm"
+                        : "Số tiền cố định"}
+                    </TableCell>
+                    <TableCell className="px-4 py-4 text-sm">
+                      {(voucher as any)?.type === "PERCENTAGE"
+                        ? `${(voucher as any)?.value}%`
+                        : formatCurrency((voucher as any)?.value)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
                       {voucher.usedCount}/{voucher.quantity}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
-                      {formatDate(voucher.startDate)} - {formatDate(voucher.endDate)}
+                      {formatDate(voucher.startDate)} -{" "}
+                      {formatDate(voucher.endDate)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm">
                       <Badge
-                        variant={voucher.status === 'ACTIVE' ? 'default' : 'destructive'}
+                        variant={
+                          voucher.status === "ACTIVE"
+                            ? "default"
+                            : "destructive"
+                        }
                       >
-                        {voucher.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
+                        {voucher.status === "ACTIVE"
+                          ? "Hoạt động"
+                          : "Không hoạt động"}
                       </Badge>
                     </TableCell>
                     <TableCell className="px-4 py-4 text-sm text-right">
@@ -359,12 +467,12 @@ export default function VouchersPage() {
                         >
                           <Icon path={mdiEmailFast} size={0.7} />
                         </Button>
-                        <a href={`/admin/discounts/vouchers/edit/${(voucher as any).id}`}>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            title="Sửa"
-                          >
+                        <a
+                          href={`/admin/discounts/vouchers/edit/${
+                            (voucher as any).id
+                          }`}
+                        >
+                          <Button variant="outline" size="icon" title="Sửa">
                             <Icon path={mdiPencilCircle} size={0.7} />
                           </Button>
                         </a>
@@ -401,7 +509,9 @@ export default function VouchersPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => handleChangePage(data.data.pagination.currentPage - 1)}
+                onClick={() =>
+                  handleChangePage(data.data.pagination.currentPage - 1)
+                }
                 disabled={data.data.pagination.currentPage === 1}
               >
                 <span className="sr-only">Trang trước</span>
@@ -419,7 +529,11 @@ export default function VouchersPage() {
                   return (
                     <Button
                       key={page}
-                      variant={page === data.data.pagination.currentPage ? "default" : "outline"}
+                      variant={
+                        page === data.data.pagination.currentPage
+                          ? "default"
+                          : "outline"
+                      }
                       size="icon"
                       onClick={() => handleChangePage(page)}
                     >
@@ -437,8 +551,13 @@ export default function VouchersPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => handleChangePage(data.data.pagination.currentPage + 1)}
-                disabled={data.data.pagination.currentPage === data.data.pagination.totalPages}
+                onClick={() =>
+                  handleChangePage(data.data.pagination.currentPage + 1)
+                }
+                disabled={
+                  data.data.pagination.currentPage ===
+                  data.data.pagination.totalPages
+                }
               >
                 <span className="sr-only">Trang sau</span>
                 <span>›</span>
@@ -446,8 +565,13 @@ export default function VouchersPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => handleChangePage(data.data.pagination.totalPages)}
-                disabled={data.data.pagination.currentPage === data.data.pagination.totalPages}
+                onClick={() =>
+                  handleChangePage(data.data.pagination.totalPages)
+                }
+                disabled={
+                  data.data.pagination.currentPage ===
+                  data.data.pagination.totalPages
+                }
               >
                 <span className="sr-only">Trang cuối</span>
                 <span>»</span>
@@ -463,23 +587,32 @@ export default function VouchersPage() {
           <DialogHeader>
             <DialogTitle>Xác nhận xóa mã giảm giá</DialogTitle>
           </DialogHeader>
-          <p className="py-4">Bạn có chắc chắn muốn xóa mã giảm giá này không? Hành động này không thể hoàn tác.</p>
+          <p className="py-4">
+            Bạn có chắc chắn muốn xóa mã giảm giá này không? Hành động này không
+            thể hoàn tác.
+          </p>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Hủy</Button>
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={() => voucherToDelete && handleDeleteVoucher(voucherToDelete)}
+              onClick={() =>
+                voucherToDelete && handleDeleteVoucher(voucherToDelete)
+              }
               disabled={deleteVoucher.isPending}
             >
               {deleteVoucher.isPending ? (
                 <>
-                  <Icon path={mdiLoading} size={0.7} className="mr-2 animate-spin" />
+                  <Icon
+                    path={mdiLoading}
+                    size={0.7}
+                    className="mr-2 animate-spin"
+                  />
                   Đang xóa...
                 </>
               ) : (
-                'Xóa'
+                "Xóa"
               )}
             </Button>
           </DialogFooter>
@@ -492,22 +625,31 @@ export default function VouchersPage() {
           <DialogHeader>
             <DialogTitle>Xác nhận gửi thông báo</DialogTitle>
           </DialogHeader>
-          <p className="py-4">Bạn có chắc chắn muốn gửi thông báo về mã giảm giá này tới tất cả khách hàng không?</p>
+          <p className="py-4">
+            Bạn có chắc chắn muốn gửi thông báo về mã giảm giá này tới tất cả
+            khách hàng không?
+          </p>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Hủy</Button>
             </DialogClose>
             <Button
-              onClick={() => voucherToNotify && handleNotifyVoucher(voucherToNotify)}
+              onClick={() =>
+                voucherToNotify && handleNotifyVoucher(voucherToNotify)
+              }
               disabled={notifyVoucher.isPending}
             >
               {notifyVoucher.isPending ? (
                 <>
-                  <Icon path={mdiLoading} size={0.7} className="mr-2 animate-spin" />
+                  <Icon
+                    path={mdiLoading}
+                    size={0.7}
+                    className="mr-2 animate-spin"
+                  />
                   Đang gửi...
                 </>
               ) : (
-                'Gửi thông báo'
+                "Gửi thông báo"
               )}
             </Button>
           </DialogFooter>
@@ -546,23 +688,31 @@ export default function VouchersPage() {
                 placeholder="Nhập giá trị đơn hàng"
               />
             </div>
-            
+
             {validationResult && (
               <div className="border rounded-[6px] p-4 mt-2">
-                <h4 className="text-md font-semibold mb-2">Kết quả kiểm tra:</h4>
+                <h4 className="text-md font-semibold mb-2">
+                  Kết quả kiểm tra:
+                </h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-maintext">Mã giảm giá:</span>
-                    <span className="font-medium">{validationResult.data.voucher.code}</span>
+                    <span className="font-medium">
+                      {validationResult.data.voucher.code}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-maintext">Tên:</span>
-                    <span className="font-medium">{validationResult.data.voucher.name}</span>
+                    <span className="font-medium">
+                      {validationResult.data.voucher.name}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-maintext">Loại:</span>
                     <span className="font-medium">
-                      {validationResult.data.discountType === 'PERCENTAGE' ? 'Phần trăm' : 'Số tiền cố định'}
+                      {validationResult.data.discountType === "PERCENTAGE"
+                        ? "Phần trăm"
+                        : "Số tiền cố định"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -574,7 +724,8 @@ export default function VouchersPage() {
                   <div className="flex justify-between">
                     <span className="text-maintext">Thời hạn:</span>
                     <span className="font-medium">
-                      {formatDate(validationResult.data.voucher.startDate)} - {formatDate(validationResult.data.voucher.endDate)}
+                      {formatDate(validationResult.data.voucher.startDate)} -{" "}
+                      {formatDate(validationResult.data.voucher.endDate)}
                     </span>
                   </div>
                 </div>
@@ -582,10 +733,18 @@ export default function VouchersPage() {
             )}
           </div>
           <DialogFooter className="justify-between">
-            <Button type="button" variant="outline" onClick={resetValidateDialog}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetValidateDialog}
+            >
               Hủy
             </Button>
-            <Button type="button" onClick={handleValidateVoucher} disabled={!voucherCodeToValidate}>
+            <Button
+              type="button"
+              onClick={handleValidateVoucher}
+              disabled={!voucherCodeToValidate}
+            >
               Kiểm tra
             </Button>
           </DialogFooter>
@@ -593,4 +752,4 @@ export default function VouchersPage() {
       </Dialog>
     </div>
   );
-} 
+}

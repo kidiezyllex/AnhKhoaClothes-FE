@@ -111,7 +111,7 @@ export const applyPromotionsToProducts = (
   }
 
   return products.map(product => {
-    const basePrice = product.variants?.[0]?.price || 0;
+    const basePrice = (product as any)?.variants?.[0]?.price || 0;
 
     if (basePrice === 0) {
       return {
@@ -124,7 +124,7 @@ export const applyPromotionsToProducts = (
       };
     }
 
-    const productId = String(product.id || product._id);
+    const productId = String((product as any)?.id || (product as any)?._id);
 
     const discountInfo = calculateProductDiscount(
       productId,

@@ -2,11 +2,11 @@ import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@mdi/react";
 import {
-  mdiCartOutline,
-  mdiHeartOutline,
+  mdiCartArrowRight,
+  mdiHeartCircle,
   mdiArrowRight,
   mdiShareVariantOutline,
-  mdiTagOutline,
+  mdiTagMultiple,
 } from "@mdi/js";
 import { useRef } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -68,9 +68,9 @@ const ProductCard = ({
 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
-  const discountedPrice = product.discount
-    ? product.price * (1 - product.discount / 100)
-    : product.price;
+  const discountedPrice = (product as any)?.discount
+    ? (product as any)?.price * (1 - (product as any)?.discount / 100)
+    : (product as any)?.price;
 
   return (
     <motion.div
@@ -96,7 +96,7 @@ const ProductCard = ({
         {product.discount > 0 && (
           <div className="absolute top-3 left-3 z-10">
             <Badge variant="promotion" className="flex items-center gap-1">
-              <Icon path={mdiTagOutline} size={0.6} />-{product.discount}%
+              <Icon path={mdiTagMultiple} size={0.6} />-{product.discount}%
             </Badge>
           </div>
         )}
@@ -108,7 +108,7 @@ const ProductCard = ({
             className="rounded-full w-10 h-10 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 shadow-sm"
           >
             <Icon
-              path={mdiHeartOutline}
+              path={mdiHeartCircle}
               size={1}
               className="text-maintext dark:text-gray-300"
             />
@@ -119,7 +119,7 @@ const ProductCard = ({
             className="rounded-full w-10 h-10 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 shadow-sm"
           >
             <Icon
-              path={mdiCartOutline}
+              path={mdiCartArrowRight}
               size={1}
               className="text-maintext dark:text-gray-300"
             />
@@ -142,7 +142,7 @@ const ProductCard = ({
             </span>
             {product.discount > 0 && (
               <span className="text-sm text-maintext dark:text-maintext line-through block">
-                {formatPrice(product.price)}
+                {formatPrice((product as any)?.price)}
               </span>
             )}
           </div>

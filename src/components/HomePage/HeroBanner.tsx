@@ -5,7 +5,7 @@ import {
   mdiSale,
   mdiArrowRightThin,
   mdiStar,
-  mdiHeart,
+  mdiHeartCircle,
   mdiTrendingUp,
   mdiShieldCheck,
 } from "@mdi/js";

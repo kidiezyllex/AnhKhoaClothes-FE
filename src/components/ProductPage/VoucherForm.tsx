@@ -1,31 +1,40 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
- 
-import { useValidateVoucher } from '@/hooks/voucher';
+import { useState } from "react";
+
+import { useValidateVoucher } from "@/hooks/voucher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Icon } from '@mdi/react';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { motion, AnimatePresence } from 'framer-motion';
-import { mdiTicket, mdiClose, mdiLoading, mdiCheck } from '@mdi/js';
+import { Icon } from "@mdi/react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { motion, AnimatePresence } from "framer-motion";
+import { mdiTicket, mdiClose, mdiLoading, mdiCheck } from "@mdi/js";
 interface VoucherFormProps {
   orderValue: number;
-  onApplyVoucher: (voucherData: { code: string; discount: number; voucherId: string }) => void;
+  onApplyVoucher: (voucherData: {
+    code: string;
+    discount: number;
+    voucherId: string;
+  }) => void;
   onRemoveVoucher: () => void;
   appliedVoucher?: { code: string; discount: number; voucherId: string } | null;
 }
 
-const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVoucher }: VoucherFormProps) => {
-  const [voucherCode, setVoucherCode] = useState('');
+const VoucherForm = ({
+  orderValue,
+  onApplyVoucher,
+  onRemoveVoucher,
+  appliedVoucher,
+}: VoucherFormProps) => {
+  const [voucherCode, setVoucherCode] = useState("");
   const validateVoucher = useValidateVoucher();
 
   const handleApplyVoucher = async () => {
     try {
       const result = await validateVoucher.mutateAsync({
         code: voucherCode,
-        orderValue
+        orderValue,
       });
 
       if (result.success && result.data.voucher) {
@@ -33,15 +42,15 @@ const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVouch
         onApplyVoucher({
           code: voucher.code,
           discount: result.data.discountValue,
-          voucherId: voucher.id
+          voucherId: voucher.id,
         });
         toast.success(`Áp dụng mã giảm giá ${voucher.code} thành công`);
-        setVoucherCode('');
+        setVoucherCode("");
       } else {
-        toast.error(result.message || 'Mã giảm giá không hợp lệ');
+        toast.error(result.message || "Mã giảm giá không hợp lệ");
       }
     } catch (error) {
-      toast.error('Không thể kiểm tra mã giảm giá. Vui lòng thử lại sau.');
+      toast.error("Không thể kiểm tra mã giảm giá. Vui lòng thử lại sau.");
     }
   };
 
@@ -55,13 +64,19 @@ const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVouch
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
-            className="flex items-center justify-between p-2 border border-green-200 bg-green-50 rounded-[6px]"
+            className="flex items-center justify-between p-2 border border-green-200 bg-[#EAEBF2] rounded-[6px]"
           >
             <div className="flex items-center gap-2">
               <Icon path={mdiTicket} size={0.7} className="text-primary" />
               <div>
                 <div className="font-medium text-sm">{appliedVoucher.code}</div>
-                <div className="text-xs text-maintext">Giảm {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(appliedVoucher.discount)}</div>
+                <div className="text-xs text-maintext">
+                  Giảm{" "}
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(appliedVoucher.discount)}
+                </div>
               </div>
             </div>
             <Button
@@ -113,4 +128,4 @@ const VoucherForm = ({ orderValue, onApplyVoucher, onRemoveVoucher, appliedVouch
   );
 };
 
-export default VoucherForm; 
+export default VoucherForm;

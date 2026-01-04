@@ -1,19 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/useToast';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 interface OrderItem {
   product: {
@@ -40,8 +35,8 @@ interface Order {
     wardId: string;
     specificAddress: string;
   };
-  paymentMethod: 'COD' | 'VNPAY';
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  paymentMethod: "COD" | "VNPAY";
+  status: "pending" | "processing" | "completed" | "cancelled";
   createdAt: string;
   updatedAt: string;
 }
@@ -58,7 +53,7 @@ export default function OrderDetailPage() {
     const fetchOrder = async () => {
       try {
         if (!user?.id) {
-          navigate('/login');
+          navigate("/login");
           return;
         }
 
@@ -68,48 +63,48 @@ export default function OrderDetailPage() {
         if (data.success) {
           setOrder(data.data);
         } else {
-          throw new Error(data.message || 'Không thể tải thông tin đơn hàng');
+          throw new Error(data.message || "Không thể tải thông tin đơn hàng");
         }
       } catch (error: any) {
         showToast({
           title: "Lỗi",
           message: error.message || "Đã có lỗi xảy ra khi tải đơn hàng",
-          type: "error"
+          type: "error",
         });
-        navigate('/orders');
+        navigate("/orders");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchOrder();
-      }, [params.id, user, navigate, showToast]);
+  }, [params.id, user, navigate, showToast]);
 
-  const getStatusColor = (status: Order['status']) => {
+  const getStatusColor = (status: Order["status"]) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-500';
-      case 'processing':
-        return 'bg-blue-500';
-      case 'completed':
-        return 'bg-green-500';
-      case 'cancelled':
-        return 'bg-red-500';
+      case "pending":
+        return "bg-yellow-500";
+      case "processing":
+        return "bg-blue-500";
+      case "completed":
+        return "bg-[#EAEBF2]0";
+      case "cancelled":
+        return "bg-red-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
-  const getStatusText = (status: Order['status']) => {
+  const getStatusText = (status: Order["status"]) => {
     switch (status) {
-      case 'pending':
-        return 'Chờ xác nhận';
-      case 'processing':
-        return 'Đang xử lý';
-      case 'completed':
-        return 'Hoàn thành';
-      case 'cancelled':
-        return 'Đã hủy';
+      case "pending":
+        return "Chờ xác nhận";
+      case "processing":
+        return "Đang xử lý";
+      case "completed":
+        return "Hoàn thành";
+      case "cancelled":
+        return "Đã hủy";
       default:
         return status;
     }
@@ -118,7 +113,7 @@ export default function OrderDetailPage() {
   const handleCancelOrder = async () => {
     try {
       const response = await fetch(`/api/orders/${params.id}/cancel`, {
-        method: 'PUT'
+        method: "PUT",
       });
       const data = await response.json();
 
@@ -126,17 +121,17 @@ export default function OrderDetailPage() {
         showToast({
           title: "Thành công",
           message: "Đã hủy đơn hàng thành công",
-          type: "success"
+          type: "success",
         });
-        setOrder(prev => prev ? { ...prev, status: 'cancelled' } : null);
+        setOrder((prev) => (prev ? { ...prev, status: "cancelled" } : null));
       } else {
-        throw new Error(data.message || 'Không thể hủy đơn hàng');
+        throw new Error(data.message || "Không thể hủy đơn hàng");
       }
     } catch (error: any) {
       showToast({
         title: "Lỗi",
         message: error.message || "Đã có lỗi xảy ra khi hủy đơn hàng",
-        type: "error"
+        type: "error",
       });
     }
   };
@@ -166,12 +161,14 @@ export default function OrderDetailPage() {
   return (
     <div className="container max-w-6xl py-8">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Chi tiết đơn hàng #{order.id.slice(-6)}</h1>
+        <h1 className="text-2xl font-bold">
+          Chi tiết đơn hàng #{order.id.slice(-6)}
+        </h1>
         <div className="flex items-center gap-4">
           <Badge className={`${getStatusColor(order.status)} text-white`}>
             {getStatusText(order.status)}
           </Badge>
-          {order.status === 'pending' && (
+          {order.status === "pending" && (
             <Button variant="destructive" onClick={handleCancelOrder}>
               Hủy đơn hàng
             </Button>
@@ -189,15 +186,19 @@ export default function OrderDetailPage() {
               <div>
                 <h3 className="font-medium">Người nhận</h3>
                 <p className="text-muted-foreground mt-1">
-                  {order.shippingAddress.name}<br />
+                  {order.shippingAddress.name}
+                  <br />
                   {order.shippingAddress.phoneNumber}
                 </p>
               </div>
               <div>
                 <h3 className="font-medium">Địa chỉ</h3>
                 <p className="text-muted-foreground mt-1">
-                  {order.shippingAddress.specificAddress}<br />
-                  {order.shippingAddress.wardId}, {order.shippingAddress.districtId}<br />
+                  {order.shippingAddress.specificAddress}
+                  <br />
+                  {order.shippingAddress.wardId},{" "}
+                  {order.shippingAddress.districtId}
+                  <br />
                   {order.shippingAddress.provinceId}
                 </p>
               </div>
@@ -214,13 +215,17 @@ export default function OrderDetailPage() {
               <div>
                 <h3 className="font-medium">Phương thức thanh toán</h3>
                 <p className="text-muted-foreground mt-1">
-                  {order.paymentMethod === 'COD' ? 'Thanh toán khi nhận hàng' : 'VNPay'}
+                  {order.paymentMethod === "COD"
+                    ? "Thanh toán khi nhận hàng"
+                    : "VNPay"}
                 </p>
               </div>
               <div>
                 <h3 className="font-medium">Thời gian đặt hàng</h3>
                 <p className="text-muted-foreground mt-1">
-                  {format(new Date(order.createdAt), 'HH:mm - dd/MM/yyyy', { locale: vi })}
+                  {format(new Date(order.createdAt), "HH:mm - dd/MM/yyyy", {
+                    locale: vi,
+                  })}
                 </p>
               </div>
               <div className="pt-4 border-t">
@@ -245,7 +250,10 @@ export default function OrderDetailPage() {
         <CardContent>
           <div className="space-y-4">
             {order.items.map((item, index) => (
-              <div key={index} className="flex items-center gap-4 py-4 border-b last:border-0">
+              <div
+                key={index}
+                className="flex items-center gap-4 py-4 border-b last:border-0"
+              >
                 <div className="w-20 h-20 bg-muted rounded relative overflow-hidden">
                   <img
                     src={item.product.image}
@@ -267,4 +275,4 @@ export default function OrderDetailPage() {
       </Card>
     </div>
   );
-} 
+}

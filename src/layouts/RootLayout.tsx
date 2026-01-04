@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 
 const RootLayout: React.FC = () => {
   return (
-    <div className="bg-green-50 min-h-screen">
+    <div className="bg-[#EAEBF2] min-h-screen">
       <Outlet />
     </div>
   );

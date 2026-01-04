@@ -15,17 +15,7 @@ import { Icon } from "@mdi/react";
 import {
   mdiMagnify,
   mdiPlus,
-  mdiMinus,
-  mdiDelete,
-  mdiCashRegister,
-  mdiTag,
-  mdiCashMultiple,
-  mdiInformationOutline,
-  mdiReceipt,
-  mdiClock,
-  mdiAccount,
-  mdiContentCopy,
-  mdiPrinter,
+  mdiInformationSlabCircle,
   mdiChevronLeft,
   mdiPalette,
   mdiCheck,
@@ -38,7 +28,7 @@ import {
   mdiClose,
   mdiCart,
   mdiChevronDown,
-  mdiViewGridOutline,
+  mdiViewGrid,
   mdiTableLarge,
   mdiEye,
   mdiBankTransfer,
@@ -415,14 +405,17 @@ const convertProductToApiProduct = (product: any): ApiProduct => {
   }
 
   return {
-    id: product.id?.toString() || product._id?.toString() || "",
-    name: product.name || "Unknown Product",
-    brand: product.brand || "Unknown",
-    category: product.category || "Unknown",
-    description: product.description,
-    variants: product.variants?.map(convertVariantToApiVariant) || [],
-    status: product.status,
-    createdAt: product.createdAt || new Date().toISOString(),
+    id:
+      (product as any)?.id?.toString() ||
+      (product as any)?._id?.toString() ||
+      "",
+    name: (product as any)?.name || "Unknown Product",
+    brand: (product as any)?.brand || "Unknown",
+    category: (product as any)?.category || "Unknown",
+    description: (product as any)?.description,
+    variants: (product as any)?.variants?.map(convertVariantToApiVariant) || [],
+    status: (product as any)?.status,
+    createdAt: (product as any)?.createdAt || new Date().toISOString(),
   };
 };
 
@@ -687,24 +680,24 @@ export default function POSPage() {
 
     for (const product of products) {
       if (
-        product.category &&
-        typeof product.category === "object" &&
-        (product.category as any).id &&
-        product.category.name
+        (product as any)?.category &&
+        typeof (product as any)?.category === "object" &&
+        ((product as any)?.category as any).id &&
+        (product as any)?.category.name
       ) {
-        if (!uniqueCatObjects.has((product.category as any).id)) {
-          uniqueCatObjects.set((product.category as any).id, {
-            id: (product.category as any).id,
-            name: product.category.name,
+        if (!uniqueCatObjects.has(((product as any)?.category as any).id)) {
+          uniqueCatObjects.set(((product as any)?.category as any).id, {
+            id: ((product as any)?.category as any).id,
+            name: (product as any)?.category.name,
           });
         }
       } else if (
-        typeof product.category === "string" &&
-        !uniqueCatObjects.has(product.category)
+        typeof (product as any)?.category === "string" &&
+        !uniqueCatObjects.has((product as any)?.category)
       ) {
-        uniqueCatObjects.set(product.category, {
-          id: product.category,
-          name: product.category,
+        uniqueCatObjects.set((product as any)?.category, {
+          id: (product as any)?.category,
+          name: (product as any)?.category,
         });
       }
     }
@@ -728,11 +721,11 @@ export default function POSPage() {
 
     // Merge promotion info back to the converted product
     if ((product as any).hasDiscount) {
-      (convertedProduct as any).hasDiscount = (product as any).hasDiscount;
+      (convertedProduct as any).hasDiscount = (product as any)?.hasDiscount;
       (convertedProduct as any).discountedPrice = (
         product as any
       ).discountedPrice;
-      (convertedProduct as any).originalPrice = (product as any).originalPrice;
+      (convertedProduct as any).originalPrice = (product as any)?.originalPrice;
       (convertedProduct as any).discountPercent = (
         product as any
       ).discountPercent;
@@ -846,9 +839,9 @@ export default function POSPage() {
     // Check for promotion and apply discount if applicable
     if ((product as any).hasDiscount) {
       // If product has a discount, use the discounted price
-      finalPrice = (product as any).discountedPrice;
-      originalPrice = (product as any).originalPrice;
-      discountPercent = (product as any).discountPercent;
+      finalPrice = (product as any)?.discountedPrice;
+      originalPrice = (product as any)?.originalPrice;
+      discountPercent = (product as any)?.discountPercent;
       hasDiscount = true;
     } else if (promotionsData?.data?.promotions?.length > 0) {
       // If no discount applied, check for active promotions
@@ -1564,7 +1557,7 @@ export default function POSPage() {
                   <div
                     className={cn(
                       "w-2 h-2 rounded-full",
-                      cart.items.length > 0 ? "bg-green-500" : "bg-gray-300"
+                      cart.items.length > 0 ? "bg-[#EAEBF2]0" : "bg-gray-300"
                     )}
                   />
                   <span className="text-sm font-medium truncate">
@@ -1618,7 +1611,7 @@ export default function POSPage() {
                           className={cn(
                             "w-2 h-2 rounded-full",
                             cart.items.length > 0
-                              ? "bg-green-500"
+                              ? "bg-[#EAEBF2]0"
                               : "bg-gray-300"
                           )}
                         />
@@ -1725,7 +1718,7 @@ export default function POSPage() {
             {selectedProduct && selectedApiVariant ? (
               // Hiển thị chi tiết sản phẩm khi có sản phẩm được chọn
               <div className="mb-4">
-                <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex flex-col lg:flex-row gap-6">
                   <motion.div
                     className="lg:w-1/2"
                     initial={{ opacity: 0, x: -20 }}
@@ -1781,7 +1774,10 @@ export default function POSPage() {
                           Admin POS
                         </Badge>
                         {(selectedProduct as any).hasDiscount && (
-                          <Badge variant="destructive" className="bg-green-500">
+                          <Badge
+                            variant="destructive"
+                            className="bg-[#EAEBF2]0"
+                          >
                             -{(selectedProduct as any).discountPercent}% OFF
                           </Badge>
                         )}
@@ -1793,7 +1789,7 @@ export default function POSPage() {
 
                       {(selectedProduct as any).hasDiscount &&
                         (selectedProduct as any).appliedPromotion && (
-                          <div className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+                          <div className="text-sm text-green-600 bg-[#EAEBF2] px-3 py-2 rounded-lg border border-green-200">
                             🎉 Đang áp dụng khuyến mãi:{" "}
                             <span className="font-semibold">
                               {(selectedProduct as any).appliedPromotion.name}
@@ -1822,7 +1818,7 @@ export default function POSPage() {
                             </span>
                             <Badge
                               variant="destructive"
-                              className="bg-green-500"
+                              className="bg-[#EAEBF2]0"
                             >
                               -{(selectedProduct as any).discountPercent}% OFF
                             </Badge>
@@ -2011,7 +2007,7 @@ export default function POSPage() {
                       value="grid"
                       className="flex items-center gap-1 text-maintext"
                     >
-                      <Icon path={mdiViewGridOutline} size={0.8} />
+                      <Icon path={mdiViewGrid} size={0.8} />
                       Lưới
                     </TabsTrigger>
                     <TabsTrigger
@@ -2053,9 +2049,9 @@ export default function POSPage() {
                     <TabsContent value="grid" className="mt-0">
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {processedProducts.map((product) => {
-                          const firstVariant = product.variants?.[0];
+                          const firstVariant = (product as any)?.variants?.[0];
                           const uniqueColors = getUniqueColors(
-                            product.variants
+                            (product as any)?.variants
                           );
                           return (
                             <motion.div
@@ -2080,7 +2076,7 @@ export default function POSPage() {
                                   {(product as any).hasDiscount && (
                                     <Badge
                                       variant="destructive"
-                                      className="bg-green-500 text-white"
+                                      className="bg-[#EAEBF2]0 text-white"
                                     >
                                       -{(product as any).discountPercent}% OFF
                                     </Badge>
@@ -2095,21 +2091,22 @@ export default function POSPage() {
                                   {product.name}
                                 </h3>
                                 <p className="text-maintext text-sm mb-2 truncate">
-                                  {getBrandName(product.brand)}
+                                  {getBrandName((product as any)?.brand)}
                                 </p>
                                 <div className="flex justify-between items-center">
                                   <div className="flex flex-col">
                                     <p
                                       className={`font-medium ${
-                                        (product as any).hasDiscount
+                                        (product as any)?.hasDiscount
                                           ? "text-primary"
                                           : "text-primary"
                                       }`}
                                     >
                                       {firstVariant
                                         ? formatCurrency(
-                                            (product as any).hasDiscount
-                                              ? (product as any).discountedPrice
+                                            (product as any)?.hasDiscount
+                                              ? (product as any)
+                                                  ?.discountedPrice
                                               : firstVariant.price
                                           )
                                         : "N/A"}
@@ -2117,7 +2114,7 @@ export default function POSPage() {
                                     {(product as any).hasDiscount && (
                                       <p className="text-xs text-maintext line-through">
                                         {formatCurrency(
-                                          (product as any).originalPrice
+                                          (product as any)?.originalPrice
                                         )}
                                       </p>
                                     )}
@@ -2189,19 +2186,20 @@ export default function POSPage() {
                           </thead>
                           <tbody>
                             {processedProducts.map((product) => {
-                              const firstVariant = product.variants?.[0];
-                              const totalStock = product.variants.reduce(
-                                (sum, v) => sum + v.stock,
-                                0
-                              );
+                              const firstVariant = (product as any)
+                                .variants?.[0];
+                              const totalStock = (
+                                product as any
+                              ).variants.reduce((sum, v) => sum + v.stock, 0);
                               const uniqueColorsCount = new Set(
-                                product.variants.map(
-                                  (v) => (v.colorId as any)?.id
+                                (product as any)?.variants.map(
+                                  (v) => (v as any)?.colorId?.id
                                 )
                               ).size;
                               const firstAvailableVariant =
-                                product.variants.find((v) => v.stock > 0) ||
-                                product.variants[0];
+                                (product as any)?.variants.find(
+                                  (v) => v.stock > 0
+                                ) || (product as any)?.variants[0];
                               return (
                                 <tr
                                   key={product.id}
@@ -2230,7 +2228,7 @@ export default function POSPage() {
                                     className="py-3 px-4 text-maintext truncate max-w-[100px]"
                                     onClick={() => handleProductSelect(product)}
                                   >
-                                    {getBrandName(product.brand)}
+                                    {getBrandName((product as any)?.brand)}
                                   </td>
                                   <td
                                     className="py-3 px-4"
@@ -2239,14 +2237,14 @@ export default function POSPage() {
                                     <div className="flex flex-col">
                                       <span
                                         className={`font-medium ${
-                                          (product as any).hasDiscount
+                                          (product as any)?.hasDiscount
                                             ? "text-primary"
                                             : "text-primary"
                                         }`}
                                       >
                                         {firstVariant
                                           ? formatCurrency(
-                                              (product as any).hasDiscount
+                                              (product as any)?.hasDiscount
                                                 ? (product as any)
                                                     .discountedPrice
                                                 : firstVariant.price
@@ -2256,7 +2254,7 @@ export default function POSPage() {
                                       {(product as any).hasDiscount && (
                                         <span className="text-xs text-maintext line-through">
                                           {formatCurrency(
-                                            (product as any).originalPrice
+                                            (product as any)?.originalPrice
                                           )}
                                         </span>
                                       )}
@@ -2270,10 +2268,12 @@ export default function POSPage() {
                                       <div className="flex -space-x-1">
                                         {Array.from(
                                           new Map(
-                                            product.variants.map((v) => [
-                                              (v.colorId as any)?.id,
-                                              v.colorId,
-                                            ])
+                                            (product as any)?.variants.map(
+                                              (v) => [
+                                                (v as any)?.colorId?.id,
+                                                (v as any)?.colorId,
+                                              ]
+                                            )
                                           ).values()
                                         )
                                           .slice(0, 3)
@@ -2341,7 +2341,7 @@ export default function POSPage() {
                                               }}
                                             >
                                               <Icon
-                                                path={mdiInformationOutline}
+                                                path={mdiInformationSlabCircle}
                                                 size={0.7}
                                                 className="text-maintext"
                                               />
@@ -2366,10 +2366,11 @@ export default function POSPage() {
                                               onClick={(e) => {
                                                 e.stopPropagation();
                                                 // Use the product from the list (which already has promotions applied)
-                                                const firstAvailableVariant =
-                                                  product.variants.find(
-                                                    (v: any) => v.stock > 0
-                                                  );
+                                                const firstAvailableVariant = (
+                                                  product as any
+                                                ).variants.find(
+                                                  (v: any) => v.stock > 0
+                                                );
                                                 if (firstAvailableVariant) {
                                                   addItemToCorrectCart(
                                                     product,
