@@ -120,4 +120,16 @@ export interface IProductFiltersResponse {
     sizes: ISize[];
     priceRange: IPriceRange;
   };
+}
+
+export interface IFilterOptionsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    articleTypes: string[];
+    genders: string[];
+    baseColours: string[];
+    seasons: string[];
+    usages: string[];
+  };
 } 

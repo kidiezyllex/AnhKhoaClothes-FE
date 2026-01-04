@@ -98,7 +98,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
+              <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
                 Email
               </FormLabel>
               <FormControl>
@@ -118,7 +118,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
+              <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
                 Mật khẩu
               </FormLabel>
               <FormControl>
@@ -145,13 +145,13 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="flex justify-between items-center">
           <a
             href="/auth/register"
-            className="text-sm text-primary hover:text-secondary transition-colors duration-300"
+            className="text-sm text-primary hover:text-secondary transition-colors duration-300 font-semibold"
           >
             Đăng ký?
           </a>
           <a
             href="/auth/forget-password"
-            className="text-sm text-primary hover:text-secondary transition-colors duration-300"
+            className="text-sm text-primary hover:text-secondary transition-colors duration-300 font-semibold"
           >
             Quên mật khẩu?
           </a>

@@ -100,6 +100,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
+import { getSizeLabel } from "@/utils/sizeMapping";
 import { useCartStore } from "@/stores/useCartStore";
 import {
   IProduct,
@@ -347,7 +348,12 @@ export default function ProductDetail() {
       const firstVariant = (product as any)?.variants[0];
       setSelectedVariant(firstVariant);
       setSelectedColor(String(firstVariant.color || ""));
-      setSelectedSize(String(firstVariant.size || ""));
+
+      const sizeNum = parseFloat(firstVariant.size || "");
+      const sizeLabel = !isNaN(sizeNum)
+        ? getSizeLabel(sizeNum)
+        : firstVariant.size;
+      setSelectedSize(String(sizeLabel || ""));
       setCurrentImageIndex(0);
     }
   }, [productData]);
@@ -388,11 +394,14 @@ export default function ProductDetail() {
     if (!product) return;
 
     // Try to find a variant with the selected color and current size
-    const matchingVariant = (product as any)?.variants.find(
-      (v) =>
+    const matchingVariant = (product as any)?.variants.find((v: any) => {
+      const vSizeNum = parseFloat(v.size || "");
+      const vLabel = !isNaN(vSizeNum) ? getSizeLabel(vSizeNum) : v.size;
+      return (
         String(v.color) === String(colorValue) &&
-        String(v.size) === String(selectedSize)
-    );
+        String(vLabel) === String(selectedSize)
+      );
+    });
 
     if (matchingVariant) {
       setSelectedVariant(matchingVariant);
@@ -400,11 +409,15 @@ export default function ProductDetail() {
     } else {
       // If no exact match, find first variant with the selected color
       const firstVariantWithColor = (product as any)?.variants.find(
-        (v) => String(v.color) === String(colorValue)
+        (v: any) => String(v.color) === String(colorValue)
       );
       if (firstVariantWithColor) {
         setSelectedVariant(firstVariantWithColor);
-        setSelectedSize(String(firstVariantWithColor.size || ""));
+        const vSizeNum = parseFloat(firstVariantWithColor.size || "");
+        const vLabel = !isNaN(vSizeNum)
+          ? getSizeLabel(vSizeNum)
+          : firstVariantWithColor.size;
+        setSelectedSize(String(vLabel || ""));
         setCurrentImageIndex(0);
       }
     }
@@ -416,11 +429,14 @@ export default function ProductDetail() {
     const product = productData?.data?.product;
     if (!product) return;
 
-    const matchingVariant = (product as any)?.variants.find(
-      (v) =>
+    const matchingVariant = (product as any)?.variants.find((v: any) => {
+      const vSizeNum = parseFloat(v.size || "");
+      const vLabel = !isNaN(vSizeNum) ? getSizeLabel(vSizeNum) : v.size;
+      return (
         String(v.color) === String(selectedColor) &&
-        String(v.size) === String(sizeValue)
-    );
+        String(vLabel) === String(sizeValue)
+      );
+    });
 
     if (matchingVariant) {
       setSelectedVariant(matchingVariant);
@@ -1035,44 +1051,57 @@ export default function ProductDetail() {
                   {Array.from(
                     new Set(
                       (product as any)?.variants
-                        .map((v) => String(v.size))
+                        .map((v) => {
+                          const val = parseFloat(v.size || "");
+                          return !isNaN(val) ? getSizeLabel(val) : v.size;
+                        })
                         .filter(Boolean)
                     )
-                  ).map((sizeValue) => {
-                    const sizeVariant = (product as any)?.variants.find(
-                      (v) => String(v.size) === sizeValue
-                    );
-                    const variantForColorAndSize = (
-                      product as any
-                    ).variants.find(
-                      (v) =>
-                        String(v.color) === String(selectedColor) &&
-                        String(v.size) === sizeValue
-                    );
-                    const isAvailable =
-                      !!variantForColorAndSize &&
-                      variantForColorAndSize.stock > 0;
+                  )
+                    .filter((size: any) =>
+                      ["S", "M", "L", "XL", "XXL"].includes(size)
+                    )
+                    .sort((a: any, b: any) => {
+                      const order = ["S", "M", "L", "XL", "XXL"];
+                      return order.indexOf(a) - order.indexOf(b);
+                    })
+                    .map((sizeValue) => {
+                      const variantForColorAndSize = (
+                        product as any
+                      ).variants.find((v) => {
+                        const vSize = parseFloat(v.size || "");
+                        const vLabel = !isNaN(vSize)
+                          ? getSizeLabel(vSize)
+                          : v.size;
+                        return (
+                          String(v.color) === String(selectedColor) &&
+                          String(vLabel) === String(sizeValue)
+                        );
+                      });
+                      const isAvailable =
+                        !!variantForColorAndSize &&
+                        variantForColorAndSize.stock > 0;
 
-                    return (
-                      <Button
-                        variant={
-                          String(selectedSize) === sizeValue
-                            ? "default"
-                            : "outline"
-                        }
-                        size="icon"
-                        key={sizeValue as any}
-                        onClick={() => handleSizeSelect(sizeValue as any)}
-                        disabled={!isAvailable}
-                        className={
-                          !isAvailable ? "opacity-50 cursor-not-allowed" : ""
-                        }
-                        title={!isAvailable ? "Không có sẵn cho màu này" : ""}
-                      >
-                        {sizeValue as any}
-                      </Button>
-                    );
-                  })}
+                      return (
+                        <Button
+                          variant={
+                            String(selectedSize) === sizeValue
+                              ? "default"
+                              : "outline"
+                          }
+                          size="icon"
+                          key={sizeValue as any}
+                          onClick={() => handleSizeSelect(sizeValue as any)}
+                          disabled={!isAvailable}
+                          className={
+                            !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                          }
+                          title={!isAvailable ? "Không có sẵn cho màu này" : ""}
+                        >
+                          {sizeValue as any}
+                        </Button>
+                      );
+                    })}
                 </div>
               </div>
 

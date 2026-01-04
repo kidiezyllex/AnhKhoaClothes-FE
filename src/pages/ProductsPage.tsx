@@ -126,6 +126,7 @@ export default function ProductsPage() {
           limit: pagination.limit,
           sortBy: productQueryParams.sortBy,
           sortOrder: productQueryParams.sortOrder,
+          ...filters,
         }
       : { keyword: "" }
   );
@@ -188,6 +189,36 @@ export default function ProductsPage() {
           const sizeId = variant.size?.id || variant.sizeId;
           return sizeId === filters.size;
         })
+      );
+    }
+
+    if (filters.articleType) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.articleType === filters.articleType
+      );
+    }
+
+    if (filters.gender) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.gender === filters.gender
+      );
+    }
+
+    if (filters.baseColour) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.baseColour === filters.baseColour
+      );
+    }
+
+    if (filters.season) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.season === filters.season
+      );
+    }
+
+    if (filters.usage) {
+      filteredProducts = filteredProducts.filter(
+        (product) => product.usage === filters.usage
       );
     }
 
@@ -445,33 +476,6 @@ export default function ProductsPage() {
       </Breadcrumb>
 
       <div className="flex flex-col lg:flex-row gap-4 items-start">
-        {/* Filters - Mobile */}
-        <AnimatePresence>
-          {isFilterOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="lg:hidden w-full"
-            >
-              <div className="bg-white rounded-[6px] shadow-sm border p-4 mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="font-medium">Bộ lọc sản phẩm</h2>
-                  <Button variant="ghost" size="sm" onClick={toggleFilter}>
-                    <Icon path={mdiClose} size={0.7} />
-                  </Button>
-                </div>
-                <ProductFilters
-                  filters={filters}
-                  onChange={handleFilterChange}
-                  formatPrice={formatPrice}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Desktop Filters */}
         <div className="hidden lg:block w-full lg:w-1/4 xl:w-1/5">
           <div className="bg-white rounded-xl shadow-sm border border-white p-4 sticky top-20">

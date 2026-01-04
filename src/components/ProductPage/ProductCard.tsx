@@ -14,6 +14,7 @@ import {
 } from "@mdi/js";
 import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
 import { calculateProductDiscount } from "@/lib/promotions";
+import { getSizeLabel } from "@/utils/sizeMapping";
 
 interface ProductCardProps {
   product: any;
@@ -219,7 +220,7 @@ export const ProductCard = ({
           </motion.div>
         </div>
 
-        <div className="p-3 flex flex-col flex-grow bg-green-50 border-t border-gray-200 relative">
+        <div className="p-3 flex flex-col flex-grow bg-green-50 relative">
           <span className="font-semibold text-base text-primary">
             {product.brand
               ? typeof (product as any)?.brand === "string"
@@ -309,9 +310,24 @@ export const ProductCard = ({
                   <div className="flex flex-wrap gap-1 text-xs text-maintext">
                     {Array.from(
                       new Set(
-                        (product as any)?.variants.map((v: any) => v.size)
+                        (product as any)?.variants.map((v: any) => {
+                          const numericValue = parseFloat(v.size || "");
+                          return !isNaN(numericValue)
+                            ? getSizeLabel(numericValue)
+                            : v.size;
+                        })
                       )
-                    ).join(" , ")}
+                    )
+                      .filter((size: any) =>
+                        ["S", "M", "L", "XL", "XXL"].includes(size)
+                      )
+                      .sort((a: any, b: any) => {
+                        const order = ["S", "M", "L", "XL", "XXL"];
+                        const indexA = order.indexOf(a);
+                        const indexB = order.indexOf(b);
+                        return indexA - indexB;
+                      })
+                      .join(", ")}
                   </div>
                 </div>
               </div>

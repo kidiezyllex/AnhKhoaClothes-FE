@@ -14,7 +14,8 @@ import {
   updateProductImages,
   deleteProduct,
   searchProducts,
-  getAllFilters 
+  getAllFilters,
+  getFilterOptions
 } from "@/api/product";
 import {
   IProductFilter,
@@ -29,7 +30,8 @@ import {
   IProductsResponse,
   IProductResponse,
   IActionResponse,
-  IProductFiltersResponse
+  IProductFiltersResponse,
+  IFilterOptionsResponse
 } from "@/interface/response/product";
 import { useBrands, useCategories, useColors, useMaterials, useSizes } from './options';
 
@@ -125,6 +127,16 @@ export const useSearchProducts = (params: IProductSearchParams): UseQueryResult<
     refetchIntervalInBackground: true,
   });
 }; 
+
+// Hook để lấy filter options (articleTypes, genders, baseColours, seasons, usages)
+export const useFilterOptions = (): UseQueryResult<IFilterOptionsResponse, Error> => {
+  return useQuery<IFilterOptionsResponse, Error>({
+    queryKey: ["filterOptions"],
+    queryFn: () => getFilterOptions(),
+    staleTime: 300000, // 5 minutes - data ít thay đổi
+    gcTime: 600000, // 10 minutes
+  });
+};
 
 // Re-export hooks from options.ts
 export { useBrands, useCategories, useColors, useMaterials, useSizes }; 

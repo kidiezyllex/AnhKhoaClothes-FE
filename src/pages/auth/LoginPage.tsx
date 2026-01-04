@@ -74,7 +74,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4 h-full">
       <div>
-        <label className="text-maintext dark:text-gray-300 font-medium block mb-2">
+        <label className="text-maintext dark:text-gray-300 font-semibold block mb-2 text-sm">
           Email
         </label>
         <Input
@@ -88,7 +88,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div>
-        <label className="text-maintext dark:text-gray-300 font-medium block mb-2">
+        <label className="text-maintext dark:text-gray-300 font-semibold block mb-2 text-sm">
           Mật khẩu
         </label>
         <div className="relative">
@@ -113,13 +113,13 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="flex justify-between items-center">
         <a
           href="/auth/register"
-          className="text-sm text-primary hover:text-secondary transition-colors duration-300"
+          className="text-sm text-primary hover:text-secondary transition-colors duration-300 font-semibold"
         >
           Đăng ký?
         </a>
         <a
           href="/auth/forget-password"
-          className="text-sm text-primary hover:text-secondary transition-colors duration-300"
+          className="text-sm text-primary hover:text-secondary transition-colors duration-300 font-semibold"
         >
           Quên mật khẩu?
         </a>

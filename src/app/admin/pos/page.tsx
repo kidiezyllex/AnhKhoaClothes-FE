@@ -117,15 +117,6 @@ import { Input } from "@/components/ui/input";
 import VouchersDialog from "./components/VouchersDialog";
 import InvoiceDialog from "./components/InvoiceDialog";
 
-/**
- * QR Code Component
- * Generates a QR code image using an external API service
- * Used for displaying payment QR codes and product information
- *
- * @param value - The data to be encoded in the QR code
- * @param size - The dimensions of the QR code in pixels (default: 200)
- * @returns A rendered QR code image with border styling
- */
 const QRCodeComponent = ({
   value,
   size = 200,
@@ -148,18 +139,6 @@ const QRCodeComponent = ({
   );
 };
 
-/**
- * Card Skeleton Component
- * Displays a loading placeholder for product cards while data is being fetched
- * Improves perceived performance by showing a visual representation of the content structure
- *
- * Includes skeleton placeholders for:
- * - Product image (full width)
- * - Product name (3/4 width)
- * - Price information (1/2 width)
- * - Variant indicators (circular shapes)
- * - Action button (full width)
- */
 const CardSkeleton = () => (
   <div className="bg-white rounded-[6px] border border-border shadow-sm overflow-hidden">
     <Skeleton className="h-48 w-full" />
@@ -178,10 +157,6 @@ const CardSkeleton = () => (
   </div>
 );
 
-/**
- * Interface for product variant data from the API
- * Represents the different variations of a product (color, size, etc.)
- */
 interface ApiVariant {
   id: string;
   colorId?: { id: string; name: string; code: string; images?: string[] }; // Color information if applicable
@@ -193,10 +168,6 @@ interface ApiVariant {
   actualSizeId?: string; // Reference to actual size ID
 }
 
-/**
- * Interface for product data from the API
- * Contains core product information and its variants
- */
 interface ApiProduct {
   id: string; // Unique product identifier
   name: string; // Product name
@@ -208,10 +179,6 @@ interface ApiProduct {
   createdAt: string; // Product creation timestamp
 }
 
-/**
- * Interface for shop information in invoices
- * Contains business details for receipt printing
- */
 interface InvoiceShopInfo {
   name: string; // Shop name
   address: string; // Shop address
@@ -219,19 +186,11 @@ interface InvoiceShopInfo {
   email: string; // Contact email
 }
 
-/**
- * Interface for customer information in invoices
- * Contains basic customer details for receipt
- */
 interface InvoiceCustomerInfo {
   name: string; // Customer name
   phone: string; // Customer phone number
 }
 
-/**
- * Interface for individual items in an invoice
- * Represents a purchased product with its details
- */
 interface InvoiceItem {
   name: string; // Product name
   quantity: number; // Quantity purchased
@@ -241,10 +200,6 @@ interface InvoiceItem {
   size: string; // Selected size
 }
 
-/**
- * Interface for complete invoice data
- * Contains all information needed for generating a receipt
- */
 interface InvoiceData {
   shopInfo: InvoiceShopInfo; // Shop details
   customerInfo: InvoiceCustomerInfo; // Customer details
@@ -261,13 +216,6 @@ interface InvoiceData {
   paymentMethod: string; // Payment method used
 }
 
-/**
- * Extracts and validates the image URL from a product variant
- * Handles different image data structures and provides a fallback image
- *
- * @param variant - The product variant containing image data
- * @returns A valid image URL or fallback image path
- */
 const getVariantImageUrl = (variant: any) => {
   if (
     !variant?.images ||
@@ -290,13 +238,6 @@ const getVariantImageUrl = (variant: any) => {
   return "/images/white-image.png";
 };
 
-/**
- * Converts raw variant data from the API to a standardized ApiVariant interface
- * Handles both populated and non-populated data structures for color and size
- *
- * @param variant - Raw variant data from the API
- * @returns Standardized ApiVariant object
- */
 const convertVariantToApiVariant = (variant: any): ApiVariant => {
   // Handle case where variant might be null or undefined
   if (!variant) {
@@ -385,13 +326,6 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
   };
 };
 
-/**
- * Converts raw product data from the API to a standardized ApiProduct interface
- * Handles missing or incomplete product data with fallback values
- *
- * @param product - Raw product data from the API
- * @returns Standardized ApiProduct object with converted variants
- */
 const convertProductToApiProduct = (product: any): ApiProduct => {
   if (!product) {
     return {
@@ -419,10 +353,6 @@ const convertProductToApiProduct = (product: any): ApiProduct => {
   };
 };
 
-/**
- * Main POS (Point of Sale) page component
- * Manages product selection, cart operations, and checkout process
- */
 export default function POSPage() {
   // State for product selection and search
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -705,13 +635,6 @@ export default function POSPage() {
     return [...baseCategories, ...Array.from(uniqueCatObjects.values())];
   }, [dataWithPromotions?.data?.products?.length]);
 
-  /**
-   * Handles product selection from the product list
-   * Updates the selected product and variant states
-   * Preserves promotion information when converting product data
-   *
-   * @param product - The selected product from the list
-   */
   const handleProductSelect = (product: any) => {
     // Keep the product with promotion info intact
     const productWithPromotion = { ...product };
@@ -753,13 +676,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Handles color selection from the product detail view
-   * Updates the selected variant based on color choice
-   * Prioritizes variants with available stock
-   *
-   * @param colorId - ID of the selected color
-   */
   const handleColorSelectFromDetail = (colorId: string) => {
     if (!selectedProduct) return;
 
@@ -780,13 +696,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Handles size selection from the product detail view
-   * Updates the selected variant based on size choice
-   * Maintains the currently selected color
-   *
-   * @param sizeId - ID of the selected size
-   */
   const handleSizeSelectFromDetail = (sizeId: string) => {
     if (!selectedProduct || !selectedApiVariant?.colorId) return;
 
@@ -805,15 +714,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Adds a product to the appropriate cart
-   * Handles product data conversion and promotion pricing
-   * Creates unique cart item IDs and manages stock validation
-   *
-   * @param product - Product to add to cart
-   * @param variant - Selected variant of the product
-   * @param isAlreadyConverted - Whether the product data is already in API format
-   */
   const addItemToCorrectCart = (
     product: any,
     variant: any,
@@ -921,11 +821,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Adds the currently selected product and variant to the cart
-   * Validates stock availability before adding
-   * Shows appropriate success/error messages
-   */
   const addToCart = () => {
     if (!selectedProduct || !selectedApiVariant) {
       toast.error("Vui lòng chọn sản phẩm và biến thể.");
@@ -940,14 +835,6 @@ export default function POSPage() {
     addItemToCorrectCart(selectedProduct, selectedApiVariant, true);
   };
 
-  /**
-   * Updates the quantity of an item in the cart
-   * Handles both increment and decrement operations
-   * Validates against available stock
-   *
-   * @param id - Cart item ID
-   * @param amount - Amount to change (positive for increment, negative for decrement)
-   */
   const updateCartItemQuantity = (id: string, amount: number) => {
     const item = cartItems.find((item) => item.id === id);
     if (!item) return;
@@ -977,12 +864,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Removes an item from the cart
-   * Handles removal from both main cart and pending carts
-   *
-   * @param id - Cart item ID to remove
-   */
   const removeCartItem = (id: string) => {
     if (activeCartId) {
       removeItemFromPendingCart(activeCartId, id);
@@ -996,13 +877,6 @@ export default function POSPage() {
     }
   };
 
-  /**
-   * Removes an item from a specific cart by ID
-   * Used for managing multiple pending carts
-   *
-   * @param cartId - ID of the cart to remove from
-   * @param itemId - ID of the item to remove
-   */
   const removeItemFromSpecificCart = (cartId: string, itemId: string) => {
     removeItemFromPendingCart(cartId, itemId);
     const cartName =
@@ -1010,11 +884,6 @@ export default function POSPage() {
     toast.success(`Đã xóa sản phẩm khỏi ${cartName}`);
   };
 
-  /**
-   * Applies a coupon/voucher code to the cart
-   * Validates the voucher and calculates discounts
-   * Shows appropriate success/error messages
-   */
   const applyCoupon = async () => {
     if (!couponCode.trim()) {
       toast.error("Vui lòng nhập mã giảm giá");

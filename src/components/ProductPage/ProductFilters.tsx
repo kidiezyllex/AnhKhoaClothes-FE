@@ -3,8 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSizeLabel } from "@/utils/sizeMapping";
 import { toast } from "react-toastify";
-import { useBrands, useCategories, useColors, useSizes } from "@/hooks/product";
+import {
+  useBrands,
+  useCategories,
+  useColors,
+  useSizes,
+  useFilterOptions,
+} from "@/hooks/product";
 import type { IProductFilter } from "@/interface/request/product";
 
 interface ProductFiltersProps {
@@ -23,7 +30,10 @@ export const ProductFilters = ({
     useCategories();
   const { data: colorsData, isLoading: isLoadingColors } = useColors();
   const { data: sizesData, isLoading: isLoadingSizes } = useSizes();
+  const { data: filterOptionsData, isLoading: isLoadingFilterOptions } =
+    useFilterOptions();
 
+  // State cho các bộ lọc hiện có
   const [selectedBrand, setSelectedBrand] = useState<string | undefined>(
     filters.brands
       ? Array.isArray(filters.brands)
@@ -32,6 +42,36 @@ export const ProductFilters = ({
       : undefined
   );
 
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
+    filters.categories
+      ? Array.isArray(filters.categories)
+        ? filters.categories[0]
+        : filters.categories
+      : undefined
+  );
+
+  // State cho các bộ lọc mới từ filter options API
+  const [selectedArticleType, setSelectedArticleType] = useState<
+    string | undefined
+  >(filters.articleType);
+
+  const [selectedGender, setSelectedGender] = useState<string | undefined>(
+    filters.gender
+  );
+
+  const [selectedBaseColour, setSelectedBaseColour] = useState<
+    string | undefined
+  >(filters.baseColour);
+
+  const [selectedSeason, setSelectedSeason] = useState<string | undefined>(
+    filters.season
+  );
+
+  const [selectedUsage, setSelectedUsage] = useState<string | undefined>(
+    filters.usage
+  );
+
+  // Sync state với filters prop
   useEffect(() => {
     if (filters.brands) {
       setSelectedBrand(
@@ -41,24 +81,6 @@ export const ProductFilters = ({
       setSelectedBrand(undefined);
     }
   }, [filters.brands]);
-
-  const handleBrandChange = (brandId: string) => {
-    if (selectedBrand === brandId) {
-      setSelectedBrand(undefined);
-      onChange({ brands: undefined });
-    } else {
-      setSelectedBrand(brandId);
-      onChange({ brands: brandId });
-    }
-  };
-
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
-    filters.categories
-      ? Array.isArray(filters.categories)
-        ? filters.categories[0]
-        : filters.categories
-      : undefined
-  );
 
   useEffect(() => {
     if (filters.categories) {
@@ -71,6 +93,17 @@ export const ProductFilters = ({
       setSelectedCategory(undefined);
     }
   }, [filters.categories]);
+
+  // Handlers cho các bộ lọc hiện có
+  const handleBrandChange = (brandId: string) => {
+    if (selectedBrand === brandId) {
+      setSelectedBrand(undefined);
+      onChange({ brands: undefined });
+    } else {
+      setSelectedBrand(brandId);
+      onChange({ brands: brandId });
+    }
+  };
 
   const handleCategoryChange = (categoryId: string) => {
     if (selectedCategory === categoryId) {
@@ -94,6 +127,39 @@ export const ProductFilters = ({
     });
   };
 
+  // Handlers cho các bộ lọc mới
+  const handleArticleTypeChange = (articleType: string) => {
+    const newValue =
+      selectedArticleType === articleType ? undefined : articleType;
+    setSelectedArticleType(newValue);
+    onChange({ articleType: newValue });
+  };
+
+  const handleGenderChange = (gender: string) => {
+    const newValue = selectedGender === gender ? undefined : gender;
+    setSelectedGender(newValue);
+    onChange({ gender: newValue });
+  };
+
+  const handleBaseColourChange = (baseColour: string) => {
+    const newValue = selectedBaseColour === baseColour ? undefined : baseColour;
+    setSelectedBaseColour(newValue);
+    onChange({ baseColour: newValue });
+  };
+
+  const handleSeasonChange = (season: string) => {
+    const newValue = selectedSeason === season ? undefined : season;
+    setSelectedSeason(newValue);
+    onChange({ season: newValue });
+  };
+
+  const handleUsageChange = (usage: string) => {
+    const newValue = selectedUsage === usage ? undefined : usage;
+    setSelectedUsage(newValue);
+    onChange({ usage: newValue });
+  };
+
+  // Memoized data
   const brands = useMemo(() => {
     return brandsData?.data?.brands || [];
   }, [brandsData]);
@@ -107,13 +173,35 @@ export const ProductFilters = ({
   }, [colorsData]);
 
   const sizes = useMemo(() => {
+    const allowedLabels = ["S", "M", "L", "XL", "XXL"];
     const rawSizes = sizesData?.data?.sizes || [];
-    return [...rawSizes].sort((a, b) => {
-      const valA = parseFloat(a.name || "0");
-      const valB = parseFloat(b.name || "0");
-      return valA - valB;
+
+    return allowedLabels.map((label) => {
+      const found = rawSizes.find((s) => {
+        const numericValue = parseFloat(s.name || "");
+        const sizeLabel = !isNaN(numericValue)
+          ? getSizeLabel(numericValue)
+          : s.name;
+        return sizeLabel === label;
+      });
+      return {
+        id: found?.id,
+        displayName: label,
+      };
     });
   }, [sizesData]);
+
+  const filterOptions = useMemo(() => {
+    return (
+      filterOptionsData?.data || {
+        articleTypes: [],
+        genders: [],
+        baseColours: [],
+        seasons: [],
+        usages: [],
+      }
+    );
+  }, [filterOptionsData]);
 
   const priceRange = useMemo(() => {
     return { min: 0, max: 10000000 };
@@ -128,12 +216,10 @@ export const ProductFilters = ({
   const handlePriceChange = (values: number[]) => {
     setSelectedPriceRange(values as [number, number]);
 
-    // Clear existing timer
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // Áp dụng thay đổi giá vào bộ lọc sau một khoảng thời gian ngắn (debouncing)
     timerRef.current = setTimeout(() => {
       onChange({
         minPrice: values[0],
@@ -144,14 +230,28 @@ export const ProductFilters = ({
 
   const handleResetFilters = () => {
     setSelectedPriceRange([priceRange.min, priceRange.max]);
+    setSelectedBrand(undefined);
     setSelectedCategory(undefined);
+    setSelectedArticleType(undefined);
+    setSelectedGender(undefined);
+    setSelectedBaseColour(undefined);
+    setSelectedSeason(undefined);
+    setSelectedUsage(undefined);
+
     onChange({
+      brands: undefined,
       categories: undefined,
       minPrice: undefined,
       maxPrice: undefined,
       color: undefined,
       size: undefined,
+      articleType: undefined,
+      gender: undefined,
+      baseColour: undefined,
+      season: undefined,
+      usage: undefined,
     });
+
     toast.info("Đã đặt lại bộ lọc");
   };
 
@@ -159,11 +259,13 @@ export const ProductFilters = ({
     isLoadingBrands ||
     isLoadingCategories ||
     isLoadingColors ||
-    isLoadingSizes
+    isLoadingSizes ||
+    isLoadingFilterOptions
   ) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-40 w-full" />
         <Skeleton className="h-40 w-full" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -172,8 +274,9 @@ export const ProductFilters = ({
 
   return (
     <div className="space-y-4">
+      {/* Price Filter */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Giá</h3>
+        <h3 className="text-sm font-semibold mb-3">Giá</h3>
         <div className="px-2">
           <Slider
             defaultValue={[priceRange.min, priceRange.max]}
@@ -192,93 +295,92 @@ export const ProductFilters = ({
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-medium mb-3">Thương hiệu</h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-          {brands.map((brand) => (
-            <div key={(brand as any)?.id} className="flex items-center gap-2">
-              <Checkbox
-                id={`brand-${(brand as any)?.id}`}
-                checked={selectedBrand === (brand as any)?.id}
-                onCheckedChange={() => handleBrandChange((brand as any)?.id)}
-              />
-              <label
-                htmlFor={`brand-${(brand as any)?.id}`}
-                className="text-sm"
-              >
-                {brand.name}
-              </label>
-            </div>
-          ))}
+      {/* Article Type Filter */}
+      {filterOptions.articleTypes.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3">Loại sản phẩm</h3>
+          <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+            {filterOptions.articleTypes.map((articleType) => (
+              <div key={articleType} className="flex items-center gap-2">
+                <Checkbox
+                  id={`articleType-${articleType}`}
+                  checked={selectedArticleType === articleType}
+                  onCheckedChange={() => handleArticleTypeChange(articleType)}
+                />
+                <label
+                  htmlFor={`articleType-${articleType}`}
+                  className="text-sm cursor-pointer"
+                >
+                  {articleType}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
+      {/* Size Filter */}
       <div>
-        <h3 className="text-sm font-medium mb-3">Danh mục</h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-          {categories.map((category) => (
-            <div
-              key={(category as any)?.id}
-              className="flex items-center gap-2"
-            >
-              <Checkbox
-                id={`category-${(category as any)?.id}`}
-                checked={selectedCategory === (category as any)?.id}
-                onCheckedChange={() =>
-                  handleCategoryChange((category as any)?.id)
-                }
-              />
-              <label
-                htmlFor={`category-${(category as any)?.id}`}
-                className="text-sm"
-              >
-                {category.name}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-medium mb-3">Màu sắc</h3>
-        <div className="flex flex-wrap gap-2">
-          {colors.map((color) => (
-            <button
-              key={color.id}
-              className={`w-8 h-8 rounded-full border overflow-hidden relative transition-all duration-300 ${
-                filters.color === color.id
-                  ? "ring-2 ring-primary ring-offset-2"
-                  : "border-gray-300"
-              }`}
-              style={{ backgroundColor: color.code }}
-              title={color.name}
-              onClick={() => handleColorChange(color.id)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-medium mb-3">Kích cỡ</h3>
+        <h3 className="text-sm font-semibold mb-3">Kích cỡ</h3>
         <div className="flex flex-wrap gap-2">
           {sizes.map((size) => (
-            <button
-              key={size.id}
-              className={`px-2 py-1 border rounded text-sm transition-all duration-300 ${
-                filters.size === size.id
-                  ? "bg-primary text-white border-primary"
-                  : "border-gray-300 hover:border-primary"
-              }`}
-              onClick={() => handleSizeChange(size.id)}
+            <Button
+              key={size.displayName}
+              variant={filters.size === size.id ? "default" : "outline"}
+              size="sm"
+              className="h-9 w-12 transition-all duration-300"
+              onClick={() => size.id && handleSizeChange(size.id)}
+              disabled={!size.id}
             >
-              {size.name || size.id}
-            </button>
+              {size.displayName}
+            </Button>
           ))}
         </div>
       </div>
 
+      {/* Season Filter */}
+      {filterOptions.seasons.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3">Mùa</h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.seasons.map((season) => (
+              <Button
+                key={season}
+                variant={selectedSeason === season ? "default" : "outline"}
+                size="sm"
+                className="h-8 transition-colors"
+                onClick={() => handleSeasonChange(season)}
+              >
+                {season}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Usage Filter */}
+      {filterOptions.usages.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3">Mục đích sử dụng</h3>
+          <div className="flex flex-wrap gap-2">
+            {filterOptions.usages.map((usage) => (
+              <Button
+                key={usage}
+                variant={selectedUsage === usage ? "default" : "outline"}
+                size="sm"
+                className="h-8 transition-colors"
+                onClick={() => handleUsageChange(usage)}
+              >
+                {usage}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Reset Button */}
       <Button variant="outline" className="w-full" onClick={handleResetFilters}>
-        Đặt lại
+        Đặt lại tất cả bộ lọc
       </Button>
     </div>
   );

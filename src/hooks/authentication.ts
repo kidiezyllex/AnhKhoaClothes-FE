@@ -31,9 +31,6 @@ export const useLogin = (): UseMutationResult<
   });
 };
 
-/**
- * Hook đăng ký
- */
 export const useRegister = (): UseMutationResult<
   IAuthResponse,
   Error,

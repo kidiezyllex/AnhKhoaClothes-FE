@@ -88,22 +88,13 @@ export const NavigationBar = () => {
         <div className="flex items-center gap-2">
           {!isAuthenticated ? (
             <div className="hidden md:flex items-center gap-2">
-              <a
-                href="/auth/login"
-                className="border border-primary text-primary hover:text-primary/80 rounded-sm"
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border border-primary text-primary hover:text-primary/80 rounded-sm"
-                >
+              <a href="/auth/login">
+                <Button variant="outline" size="sm">
                   Đăng nhập
                 </Button>
               </a>
-              <a href="/auth/register" className="rounded-sm bg-primary/80">
-                <Button size="sm" className="rounded-sm bg-primary/80">
-                  Đăng ký
-                </Button>
+              <a href="/auth/register">
+                <Button size="sm">Đăng ký</Button>
               </a>
             </div>
           ) : (

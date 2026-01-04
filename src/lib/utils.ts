@@ -64,14 +64,6 @@ export const calculateDiscountedPrice = (
   return Math.round(finalPrice);
 };
 
-/**
- * Format price to Vietnamese Dong currency format
- * @param price - The price to format
- * @returns Formatted price string in VND
- * @example
- * formatPriceVND(100000) // Returns "100.000 ₫"
- * formatPriceVND(1250000) // Returns "1.250.000 ₫"
- */
 export const formatPriceVND = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',

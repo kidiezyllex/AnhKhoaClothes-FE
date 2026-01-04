@@ -14,6 +14,11 @@ export interface IProductFilter {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   status?: string;
+  articleType?: string;
+  gender?: string;
+  baseColour?: string;
+  season?: string;
+  usage?: string;
 }
 
 export interface IProductVariant {
@@ -79,4 +84,9 @@ export interface IProductSearchParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   status?: string;
+  articleType?: string;
+  gender?: string;
+  baseColour?: string;
+  season?: string;
+  usage?: string;
 } 

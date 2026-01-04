@@ -154,123 +154,125 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
-                Tên đăng nhập
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Nhập tên đăng nhập"
-                  {...field}
-                  className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
-                Họ và tên
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Nhập họ và tên của bạn"
-                  {...field}
-                  className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
-                Email
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="Nhập email của bạn"
-                  {...field}
-                  className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-medium">
-                Mật khẩu
-              </FormLabel>
-              <FormControl>
-                <div className="relative">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                  Tên đăng nhập
+                </FormLabel>
+                <FormControl>
                   <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Nhập mật khẩu"
+                    type="text"
+                    placeholder="Nhập tên đăng nhập"
                     {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      evaluatePasswordStrength(e.target.value);
-                    }}
-                    className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 pr-10"
+                    className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
                   />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext hover:text-maintext focus:outline-none"
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                  Họ và tên
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Nhập họ và tên của bạn"
+                    {...field}
+                    className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Nhập email của bạn"
+                    {...field}
+                    className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                  Mật khẩu
+                </FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Nhập mật khẩu"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        evaluatePasswordStrength(e.target.value);
+                      }}
+                      className="border-gray-300 dark:border-gray-700 focus-visible:ring-primary focus-visible:border-primary transition-all duration-300 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext hover:text-maintext focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+                <div className="mt-2">
+                  <meter
+                    min={0}
+                    max={100}
+                    low={40}
+                    high={80}
+                    optimum={100}
+                    value={passwordStrength}
+                    className="w-full h-1.5 rounded-full overflow-hidden [&::-webkit-meter-bar]:bg-gray-300 [&::-webkit-meter-optimum-value]:bg-[#EAEBF2]0 [&::-webkit-meter-suboptimum-value]:bg-yellow-500 [&::-webkit-meter-even-less-good-value]:bg-red-500 [&::-moz-meter-bar]:bg-gray-300 [&::-moz-meter-optimum]:bg-[#EAEBF2]0 [&::-moz-meter-suboptimum]:bg-yellow-500 [&::-moz-meter-border-less-good]:bg-red-500"
+                  ></meter>
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color:
+                        passwordStrength < 40
+                          ? "#ef4444"
+                          : passwordStrength < 80
+                          ? "#f59e0b"
+                          : "#22c55e",
+                    }}
                   >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                    {strengthMessage}
+                  </p>
                 </div>
-              </FormControl>
-              <FormMessage />
-              <div className="mt-2">
-                <meter
-                  min={0}
-                  max={100}
-                  low={40}
-                  high={80}
-                  optimum={100}
-                  value={passwordStrength}
-                  className="w-full h-1.5 rounded-full overflow-hidden [&::-webkit-meter-bar]:bg-gray-300 [&::-webkit-meter-optimum-value]:bg-[#EAEBF2]0 [&::-webkit-meter-suboptimum-value]:bg-yellow-500 [&::-webkit-meter-even-less-good-value]:bg-red-500 [&::-moz-meter-bar]:bg-gray-300 [&::-moz-meter-optimum]:bg-[#EAEBF2]0 [&::-moz-meter-suboptimum]:bg-yellow-500 [&::-moz-meter-border-less-good]:bg-red-500"
-                ></meter>
-                <p
-                  className="text-xs mt-1"
-                  style={{
-                    color:
-                      passwordStrength < 40
-                        ? "#ef4444"
-                        : passwordStrength < 80
-                        ? "#f59e0b"
-                        : "#22c55e",
-                  }}
-                >
-                  {strengthMessage}
-                </p>
-              </div>
-            </FormItem>
-          )}
-        />
+              </FormItem>
+            )}
+          />
+        </div>
         <div className="flex justify-between items-center">
           <a
             href="/auth/login"

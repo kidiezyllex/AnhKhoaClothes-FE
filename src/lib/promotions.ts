@@ -144,9 +144,6 @@ export const applyPromotionsToProducts = (
   });
 };
 
-/**
- * Format price with currency
- */
 export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -155,9 +152,6 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-/**
- * Check if a promotion is currently active
- */
 export const isPromotionActive = (promotion: any): boolean => {
   if (promotion.status !== 'ACTIVE') return false;
 
@@ -170,9 +164,6 @@ export const isPromotionActive = (promotion: any): boolean => {
   return now >= startDate && now <= endDate;
 };
 
-/**
- * Filter promotions to only include those that are currently active
- */
 export const filterActivePromotions = (promotions: any[]): any[] => {
   if (!promotions || promotions.length === 0) return [];
   

@@ -14,7 +14,8 @@ import {
   IProductsResponse,          // Response danh sách sản phẩm
   IProductResponse,           // Response chi tiết sản phẩm
   IActionResponse,            // Response cho hành động như xóa
-  IProductFiltersResponse     // Response chứa các bộ lọc tìm kiếm (màu, size,...)
+  IProductFiltersResponse,    // Response chứa các bộ lọc tìm kiếm (màu, size,...)
+  IFilterOptionsResponse      // Response cho filter options từ API mới
 } from "@/interface/response/product";
 
 // ====== Import các hàm gửi HTTP request ====== //
@@ -115,3 +116,10 @@ export const getAllFilters = async (): Promise<IProductFiltersResponse> => {
   const res = await sendGet("/products/filters"); // Gửi GET đến /products/filters
   return res as IProductFiltersResponse;
 };
+
+// Lấy các giá trị unique cho bộ lọc sản phẩm (articleTypes, genders, baseColours, seasons, usages)
+export const getFilterOptions = async (): Promise<IFilterOptionsResponse> => {
+  const res = await sendGet("/filters/filter_options"); // Gửi GET đến /filters/filter_options
+  return res as IFilterOptionsResponse;
+};
+

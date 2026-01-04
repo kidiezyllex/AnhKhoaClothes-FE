@@ -1,8 +1,3 @@
-/**
- * Định dạng giá tiền theo định dạng VND
- * @param price Số tiền cần định dạng
- * @returns Chuỗi đã định dạng theo VND
- */
 export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -11,11 +6,6 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
-/**
- * Định dạng ngày tháng theo định dạng Việt Nam
- * @param dateString Chuỗi ngày cần định dạng
- * @returns Chuỗi ngày đã định dạng theo Việt Nam
- */
 export const formatDate = (dateString: string): string => {
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
@@ -24,11 +14,6 @@ export const formatDate = (dateString: string): string => {
   }).format(new Date(dateString));
 };
 
-/**
- * Định dạng ngày tháng có giờ theo định dạng Việt Nam
- * @param dateString Chuỗi ngày giờ cần định dạng
- * @returns Chuỗi ngày giờ đã định dạng theo Việt Nam
- */
 export const formatDateTime = (dateString: string): string => {
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
@@ -40,11 +25,6 @@ export const formatDateTime = (dateString: string): string => {
   }).format(new Date(dateString));
 };
 
-/**
- * Chuyển đổi chuỗi thành slug URL
- * @param text Chuỗi cần chuyển đổi
- * @returns Chuỗi slug
- */
 export const slugify = (text: string): string => {
   return text
     .toLowerCase()
@@ -56,11 +36,6 @@ export const slugify = (text: string): string => {
     .replace(/^-+|-+$/g, '');
 };
 
-/**
- * Định dạng số điện thoại Việt Nam
- * @param phone Số điện thoại cần định dạng 
- * @returns Chuỗi số điện thoại đã định dạng
- */
 export const formatPhoneNumber = (phone: string): string => {
   // Loại bỏ tất cả ký tự không phải số
   const cleaned = phone.replace(/\D/g, '');
@@ -76,11 +51,6 @@ export const formatPhoneNumber = (phone: string): string => {
   return phone;
 };
 
-/**
- * Định dạng số lượng sản phẩm còn lại trong kho
- * @param stock Số lượng sản phẩm
- * @returns Chuỗi định dạng tình trạng kho
- */
 export const formatStockStatus = (stock: number): { text: string; className: string } => {
   if (stock <= 0) {
     return { text: 'Hết hàng', className: 'text-red-500' };
@@ -92,12 +62,6 @@ export const formatStockStatus = (stock: number): { text: string; className: str
     return { text: 'Còn hàng', className: 'text-green-500' };
   }
 };
-/**
- * Định dạng giá trị giảm giá dựa trên loại (phần trăm hoặc số tiền cố định)
- * @param type Loại giảm giá (PERCENTAGE hoặc FIXED_AMOUNT)
- * @param value Giá trị giảm giá
- * @returns Chuỗi đã định dạng
- */
 export const formatDiscountValue = (type: 'PERCENTAGE' | 'FIXED_AMOUNT', value: number): string => {
   if (type === 'PERCENTAGE') {
     return `-${value}%`;
@@ -105,7 +69,4 @@ export const formatDiscountValue = (type: 'PERCENTAGE' | 'FIXED_AMOUNT', value: 
   return `-${formatPrice(value)}`;
 };
 
-/**
- * Alias cho formatPrice để tương thích ngược
- */
 export const formatCurrency = formatPrice; 
