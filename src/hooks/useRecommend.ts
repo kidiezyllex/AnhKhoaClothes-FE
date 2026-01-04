@@ -3,11 +3,12 @@ import { sendPost } from "@/api/axios";
 import { IHybridRecommendRequest } from "@/interface/request/recommend";
 import { IModelRecommendationResponse } from "@/interface/response/recommend";
 
-// Helper to build URL - assuming relative path for now as per project structure
+// Helpers to build URL - adjusted to not repeat /api/v1 if it's already in the base URL
 const buildMlServiceUrl = (path: string) => path;
 
 export const getHybridModelRecommendations = async (body: IHybridRecommendRequest): Promise<IModelRecommendationResponse> => {
-	return await sendPost(buildMlServiceUrl(`/api/v1/hybrid/recommend/`), body);
+	// Paths in sendPost/sendGet should be relative to baseURL (which usually already includes /api/v1)
+	return await sendPost(buildMlServiceUrl(`/hybrid/recommend`), body);
 };
 
 export const useHybridModelRecommendations = () => {

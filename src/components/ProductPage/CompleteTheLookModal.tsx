@@ -56,25 +56,26 @@ interface CompleteTheLookModalProps {
 }
 
 // --- Icons & Constants ---
-const ICON_COLOR = "#ec4899"; // Pink-600
+const ICON_COLOR = "var(--primary)";
 
-const getCategoryIcon = (categoryName: string) => {
+const getCategoryIcon = (categoryName: string, iconClassName?: string) => {
   const key = categoryName.trim().toLowerCase();
+  const defaultClass = iconClassName || "w-5 h-5 text-primary";
   switch (key) {
     case "tops":
-      return <Shirt className="w-5 h-5 text-pink-500" />;
+      return <Shirt className={defaultClass} />;
     case "dresses":
-      return <FaFemale className="w-5 h-5 text-pink-500" />;
+      return <FaFemale className={defaultClass} />;
     case "bottoms":
-      return <PiPants className="w-5 h-5 text-pink-500" />;
+      return <PiPants className={defaultClass} />;
     case "shoes":
-      return <FaShoePrints className="w-5 h-5 text-pink-500" />;
+      return <FaShoePrints className={defaultClass} />;
     case "accessories":
-      return <FaGem className="w-5 h-5 text-pink-500" />;
+      return <FaGem className={defaultClass} />;
     case "innerwear":
-      return <Shirt className="w-5 h-5 text-pink-500" />;
+      return <Shirt className={defaultClass} />;
     default:
-      return <FaMagic className="w-5 h-5 text-pink-500" />;
+      return <FaMagic className={defaultClass} />;
   }
 };
 
@@ -208,7 +209,7 @@ const LazyProductImage = ({
     <div className={`relative overflow-hidden bg-gray-50 ${className}`}>
       {imageState === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-pink-500" />
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
         </div>
       )}
       <img
@@ -358,9 +359,6 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
     }
 
     try {
-      // For the sake of simplicity in this refactor, I won't re-implement the complex category logic
-      // for saving unless strictly needed. I'll just save the outfit structure.
-      // But to match the previous logic's carousel selection:
       const categories = ["Tops", "Dresses", "Bottoms", "Shoes", "Accessories"];
       const productsByCategory: Record<string, any[]> = {
         Tops: [],
@@ -383,8 +381,6 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
         const list = productsByCategory[cat] || [];
         if (list[idx]) displayedProducts.push(list[idx]);
       });
-
-      // If no products in main categories, check Other? (omitted for brevity)
 
       const payload = {
         name: outfit.name,
@@ -441,7 +437,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
     return (
       <Card
-        className="w-full h-full overflow-hidden border hover:border-pink-500 transition-all cursor-pointer group"
+        className="w-full h-full overflow-hidden border hover:border-primary transition-all cursor-pointer group"
         onClick={() =>
           window.open(
             `/products/product-${product._id || product.product_id}`,
@@ -465,7 +461,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
           {product.articleType && (
             <Badge
               variant="secondary"
-              className="mb-2 text-[10px] font-normal bg-pink-50 text-pink-600 border-pink-100"
+              className="mb-2 text-[10px] font-normal bg-primary/10 text-primary border-primary/20"
             >
               {product.articleType}
             </Badge>
@@ -474,7 +470,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
             {product.name}
           </h3>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-pink-600">
+            <span className="text-sm font-bold text-primary">
               {formatPriceVND(salePrice)}
             </span>
             {product.sale > 0 && (
@@ -487,9 +483,9 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
             <div className="mt-2">{getScoreChip(product.score)}</div>
           )}
           <Button
-            variant="ghost"
-            className="w-full mt-2 h-8 text-xs text-pink-600 hover:text-pink-700 hover:bg-pink-50"
             size="sm"
+            className="w-full mt-2 bg-green-50"
+            variant="outline"
           >
             View Details <ArrowUpRight className="w-3 h-3 ml-1" />
           </Button>
@@ -500,17 +496,17 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className="max-w-[95vw] h-[90vh] p-0 overflow-hidden flex flex-col bg-gray-50">
-        <DialogHeader className="px-6 py-4 bg-white border-b flex-shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-pink-600 text-xl font-bold">
+      <DialogContent className="max-w-[95vw] gap-0 h-[90vh] p-0 overflow-hidden flex flex-col bg-gray-50">
+        <DialogHeader className="px-6 py-3 bg-white border-b flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-primary pl-4 text-xl font-bold">
             <FaMagic /> Complete The Look
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden p-6">
+        <div className="flex-1 overflow-hidden p-4 pt-0">
           {isLoading ? (
             <div className="w-full h-full flex flex-col items-center justify-center gap-4">
-              <Loader2 className="w-12 h-12 animate-spin text-pink-500" />
+              <Loader2 className="w-12 h-12 animate-spin text-primary" />
               <p className="text-gray-500">
                 Generating fashion recommendations...
               </p>
@@ -528,13 +524,13 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
               <TabsList className="w-full justify-start border-b rounded-none p-0 h-auto bg-transparent mb-4">
                 <TabsTrigger
                   value="personalized"
-                  className="px-6 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-pink-500 data-[state=active]:text-pink-600 data-[state=active]:bg-transparent"
+                  className="px-6 py-3 rounded-none border-b-2 border-transparent text-gray-500 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
                 >
                   Personalized
                 </TabsTrigger>
                 <TabsTrigger
                   value="outfit"
-                  className="px-6 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-pink-500 data-[state=active]:text-pink-600 data-[state=active]:bg-transparent"
+                  className="px-6 py-3 rounded-none border-b-2 border-transparent text-gray-500 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
                 >
                   Outfit Sets
                 </TabsTrigger>
@@ -542,217 +538,224 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
               <TabsContent
                 value="personalized"
-                className="flex-1 overflow-hidden"
+                className="flex-1 overflow-hidden data-[state=inactive]:hidden"
               >
-                <ScrollArea className="h-full">
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-10">
-                    {personalizedData.length > 0 ? (
-                      personalizedData.map((prod) => (
-                        <div key={prod._id} className="h-full">
-                          {renderProductCard(prod, true)}
+                {activeTab === "personalized" && (
+                  <ScrollArea className="h-full">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-10">
+                      {personalizedData.length > 0 ? (
+                        personalizedData.map((prod) => (
+                          <div key={prod._id} className="h-full">
+                            {renderProductCard(prod, true)}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-full h-64 flex items-center justify-center text-gray-400">
+                          No personalized items found.
                         </div>
-                      ))
-                    ) : (
-                      <div className="col-span-full h-64 flex items-center justify-center text-gray-400">
-                        No personalized items found.
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                      )}
+                    </div>
+                  </ScrollArea>
+                )}
               </TabsContent>
 
               <TabsContent
                 value="outfit"
-                className="flex-1 overflow-hidden bg-white rounded-lg border shadow-sm flex flex-col"
+                className="flex-1 overflow-hidden bg-white rounded-lg border shadow-sm flex flex-col data-[state=inactive]:hidden"
               >
-                <div className="overflow-x-auto flex-1">
-                  <Table className="min-w-[1000px] h-full">
-                    <TableHeader className="sticky top-0 bg-gray-50 z-10">
-                      <TableRow>
-                        {[
-                          "Tops",
-                          "Dresses",
-                          "Bottoms",
-                          "Shoes",
-                          "Accessories",
-                        ].map((cat) => (
-                          <TableHead
-                            key={cat}
-                            className="text-center font-bold text-gray-700 min-w-[200px]"
-                          >
-                            <div className="flex items-center justify-center gap-2 py-4">
-                              {getCategoryIcon(cat)} {cat}
-                            </div>
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {outfitData.length > 0 ? (
-                        outfitData.map((outfit, idx) => {
-                          const categories = [
+                {activeTab === "outfit" && (
+                  <div className="overflow-x-auto flex-1">
+                    <Table className="min-w-[1000px] h-full">
+                      <TableHeader className="sticky top-0 bg-primary z-10">
+                        <TableRow className="hover:bg-primary border-none">
+                          {[
                             "Tops",
                             "Dresses",
                             "Bottoms",
                             "Shoes",
                             "Accessories",
-                          ];
-                          const productsByCategory: Record<string, any[]> = {
-                            Tops: [],
-                            Dresses: [],
-                            Bottoms: [],
-                            Shoes: [],
-                            Accessories: [],
-                            Other: [],
-                          };
-                          outfit.products.forEach((p: any) => {
-                            const cat = p.category || "Other";
-                            if (productsByCategory[cat])
-                              productsByCategory[cat].push(p);
-                            else productsByCategory.Other.push(p);
-                          });
-
-                          const isSaved = savedOutfits.has(`outfit-${idx}`);
-
-                          return (
-                            <React.Fragment key={idx}>
-                              {/* Outfit Header Row */}
-                              <TableRow className="bg-pink-50/50 hover:bg-pink-50/80">
-                                <TableCell colSpan={5} className="py-3 px-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                      <span className="font-bold text-pink-700 text-lg">
-                                        {outfit.name}
-                                      </span>
-                                      <Badge
-                                        variant="outline"
-                                        className="bg-pink-100 text-pink-700 border-pink-200"
-                                      >
-                                        Score:{" "}
-                                        {(
-                                          outfit.compatibilityScore * 100
-                                        ).toFixed(0)}
-                                        %
-                                      </Badge>
-                                      <span className="text-sm text-gray-500">
-                                        Total:{" "}
-                                        <span className="font-semibold text-pink-600">
-                                          {formatPriceVND(outfit.totalPrice)}
-                                        </span>
-                                      </span>
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant={isSaved ? "outline" : "default"}
-                                      onClick={() =>
-                                        handleSaveOutfit(outfit, idx)
-                                      }
-                                      className={
-                                        isSaved
-                                          ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
-                                          : "bg-pink-600 hover:bg-pink-700"
-                                      }
-                                      disabled={isSaved}
-                                    >
-                                      {isSaved ? (
-                                        <>
-                                          <BookmarkCheck className="w-4 h-4 mr-2" />{" "}
-                                          Saved
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Bookmark className="w-4 h-4 mr-2" />{" "}
-                                          Save Outfit
-                                        </>
-                                      )}
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-
-                              {/* Outfit Products Row */}
-                              <TableRow className="border-b-4 border-gray-100">
-                                {categories.map((cat) => {
-                                  const key = `${cat}-${idx}`;
-                                  const prods = productsByCategory[cat] || [];
-                                  const currentIndex =
-                                    carouselIndices[key] || 0;
-                                  const currentProd = prods[currentIndex];
-
-                                  return (
-                                    <TableCell
-                                      key={cat}
-                                      className="p-2 align-top h-[320px]"
-                                    >
-                                      {prods.length > 0 && currentProd ? (
-                                        <div className="h-full w-full flex flex-col">
-                                          <div className="flex-1 min-h-0 mb-2">
-                                            {renderProductCard(currentProd)}
-                                          </div>
-                                          {prods.length > 1 && (
-                                            <div className="flex items-center justify-between bg-gray-100 rounded-md p-1 mt-auto">
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() =>
-                                                  handlePrevItem(
-                                                    cat,
-                                                    idx,
-                                                    prods.length
-                                                  )
-                                                }
-                                              >
-                                                <FaMinus className="w-3 h-3" />
-                                              </Button>
-                                              <span className="text-[10px] text-gray-500 font-medium">
-                                                {currentIndex + 1} /{" "}
-                                                {prods.length}
-                                              </span>
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() =>
-                                                  handleNextItem(
-                                                    cat,
-                                                    idx,
-                                                    prods.length
-                                                  )
-                                                }
-                                              >
-                                                <FaPlus className="w-3 h-3" />
-                                              </Button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <div className="h-full w-full border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-300 p-4 text-center">
-                                          <span className="text-xs">
-                                            No items in this category
-                                          </span>
-                                        </div>
-                                      )}
-                                    </TableCell>
-                                  );
-                                })}
-                              </TableRow>
-                            </React.Fragment>
-                          );
-                        })
-                      ) : (
-                        <TableRow>
-                          <TableCell
-                            colSpan={5}
-                            className="text-center py-20 text-gray-400"
-                          >
-                            No outfits found
-                          </TableCell>
+                          ].map((cat) => (
+                            <TableHead
+                              key={cat}
+                              className="text-center font-bold text-white min-w-[200px]"
+                            >
+                              <div className="flex items-center justify-center gap-2 py-4">
+                                {getCategoryIcon(cat, "w-5 h-5 text-white")}{" "}
+                                {cat}
+                              </div>
+                            </TableHead>
+                          ))}
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {outfitData.length > 0 ? (
+                          outfitData.map((outfit, idx) => {
+                            const categories = [
+                              "Tops",
+                              "Dresses",
+                              "Bottoms",
+                              "Shoes",
+                              "Accessories",
+                            ];
+                            const productsByCategory: Record<string, any[]> = {
+                              Tops: [],
+                              Dresses: [],
+                              Bottoms: [],
+                              Shoes: [],
+                              Accessories: [],
+                              Other: [],
+                            };
+                            outfit.products.forEach((p: any) => {
+                              const cat = p.category || "Other";
+                              if (productsByCategory[cat])
+                                productsByCategory[cat].push(p);
+                              else productsByCategory.Other.push(p);
+                            });
+
+                            const isSaved = savedOutfits.has(`outfit-${idx}`);
+
+                            return (
+                              <React.Fragment key={idx}>
+                                {/* Outfit Header Row */}
+                                <TableRow className="bg-primary/5 hover:bg-primary/10">
+                                  <TableCell colSpan={5} className="py-3 px-4">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-4">
+                                        <span className="font-bold text-primary text-lg">
+                                          {outfit.name}
+                                        </span>
+                                        <Badge
+                                          variant="outline"
+                                          className="bg-primary/10 text-primary border-primary/20"
+                                        >
+                                          Score:{" "}
+                                          {(
+                                            outfit.compatibilityScore * 100
+                                          ).toFixed(0)}
+                                          %
+                                        </Badge>
+                                        <span className="text-sm text-gray-500">
+                                          Total:{" "}
+                                          <span className="font-semibold text-primary">
+                                            {formatPriceVND(outfit.totalPrice)}
+                                          </span>
+                                        </span>
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        variant={
+                                          isSaved ? "outline" : "default"
+                                        }
+                                        onClick={() =>
+                                          handleSaveOutfit(outfit, idx)
+                                        }
+                                        className={
+                                          isSaved
+                                            ? "border-green-500 text-green-600 bg-green-50 hover:bg-green-100"
+                                            : "bg-primary hover:bg-primary/90"
+                                        }
+                                        disabled={isSaved}
+                                      >
+                                        {isSaved ? (
+                                          <>
+                                            <BookmarkCheck className="w-4 h-4 mr-2" />{" "}
+                                            Saved
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Bookmark className="w-4 h-4" /> Lưu
+                                            Outfit
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+
+                                {/* Outfit Products Row */}
+                                <TableRow className="border-b-4 border-gray-100">
+                                  {categories.map((cat) => {
+                                    const key = `${cat}-${idx}`;
+                                    const prods = productsByCategory[cat] || [];
+                                    const currentIndex =
+                                      carouselIndices[key] || 0;
+                                    const currentProd = prods[currentIndex];
+
+                                    return (
+                                      <TableCell
+                                        key={cat}
+                                        className="p-2 align-top h-[320px]"
+                                      >
+                                        {prods.length > 0 && currentProd ? (
+                                          <div className="h-full w-full flex flex-col">
+                                            <div className="flex-1 min-h-0 mb-2">
+                                              {renderProductCard(currentProd)}
+                                            </div>
+                                            {prods.length > 1 && (
+                                              <div className="flex items-center justify-between bg-gray-100 rounded-md p-1 mt-auto">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-6 w-6"
+                                                  onClick={() =>
+                                                    handlePrevItem(
+                                                      cat,
+                                                      idx,
+                                                      prods.length
+                                                    )
+                                                  }
+                                                >
+                                                  <FaMinus className="w-3 h-3" />
+                                                </Button>
+                                                <span className="text-[10px] text-gray-500 font-medium">
+                                                  {currentIndex + 1} /{" "}
+                                                  {prods.length}
+                                                </span>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="icon"
+                                                  className="h-6 w-6"
+                                                  onClick={() =>
+                                                    handleNextItem(
+                                                      cat,
+                                                      idx,
+                                                      prods.length
+                                                    )
+                                                  }
+                                                >
+                                                  <FaPlus className="w-3 h-3" />
+                                                </Button>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <div className="h-full w-full border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-300 p-4 text-center">
+                                            <span className="text-xs">
+                                              No items in this category
+                                            </span>
+                                          </div>
+                                        )}
+                                      </TableCell>
+                                    );
+                                  })}
+                                </TableRow>
+                              </React.Fragment>
+                            );
+                          })
+                        ) : (
+                          <TableRow>
+                            <TableCell
+                              colSpan={5}
+                              className="text-center py-20 text-gray-400"
+                            >
+                              No outfits found
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           )}

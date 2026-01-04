@@ -326,21 +326,23 @@ export default function AuthPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-[600px]"
+          className="w-[500px]"
         >
           <Card className="flex flex-col w-full shadow-sm bg-white dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold text-maintext dark:text-white">
-                <span className="relative">
-                  Tạo tài khoản mới
-                  <span className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full"></span>
-                </span>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-maintext dark:text-white flex items-center justify-between">
+                Tạo tài khoản mới
+                <img
+                  draggable="false"
+                  src="/images/logo.svg"
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  className="w-auto h-12"
+                />
               </CardTitle>
-              <CardDescription className="text-maintext dark:text-maintext pt-3">
-                Đăng ký để khám phá Clothes Shop!
-              </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent>
               <ScrollArea className="h-[60vh] pr-4">
                 <div className="pb-4">
                   <RegisterForm onSuccess={handleSuccess} />

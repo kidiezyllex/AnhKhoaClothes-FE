@@ -111,7 +111,7 @@ export const NavigationBar = () => {
               <span className="text-sm font-medium text-maintext">
                 Xin chào,{" "}
                 <span className="text-primary font-bold">
-                  {user?.fullName || "Khách hàng"}
+                  {user?.name || user?.fullName || "Khách hàng"}
                 </span>
               </span>
             </div>

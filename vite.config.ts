@@ -13,16 +13,19 @@ export default defineConfig({
   server: {
     // Cổng chạy ứng dụng là 3000
     port: 3000,
+    strictPort: true, // Nếu cổng 3000 bận thì báo lỗi thay vì tự chuyển cổng khác
 
-    // Theo dõi thay đổi file bằng polling (hữu ích khi chạy trên Docker, WSL,...)
+    // Tắt polling nếu không dùng Docker/WSL cũ để giảm tải CPU
     watch: {
-      usePolling: true,
+      usePolling: false, 
     },
 
-    // Bật HMR (Hot Module Replacement) để tự động reload khi có thay đổi
-    hmr: true,
+    // Bật HMR (Hot Module Replacement)
+    hmr: {
+      overlay: true, // Hiển thị lỗi trên màn hình
+    },
 
-    // Cho phép tất cả các host truy cập (phù hợp khi chạy LAN, Docker,...)
+    // Cho phép tất cả các host truy cập
     allowedHosts: ['*'],
   },
 
@@ -38,6 +41,30 @@ export default defineConfig({
       // Khi import '@/' sẽ hiểu là './src'
       '@': path.resolve(__dirname, './src'),
     },
+  },
+
+  // 🛠️ Cấu hình Build
+  build: {
+    target: 'esnext',
+    minify: 'esbuild', // Dùng esbuild để build nhanh hơn
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        // Tách code (Code Splitting) thông minh hơn
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@mui/material', '@mui/icons-material', 'framer-motion'],
+          'utils-vendor': ['axios', 'date-fns', 'lodash'],
+        },
+      },
+    },
+    // Tăng giới hạn cảnh báo chunk size (mặc định 500kb)
+    chunkSizeWarningLimit: 1000, 
+  },
+
+  // ⚡ Tối ưu hóa dependencies (Pre-bundling)
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'axios'],
   },
 
   // 🌐 Base path cho toàn bộ app khi build (mặc định '/')

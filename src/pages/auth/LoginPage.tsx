@@ -172,21 +172,23 @@ const LoginPage: React.FC = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="h-full w-[600px]"
+          className="h-full w-[500px]"
         >
-          <Card className="flex flex-col w-full h-full shadow-sm bg-white/50 dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold text-maintext dark:text-white">
-                <span className="relative">
-                  Đăng nhập tài khoản
-                  <span className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full"></span>
-                </span>
+          <Card className="flex flex-col w-full h-full shadow-sm bg-white dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-maintext dark:text-white flex items-center justify-between">
+                Đăng nhập tài khoản
+                <img
+                  draggable="false"
+                  src="/images/logo.svg"
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  className="w-auto h-12"
+                />
               </CardTitle>
-              <CardDescription className="text-maintext dark:text-maintext pt-3">
-                Đăng nhập để tiếp tục mua sắm và theo dõi đơn hàng của bạn
-              </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 pt-6">
+            <CardContent className="flex-1 pt-4 bg-white">
               <LoginForm onSuccess={handleSuccess} />
             </CardContent>
           </Card>

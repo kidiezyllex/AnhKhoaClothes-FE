@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import CartIcon from "@/components/ui/CartIcon";
-import { useNavigate } from "react-router-dom";
 import { ProductCard } from "@/components/ProductPage/ProductCard";
-import CompleteTheLookModal from "@/components/ProductPage/CompleteTheLookModal";
 import { useHybridModelRecommendations } from "@/hooks/useRecommend";
-import { useAuth } from "@/hooks/useAuth";
+import { useUser } from "@/context/useUserContext";
+
+const CompleteTheLookModal = React.lazy(
+  () => import("@/components/ProductPage/CompleteTheLookModal")
+);
 
 // Add custom styles for zoom cursor
 const zoomStyles = `
@@ -55,7 +57,6 @@ import {
   applyPromotionsToProducts,
   filterActivePromotions,
 } from "@/lib/promotions";
-import { getSizeLabel } from "@/utils/sizeMapping";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Icon } from "@mdi/react";
@@ -309,7 +310,7 @@ export default function ProductDetail() {
   const { data: allProductsData } = useProducts({ limit: 8 });
   const { data: promotionsData } = usePromotions({ status: "ACTIVE" });
   const { addToCart } = useCartStore();
-  const { user } = useAuth();
+  const { user } = useUser();
 
   const [outfitModalOpen, setOutfitModalOpen] = useState(false);
   const getHybridRecommendations = useHybridModelRecommendations();
@@ -369,7 +370,18 @@ export default function ProductDetail() {
     }
   }, [productData, selectedVariant, promotionsData]);
 
-  // Xử lý chọn màu sắc
+  useEffect(() => {
+    if (productId && user?.id) {
+      getHybridRecommendations.mutate({
+        user_id: user.id,
+        current_product_id: productId,
+        alpha: 0.5,
+        top_k_personalized: 6,
+        top_k_outfit: 3,
+      });
+    }
+  }, [productId, user?.id]);
+
   const handleColorSelect = (colorValue: string) => {
     setSelectedColor(colorValue);
     const product = productData?.data?.product;
@@ -1125,12 +1137,6 @@ export default function ProductDetail() {
                       return;
                     }
                     setOutfitModalOpen(true);
-                    if (productId && user.id) {
-                      getHybridRecommendations.mutate({
-                        user_id: user.id,
-                        current_product_id: productId,
-                      });
-                    }
                   }}
                 >
                   <Icon path={mdiAlphaSBox} size={1} />

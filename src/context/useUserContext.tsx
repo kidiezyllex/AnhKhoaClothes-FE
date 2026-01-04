@@ -15,6 +15,7 @@ import { clearToken, setTokenToLocalStorage } from "@/helper/tokenStorage";
 import { useUserProfile } from "@/hooks/account";
 import { IAccountResponse } from "@/interface/response/account";
 import cookies from "js-cookie";
+import { useAuth } from "@/hooks/useAuth";
 
 type UserContextType = {
   user: null | Record<string, any>;
@@ -139,8 +140,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       if (user) {
         localStorage.setItem("user", JSON.stringify(user));
+        // Đồng bộ sang useAuth (Zustand)
+        useAuth.getState().setUser(user as any);
       } else {
         localStorage.removeItem("user");
+        useAuth.getState().setUser(null);
       }
     }
   }, [user]);
@@ -158,6 +162,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     navigate("/auth/login");
   }, [navigate]);
 
+  // Tự động đồng bộ user state từ profileData
+  useEffect(() => {
+    if (profileData?.status === "success" && profileData.data?.user) {
+      setUser(profileData.data.user);
+    }
+  }, [profileData]);
+
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
@@ -167,7 +178,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       logoutUser,
       fetchUserProfile,
       isLoadingProfile: isProfileLoading || isLoadingProfile,
-      isAuthenticated: !!user || !!profile,
+      isAuthenticated: !!user,
       updateUserProfile,
     }),
     [

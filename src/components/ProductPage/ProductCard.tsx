@@ -34,17 +34,14 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Extract data from the first variant as requested
   const firstVariant = (product as any)?.variants?.[0];
   const basePrice = firstVariant?.price || 0;
   const currentStock = firstVariant?.stock || 0;
 
-  // Calculate discount - prioritize (product as any)?.sale from JSON, fallback to promotionsData
   const getDiscountInfo = () => {
     let discountPercent = (product as any)?.sale || 0;
     let discountedPrice = calculateDiscountedPrice(basePrice, discountPercent);
 
-    // If no direct sale on product, check promotionsData
     if (
       discountPercent === 0 &&
       promotionsData?.data?.promotions &&
@@ -112,16 +109,10 @@ export const ProductCard = ({
               <Badge variant="teal">{product.articleType}</Badge>
             )}
             {discountInfo.isDiscounted && (
-              <motion.div
-                initial={{ scale: 0, rotate: 180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Badge variant="bestSeller" className="flex items-center gap-1">
-                  <Icon path={mdiTagMultiple} size={0.6} />-
-                  {discountInfo.percent}%
-                </Badge>
-              </motion.div>
+              <Badge variant="bestSeller" className="flex items-center gap-1">
+                <Icon path={mdiTagMultiple} size={0.6} />-{discountInfo.percent}
+                %
+              </Badge>
             )}
             {/* Stock badge */}
             {(() => {
