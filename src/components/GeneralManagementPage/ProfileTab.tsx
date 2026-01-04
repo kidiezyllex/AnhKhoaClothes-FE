@@ -156,7 +156,7 @@ export const ProfileTab = () => {
       {/* Profile Section */}
       <Card className="border-none shadow-md overflow-hidden">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
+          <CardTitle className="flex items-center gap-2">
             <Icon path={mdiAccountEdit} size={1} className="text-primary" />
             <span>Thông tin cá nhân</span>
           </CardTitle>
@@ -309,9 +309,8 @@ export const ProfileTab = () => {
 
       {/* Password Section */}
       <Card className="border-none shadow-md overflow-hidden">
-        <div className="h-2 bg-extra/80"></div>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
+          <CardTitle className="flex items-center gap-2">
             <Icon path={mdiShieldAccount} size={1} className="text-extra" />
             <span>Đổi mật khẩu</span>
           </CardTitle>

@@ -170,7 +170,7 @@ const LoginPage: React.FC = () => {
         >
           <Card className="flex flex-col w-full h-full shadow-sm bg-white dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-gray-700 dark:text-white flex items-center justify-between">
+              <CardTitle className="font-bold text-gray-700 dark:text-white flex items-center justify-between">
                 Đăng nhập tài khoản
                 <img
                   draggable="false"

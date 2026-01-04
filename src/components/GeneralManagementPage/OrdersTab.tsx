@@ -51,43 +51,18 @@ import { toast } from "react-toastify";
 // --- Components ---
 
 export const OrderStatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { label: string; className: string }> = {
-    CHO_XAC_NHAN: {
-      label: "Chờ xác nhận",
-      className: "!bg-yellow-400 !text-white !border-yellow-500 text-nowrap",
-    },
-    CHO_GIAO_HANG: {
-      label: "Chờ giao hàng",
-      className: "!bg-blue-400 !text-white !border-blue-500 text-nowrap",
-    },
-    DANG_VAN_CHUYEN: {
-      label: "Đang vận chuyển",
-      className: "!bg-orange-400 !text-white !border-orange-500 text-nowrap",
-    },
-    DA_GIAO_HANG: {
-      label: "Đã giao hàng",
-      className: "!bg-green-400 !text-white !border-green-500 text-nowrap",
-    },
-    HOAN_THANH: {
-      label: "Hoàn thành",
-      className: "!bg-emerald-400 !text-white !border-emerald-500 text-nowrap",
-    },
-    DA_HUY: {
-      label: "Đã hủy",
-      className: "!bg-red-400 !text-white !border-red-500 text-nowrap",
-    },
+  const statusConfig: Record<string, { label: string }> = {
+    CHO_XAC_NHAN: { label: "Chờ xác nhận" },
+    CHO_GIAO_HANG: { label: "Chờ giao hàng" },
+    DANG_VAN_CHUYEN: { label: "Đang vận chuyển" },
+    DA_GIAO_HANG: { label: "Đã giao hàng" },
+    HOAN_THANH: { label: "Hoàn thành" },
+    DA_HUY: { label: "Đã hủy" },
   };
 
-  const config = statusConfig[status] || {
-    label: status,
-    className: "bg-gray-400 text-gray-700 border-gray-500",
-  };
+  const config = statusConfig[status] || { label: status };
 
-  return (
-    <Badge className={`${config.className} rounded-[4px] font-normal`}>
-      {config.label}
-    </Badge>
-  );
+  return <Badge variant={status as any}>{config.label}</Badge>;
 };
 
 export const OrderDetailDialog: React.FC<{
@@ -412,11 +387,7 @@ export const OrderDetailDialog: React.FC<{
                           Trạng thái:
                         </span>
                         <Badge
-                          className={
-                            orderData.data.is_paid
-                              ? "bg-green-100 text-green-800 border-green-200"
-                              : "!bg-extra text-white"
-                          }
+                          variant={orderData.data.is_paid ? "PAID" : "UNPAID"}
                         >
                           {orderData.data.is_paid
                             ? "Đã thanh toán"
@@ -458,7 +429,7 @@ export const OrderDetailDialog: React.FC<{
                                   item.images?.[0] || "/images/white-image.png"
                                 }
                                 alt={item.name}
-                                className="w-16 h-16 object-contain rounded-md"
+                                className="w-20 h-20 object-contain rounded-md"
                               />
                             </TableCell>
                             <TableCell className="font-medium">
@@ -1025,13 +996,7 @@ export const OrdersTab = () => {
                         {getPaymentMethodName(order.payment_method)}
                       </TableCell>
                       <TableCell className="px-3 py-2">
-                        <Badge
-                          className={
-                            order.is_paid
-                              ? "!bg-emerald-400 !text-white !border-emerald-500 text-nowrap !rounded"
-                              : "!bg-extra text-nowrap text-white px-2 py-1 rounded"
-                          }
-                        >
+                        <Badge variant={order.is_paid ? "PAID" : "UNPAID"}>
                           {order.is_paid ? "Đã thanh toán" : "Chờ thanh toán"}
                         </Badge>
                       </TableCell>

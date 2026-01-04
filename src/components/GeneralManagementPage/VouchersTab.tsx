@@ -126,7 +126,7 @@ export const VouchersTab = () => {
                   new Date(voucher.endDate) < new Date()) && (
                   <div className="absolute top-3 right-3 z-10">
                     <Badge
-                      variant="destructive"
+                      variant="INACTIVE"
                       className="text-xs px-2 py-1 rounded-full shadow-sm"
                     >
                       {new Date(voucher.endDate) < new Date()

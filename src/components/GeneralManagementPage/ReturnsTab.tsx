@@ -36,31 +36,15 @@ import { toast } from "react-toastify";
 // --- Components ---
 
 export const ReturnStatusBadge = ({ status }: { status: string }) => {
-  const statusConfig: Record<string, { label: string; className: string }> = {
-    CHO_XU_LY: {
-      label: "Chờ xử lý",
-      className: "!bg-yellow-400 !text-white !border-yellow-500 text-nowrap",
-    },
-    DA_HOAN_TIEN: {
-      label: "Đã hoàn tiền",
-      className: "!bg-green-400 !text-white !border-green-500 text-nowrap",
-    },
-    DA_HUY: {
-      label: "Đã hủy",
-      className: "!bg-red-400 !text-white !border-red-500 text-nowrap",
-    },
+  const statusConfig: Record<string, { label: string }> = {
+    CHO_XU_LY: { label: "Chờ xử lý" },
+    DA_HOAN_TIEN: { label: "Đã hoàn tiền" },
+    DA_HUY: { label: "Đã hủy" },
   };
 
-  const config = statusConfig[status] || {
-    label: status,
-    className: "bg-gray-400 text-gray-700 border-gray-500",
-  };
+  const config = statusConfig[status] || { label: status };
 
-  return (
-    <Badge className={`${config.className} rounded-[4px] font-normal`}>
-      {config.label}
-    </Badge>
-  );
+  return <Badge variant={status as any}>{config.label}</Badge>;
 };
 
 export const ReturnDetailDialog: React.FC<{

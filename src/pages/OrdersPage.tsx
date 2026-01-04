@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/useToast";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -11,9 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface OrderItem {
   product: {
@@ -144,9 +144,7 @@ const OrdersPage: React.FC = () => {
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">
-                      Đơn hàng #{order.id.slice(-6)}
-                    </CardTitle>
+                    <CardTitle>Đơn hàng #{order.id.slice(-6)}</CardTitle>
                     <CardDescription>
                       {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", {
                         locale: vi,
