@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, Suspense } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { Suspense, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 function PaymentResultContent() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -26,14 +26,14 @@ function PaymentResultContent() {
             <XCircleIcon className="mx-auto h-16 w-16 text-red-500" />
           )}
 
-          <h2 className="mt-4 text-2xl font-semibold text-maintext">
+          <h2 className="mt-4 text-2xl font-semibold text-gray-700">
             {success ? "Thanh toán thành công" : "Thanh toán thất bại"}
           </h2>
 
-          <p className="mt-2 text-maintext">{message}</p>
+          <p className="mt-2 text-gray-700">{message}</p>
 
           {orderId && (
-            <p className="mt-2 text-sm text-maintext">Mã đơn hàng: {orderId}</p>
+            <p className="mt-2 text-sm text-gray-700">Mã đơn hàng: {orderId}</p>
           )}
 
           <div className="mt-8 space-y-4">
@@ -46,7 +46,7 @@ function PaymentResultContent() {
 
             <a
               href="/"
-              className="block w-full bg-gray-100 text-maintext py-2 px-4 rounded-[6px] hover:bg-gray-200"
+              className="block w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-[6px] hover:bg-gray-200"
             >
               Về trang chủ
             </a>

@@ -2,9 +2,6 @@
 
 import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { useCreateVoucher } from "@/hooks/voucher";
-import { IVoucherCreate } from "@/interface/request/voucher";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,10 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import { mdiArrowLeft, mdiLoading } from "@mdi/js";
 import {
   Select,
   SelectContent,
@@ -34,6 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCreateVoucher } from "@/hooks/voucher";
+import { IVoucherCreate } from "@/interface/request/voucher";
+import { mdiArrowLeft, mdiLoading } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const initialVoucher: IVoucherCreate = {
   code: "",
@@ -224,7 +224,7 @@ export default function CreateVoucherPage() {
           <CardHeader>
             <CardTitle>Thông tin mã giảm giá</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-maintext">
+          <CardContent className="space-y-4 text-gray-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="code">
@@ -273,7 +273,7 @@ export default function CreateVoucherPage() {
                 {errors.code && (
                   <p className="text-red-500 text-sm">{errors.code}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   Mã voucher chỉ bao gồm chữ hoa, số, gạch dưới và gạch ngang
                 </p>
               </div>
@@ -357,7 +357,7 @@ export default function CreateVoucherPage() {
                 {errors.discountValue && (
                   <p className="text-red-500 text-sm">{errors.discountValue}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   {voucher.discountType === "PERCENTAGE"
                     ? "Phần trăm giảm giá (0-100%)"
                     : "Số tiền giảm giá cố định"}
@@ -380,7 +380,7 @@ export default function CreateVoucherPage() {
                 {errors.quantity && (
                   <p className="text-red-500 text-sm">{errors.quantity}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   Tổng số voucher có thể sử dụng
                 </p>
               </div>
@@ -411,7 +411,7 @@ export default function CreateVoucherPage() {
                   {errors.maxDiscount && (
                     <p className="text-red-500 text-sm">{errors.maxDiscount}</p>
                   )}
-                  <p className="text-xs text-maintext">
+                  <p className="text-xs text-gray-700">
                     Giới hạn số tiền giảm tối đa (để trống nếu không giới hạn)
                   </p>
                 </div>
@@ -440,7 +440,7 @@ export default function CreateVoucherPage() {
                 {errors.minOrderValue && (
                   <p className="text-red-500 text-sm">{errors.minOrderValue}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   Giá trị đơn hàng tối thiểu để áp dụng voucher (0 = không giới
                   hạn)
                 </p>
@@ -510,7 +510,7 @@ export default function CreateVoucherPage() {
                 {errors.status && (
                   <p className="text-red-500 text-sm">{errors.status}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   Trạng thái của voucher (người dùng chỉ có thể sử dụng voucher
                   đang hoạt động)
                 </p>

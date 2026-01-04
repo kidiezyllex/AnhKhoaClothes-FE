@@ -1,26 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencilCircle,
-  mdiDeleteCircle,
-  mdiFilterMultiple,
-  mdiLoading,
-  mdiFilterRemove,
-} from "@mdi/js";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { usePromotions, useDeletePromotion } from "@/hooks/promotion";
-import { IPromotionFilter } from "@/interface/request/promotion";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,14 +11,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -44,16 +29,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useDeletePromotion, usePromotions } from "@/hooks/promotion";
+import { IPromotionFilter } from "@/interface/request/promotion";
+import {
+  mdiDeleteCircle,
+  mdiFilterMultiple,
+  mdiFilterRemove,
+  mdiLoading,
+  mdiMagnify,
+  mdiPencilCircle,
+  mdiPlus,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function PromotionsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,7 +204,7 @@ export default function PromotionsPage() {
               <Icon
                 path={mdiMagnify}
                 size={0.8}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
               <Input
                 type="text"
@@ -251,7 +251,7 @@ export default function PromotionsPage() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Trạng thái
                     </label>
                     <Select
@@ -276,7 +276,7 @@ export default function PromotionsPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Thời gian bắt đầu
                     </label>
                     <Input
@@ -290,7 +290,7 @@ export default function PromotionsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Thời gian kết thúc
                     </label>
                     <Input
@@ -343,25 +343,25 @@ export default function PromotionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Mã
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên chiến dịch
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Giảm giá
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Sản phẩm
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Thời gian
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-gray-700">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -379,7 +379,7 @@ export default function PromotionsPage() {
                         <div>
                           <div className="font-medium">{promotion.name}</div>
                           {promotion.description && (
-                            <div className="text-xs text-maintext mt-1 line-clamp-2">
+                            <div className="text-xs text-gray-700 mt-1 line-clamp-2">
                               {promotion.description}
                             </div>
                           )}
@@ -398,7 +398,7 @@ export default function PromotionsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-4 text-sm">
-                        <span className="text-maintext">
+                        <span className="text-gray-700">
                           {promotion.applyTo === "ALL_PRODUCTS"
                             ? "Tất cả sản phẩm"
                             : `${promotion.productIds?.length || 0} sản phẩm`}
@@ -407,7 +407,7 @@ export default function PromotionsPage() {
                       <TableCell className="px-4 py-4 text-sm">
                         <div className="text-xs">
                           <div>{formatDate(promotion.startDate)}</div>
-                          <div className="text-maintext">
+                          <div className="text-gray-700">
                             đến {formatDate(promotion.endDate)}
                           </div>
                         </div>
@@ -443,7 +443,7 @@ export default function PromotionsPage() {
                   <TableRow>
                     <TableCell
                       colSpan={7}
-                      className="px-4 py-8 text-center text-maintext"
+                      className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy chiến dịch khuyến mãi nào
                     </TableCell>

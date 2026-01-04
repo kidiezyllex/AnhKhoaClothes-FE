@@ -1,13 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -23,12 +18,17 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useUser } from "@/context/useUserContext";
+import { useLogin } from "@/hooks/authentication";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useUser } from "@/context/useUserContext";
-import { motion } from "framer-motion";
-import { useLogin } from "@/hooks/authentication";
+import { z } from "zod";
 
 import { ISignIn } from "@/interface/request/authentication";
 
@@ -98,7 +98,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+              <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                 Email
               </FormLabel>
               <FormControl>
@@ -118,7 +118,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+              <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                 Mật khẩu
               </FormLabel>
               <FormControl>
@@ -132,7 +132,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
                   <button
                     type="button"
                     onClick={togglePasswordVisibility}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext hover:text-maintext focus:outline-none"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 hover:text-gray-700 focus:outline-none"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -209,13 +209,13 @@ export default function AuthPage() {
         >
           <Card className="flex flex-col w-full h-full shadow-sm bg-white/50 dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
             <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold text-maintext dark:text-white">
+              <CardTitle className="text-2xl font-bold text-gray-700 dark:text-white">
                 <span className="relative">
                   Đăng nhập tài khoản
                   <span className="absolute -bottom-1 left-0 w-12 h-1 bg-gradient-to-r from-primary to-secondary rounded-full"></span>
                 </span>
               </CardTitle>
-              <CardDescription className="text-maintext dark:text-maintext pt-3">
+              <CardDescription className="text-gray-700 dark:text-gray-700 pt-3">
                 Đăng nhập để tiếp tục mua sắm và theo dõi đơn hàng của bạn
               </CardDescription>
             </CardHeader>

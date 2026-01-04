@@ -2,19 +2,7 @@
 
 import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,16 +11,28 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useProducts } from "@/hooks/product";
+import { useCreatePromotion } from "@/hooks/promotion";
+import { IPromotionCreate } from "@/interface/request/promotion";
+import { mdiArrowLeft, mdiInformation, mdiLoading } from "@mdi/js";
 import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useCreatePromotion } from "@/hooks/promotion";
-import { useProducts } from "@/hooks/product";
-import { IPromotionCreate } from "@/interface/request/promotion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
-import { mdiArrowLeft, mdiPercent, mdiInformation, mdiLoading } from "@mdi/js";
 export default function CreatePromotionPage() {
   const navigate = useNavigate();
   const createPromotion = useCreatePromotion();
@@ -366,7 +366,7 @@ export default function CreatePromotionPage() {
                               >
                                 {product.name}
                               </Label>
-                              <div className="text-xs text-maintext">
+                              <div className="text-xs text-gray-700">
                                 Mã: {product.code} | Thương hiệu:{" "}
                                 {typeof (product as any)?.brand === "string"
                                   ? (product as any)?.brand

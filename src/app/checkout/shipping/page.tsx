@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useCartStore } from "@/stores/useCartStore";
+import SuccessModal from "@/components/OrderSuccess/SuccessModal";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,10 +11,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -32,26 +27,29 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { Input } from "@/components/ui/input";
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { checkImageUrl } from "@/lib/utils";
-import { formatPrice } from "@/utils/formatters";
-import { useCreateOrder } from "@/hooks/order";
-import { useUser } from "@/context/useUserContext";
-import { useCreateNotification } from "@/hooks/notification";
-import { useUserProfile } from "@/hooks/account";
 import VNPayModal from "@/components/VNPayPayment/VNPayModal";
-import SuccessModal from "@/components/OrderSuccess/SuccessModal";
-import React from "react";
+import { useUser } from "@/context/useUserContext";
+import { useUserProfile } from "@/hooks/account";
+import { useCreateNotification } from "@/hooks/notification";
+import { useCreateOrder } from "@/hooks/order";
+import { checkImageUrl } from "@/lib/utils";
+import { useCartStore } from "@/stores/useCartStore";
+import { formatPrice } from "@/utils/formatters";
 import { getSizeLabel } from "@/utils/sizeMapping";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import * as z from "zod";
 
 const shippingFormSchema = z.object({
   fullName: z.string().min(1, "Vui lòng nhập họ tên"),
@@ -620,29 +618,29 @@ export default function ShippingPage() {
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/"
-              className="!text-maintext hover:!text-maintext"
+              className="!text-gray-700 hover:!text-gray-700"
             >
               Trang chủ
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+          <BreadcrumbSeparator className="!text-gray-700 hover:!text-gray-700" />
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/products"
-              className="!text-maintext hover:!text-maintext"
+              className="!text-gray-700 hover:!text-gray-700"
             >
               Sản phẩm
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+          <BreadcrumbSeparator className="!text-gray-700 hover:!text-gray-700" />
           <BreadcrumbItem>
-            <BreadcrumbPage className="!text-maintext hover:!text-maintext">
+            <BreadcrumbPage className="!text-gray-700 hover:!text-gray-700">
               Thanh toán đơn hàng
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-maintext">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
         <div>
           <Card>
             <CardHeader>
@@ -659,7 +657,7 @@ export default function ShippingPage() {
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Họ tên
                         </FormLabel>
                         <FormControl>
@@ -679,7 +677,7 @@ export default function ShippingPage() {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Số điện thoại
                         </FormLabel>
                         <FormControl>
@@ -698,7 +696,7 @@ export default function ShippingPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Email
                         </FormLabel>
                         <FormControl>
@@ -718,7 +716,7 @@ export default function ShippingPage() {
                     name="province"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Tỉnh/Thành phố
                         </FormLabel>
                         <FormControl>
@@ -760,7 +758,7 @@ export default function ShippingPage() {
                     name="district"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Quận/Huyện
                         </FormLabel>
                         <FormControl>
@@ -806,7 +804,7 @@ export default function ShippingPage() {
                     name="ward"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Phường/Xã
                         </FormLabel>
                         <FormControl>
@@ -852,7 +850,7 @@ export default function ShippingPage() {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Địa chỉ cụ thể
                         </FormLabel>
                         <FormControl>
@@ -872,7 +870,7 @@ export default function ShippingPage() {
                     name="paymentMethod"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-maintext font-semibold">
+                        <FormLabel className="text-gray-700 font-semibold">
                           Phương thức thanh toán
                         </FormLabel>
                         <FormControl>
@@ -940,15 +938,15 @@ export default function ShippingPage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-maintext">{item.name}</h4>
+                      <h4 className="font-medium text-gray-700">{item.name}</h4>
                       <p className="text-sm text-muted-foreground">
                         {item.brand}
                         {item.size &&
                           ` • Size ${getSizeLabel(Number(item.size))}`}
                       </p>
-                      <div className="flex justify-between mt-2 text-maintext">
+                      <div className="flex justify-between mt-2 text-gray-700">
                         <span>x{item.quantity}</span>
-                        <span className="text-maintext">
+                        <span className="text-gray-700">
                           {formatPrice(item.price)}
                         </span>
                       </div>
@@ -962,7 +960,7 @@ export default function ShippingPage() {
                 <span className="text-muted-foreground font-semibold text-sm">
                   Tạm tính
                 </span>
-                <span className="text-maintext">
+                <span className="text-gray-700">
                   {formatPrice(subtotal + voucherDiscount)}
                 </span>
               </div>
@@ -981,15 +979,15 @@ export default function ShippingPage() {
                 <span className="text-muted-foreground font-semibold text-sm">
                   Thuế
                 </span>
-                <span className="text-maintext">{formatPrice(tax)}</span>
+                <span className="text-gray-700">{formatPrice(tax)}</span>
               </div>
               <div className="flex justify-between w-full">
                 <span className="text-muted-foreground font-semibold text-sm">
                   Phí vận chuyển
                 </span>
-                <span className="text-maintext">{formatPrice(shipping)}</span>
+                <span className="text-gray-700">{formatPrice(shipping)}</span>
               </div>
-              <div className="flex justify-between w-full text-base font-semibold text-maintext pt-2 border-t">
+              <div className="flex justify-between w-full text-base font-semibold text-gray-700 pt-2 border-t">
                 <span>Tổng cộng</span>
                 <span className="text-lg text-primary font-semibold">
                   {formatPrice(total)}

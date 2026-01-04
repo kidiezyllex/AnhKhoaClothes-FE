@@ -1,20 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -23,13 +12,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@/context/useUserContext";
+import { useRegister } from "@/hooks/authentication";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useUser } from "@/context/useUserContext";
-import { motion } from "framer-motion";
-import { useRegister } from "@/hooks/authentication";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { z } from "zod";
 
 const registerSchema = z.object({
   username: z.string().min(4, "Tên đăng nhập phải có ít nhất 4 ký tự"),
@@ -160,7 +154,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                   Tên đăng nhập
                 </FormLabel>
                 <FormControl>
@@ -180,7 +174,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                   Họ và tên
                 </FormLabel>
                 <FormControl>
@@ -200,7 +194,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -220,7 +214,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-maintext dark:text-gray-300 font-semibold">
+                <FormLabel className="text-gray-700 dark:text-gray-300 font-semibold">
                   Mật khẩu
                 </FormLabel>
                 <FormControl>
@@ -238,7 +232,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void }) {
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext hover:text-maintext focus:outline-none"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 hover:text-gray-700 focus:outline-none"
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -332,7 +326,7 @@ export default function AuthPage() {
         >
           <Card className="flex flex-col w-full shadow-sm bg-white dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-maintext dark:text-white flex items-center justify-between">
+              <CardTitle className="text-xl font-bold text-gray-700 dark:text-white flex items-center justify-between">
                 Tạo tài khoản mới
                 <img
                   draggable="false"

@@ -1,10 +1,60 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import CartIcon from "@/components/ui/CartIcon";
 import { ProductCard } from "@/components/ProductPage/ProductCard";
-import { useHybridModelRecommendations } from "@/hooks/useRecommend";
+import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import CartIcon from "@/components/ui/CartIcon";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/context/useUserContext";
+import { useProductDetail, useProducts } from "@/hooks/product";
+import { usePromotions } from "@/hooks/promotion";
+import { useHybridModelRecommendations } from "@/hooks/useRecommend";
+import {
+  IPopulatedProductVariant,
+  IProduct,
+} from "@/interface/response/product";
+import {
+  applyPromotionsToProducts,
+  calculateProductDiscount,
+  filterActivePromotions,
+  ProductWithDiscount,
+} from "@/lib/promotions";
+import { calculateDiscountedPrice, checkImageUrl } from "@/lib/utils";
+import { useCartStore } from "@/stores/useCartStore";
+import { getSizeLabel } from "@/utils/sizeMapping";
+import {
+  mdiAlphaSBox,
+  mdiCartArrowRight,
+  mdiCartPlus,
+  mdiCheck,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiCreditCard,
+  mdiHeartCircle,
+  mdiMagnify,
+  mdiPalette,
+  mdiRefresh,
+  mdiRuler,
+  mdiShield,
+  mdiStar,
+  mdiStarOutline,
+  mdiTagMultiple,
+  mdiTruck,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const CompleteTheLookModal = React.lazy(
   () => import("@/components/ProductPage/CompleteTheLookModal")
@@ -49,67 +99,6 @@ if (typeof document !== "undefined") {
   styleSheet.innerText = zoomStyles;
   document.head.appendChild(styleSheet);
 }
-import { useProductDetail, useProducts } from "@/hooks/product";
-import { usePromotions } from "@/hooks/promotion";
-import {
-  calculateProductDiscount,
-  formatPrice as formatPromotionPrice,
-  applyPromotionsToProducts,
-  filterActivePromotions,
-} from "@/lib/promotions";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import {
-  mdiCartArrowRight,
-  mdiHeartCircle,
-  mdiShareVariant,
-  mdiCheck,
-  mdiChevronLeft,
-  mdiChevronRight,
-  mdiStar,
-  mdiStarOutline,
-  mdiTruck,
-  mdiShield,
-  mdiCreditCard,
-  mdiRefresh,
-  mdiRuler,
-  mdiWeight,
-  mdiPalette,
-  mdiInformation,
-  mdiCartPlus,
-  mdiMagnify,
-  mdiTagMultiple,
-  mdiAutoFix,
-  mdiEye,
-  mdiAlphaSBox,
-} from "@mdi/js";
-import { IPromotionsResponse } from "@/interface/response/promotion";
-import { ProductWithDiscount } from "@/lib/promotions";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
-import { getSizeLabel } from "@/utils/sizeMapping";
-import { useCartStore } from "@/stores/useCartStore";
-import {
-  IProduct,
-  IBrand,
-  ICategory,
-  IPopulatedProductVariant,
-  IProductImage,
-} from "@/interface/response/product";
-import { motion, AnimatePresence } from "framer-motion";
 const ImageZoom = ({
   src,
   alt,
@@ -633,23 +622,23 @@ export default function ProductDetail() {
               <BreadcrumbItem>
                 <BreadcrumbLink
                   href="/"
-                  className="!text-maintext hover:!text-maintext transition-colors"
+                  className="!text-gray-700 hover:!text-gray-700 transition-colors"
                 >
                   Trang chủ
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+              <BreadcrumbSeparator className="!text-gray-700 hover:!text-gray-700" />
               <BreadcrumbItem>
                 <BreadcrumbLink
                   href="/products"
-                  className="!text-maintext hover:!text-maintext transition-colors"
+                  className="!text-gray-700 hover:!text-gray-700 transition-colors"
                 >
                   Tất cả sản phẩm
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+              <BreadcrumbSeparator className="!text-gray-700 hover:!text-gray-700" />
               <BreadcrumbItem>
-                <BreadcrumbPage className="!text-maintext hover:!text-maintext">
+                <BreadcrumbPage className="!text-gray-700 hover:!text-gray-700">
                   {product.productDisplayName || (product as any)?.name}
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -702,7 +691,7 @@ export default function ProductDetail() {
                 </>
               ) : (
                 <div className="flex items-center justify-center h-full">
-                  <p className="text-maintext">Không có hình ảnh</p>
+                  <p className="text-gray-700">Không có hình ảnh</p>
                 </div>
               )}
             </div>
@@ -749,39 +738,39 @@ export default function ProductDetail() {
             <Card className="p-4 border-green-100 mt-4">
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext font-semibold">
+                  <span className="!text-gray-700 font-semibold">
                     Phân loại chính
                   </span>
-                  <span className="font-medium text-maintext">
+                  <span className="font-medium text-gray-700">
                     {product.masterCategory}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext font-semibold">
+                  <span className="!text-gray-700 font-semibold">
                     Phân loại phụ
                   </span>
-                  <span className="font-medium text-maintext">
+                  <span className="font-medium text-gray-700">
                     {product.subCategory}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext font-semibold">
+                  <span className="!text-gray-700 font-semibold">
                     Kiểu dáng
                   </span>
-                  <span className="font-medium text-maintext">
+                  <span className="font-medium text-gray-700">
                     {product.articleType}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext font-semibold">
+                  <span className="!text-gray-700 font-semibold">
                     Màu cơ bản
                   </span>
-                  <span className="font-medium text-maintext">
+                  <span className="font-medium text-gray-700">
                     {product.baseColour}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                  <span className="!text-maintext font-semibold">
+                  <span className="!text-gray-700 font-semibold">
                     Mã sản phẩm
                   </span>
                   <span className="font-mono font-medium text-primary">
@@ -790,28 +779,28 @@ export default function ProductDetail() {
                 </div>
                 {product.gender && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext font-semibold">
+                    <span className="!text-gray-700 font-semibold">
                       Giới tính
                     </span>
-                    <span className="font-medium text-maintext">
+                    <span className="font-medium text-gray-700">
                       {product.gender}
                     </span>
                   </div>
                 )}
                 {product.usage && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext font-semibold">
+                    <span className="!text-gray-700 font-semibold">
                       Dịp sử dụng
                     </span>
-                    <span className="font-medium text-maintext">
+                    <span className="font-medium text-gray-700">
                       {product.usage}
                     </span>
                   </div>
                 )}
                 {product.season && (
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="!text-maintext font-semibold">Mùa</span>
-                    <span className="font-medium text-maintext">
+                    <span className="!text-gray-700 font-semibold">Mùa</span>
+                    <span className="font-medium text-gray-700">
                       {product.season} ({product.year})
                     </span>
                   </div>
@@ -850,7 +839,7 @@ export default function ProductDetail() {
                   )}
               </div>
 
-              <h1 className="text-3xl lg:text-4xl font-bold text-maintext leading-tight">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-700 leading-tight">
                 {product.productDisplayName || (product as any)?.name}
               </h1>
 
@@ -874,7 +863,7 @@ export default function ProductDetail() {
                     />
                   ))}
                 </div>
-                <span className="text-sm !text-maintext">
+                <span className="text-sm !text-gray-700">
                   ({product.rating || "4.0"}) •{" "}
                   {((product as any)?.reviews?.length || 0) + 128} đánh giá
                 </span>
@@ -912,7 +901,7 @@ export default function ProductDetail() {
                   {((productDiscount && productDiscount.discountPercent > 0) ||
                     (product as any)?.sale) &&
                     selectedVariant && (
-                      <div className="text-xl text-maintext line-through font-medium bg-gray-100 px-3 py-2 rounded-lg">
+                      <div className="text-xl text-gray-700 line-through font-medium bg-gray-100 px-3 py-2 rounded-lg">
                         {formatPrice(
                           productDiscount && productDiscount.discountPercent > 0
                             ? productDiscount.originalPrice
@@ -934,17 +923,17 @@ export default function ProductDetail() {
                     <div className="space-y-2">
                       {/* Step 1: Original Price */}
                       <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                        <span className="text-sm font-semibold text-maintext">
+                        <span className="text-sm font-semibold text-gray-700">
                           Giá gốc:
                         </span>
-                        <span className="text-sm font-semibold text-maintext">
+                        <span className="text-sm font-semibold text-gray-700">
                           {formatPrice(productDiscount.originalPrice)}
                         </span>
                       </div>
 
                       {/* Step 2: Discount Amount */}
                       <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                        <span className="text-sm font-semibold text-maintext">
+                        <span className="text-sm font-semibold text-gray-700">
                           Giảm giá ({productDiscount.discountPercent}%):
                         </span>
                         <span className="text-sm font-semibold text-red-600">
@@ -963,7 +952,7 @@ export default function ProductDetail() {
                 {/* Show original price info when no discount */}
                 {(!productDiscount || productDiscount.discountPercent === 0) &&
                   selectedVariant && (
-                    <div className="text-sm text-maintext">
+                    <div className="text-sm text-gray-700">
                       Giá bán: {formatPrice(selectedVariant.price)}
                     </div>
                   )}
@@ -978,12 +967,12 @@ export default function ProductDetail() {
                     <Icon
                       path={mdiPalette}
                       size={1}
-                      className="!text-maintext"
+                      className="!text-gray-700"
                     />
-                    <span className="font-semibold text-maintext">Màu sắc</span>
+                    <span className="font-semibold text-gray-700">Màu sắc</span>
                   </div>
                   {selectedColor && (
-                    <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
+                    <span className="text-sm !text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
                       {selectedColor}
                     </span>
                   )}
@@ -1036,13 +1025,13 @@ export default function ProductDetail() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Icon path={mdiRuler} size={1} className="!text-maintext" />
-                    <span className="font-semibold text-maintext">
+                    <Icon path={mdiRuler} size={1} className="!text-gray-700" />
+                    <span className="font-semibold text-gray-700">
                       Kích thước
                     </span>
                   </div>
                   {selectedSize && (
-                    <span className="text-sm !text-maintext bg-gray-100 px-3 py-1 rounded-full">
+                    <span className="text-sm !text-gray-700 bg-gray-100 px-3 py-1 rounded-full">
                       {selectedSize}
                     </span>
                   )}
@@ -1112,15 +1101,15 @@ export default function ProductDetail() {
                     <Icon
                       path={mdiCartPlus}
                       size={1}
-                      className="!text-maintext"
+                      className="!text-gray-700"
                     />
-                    <span className="font-semibold text-maintext">
+                    <span className="font-semibold text-gray-700">
                       Số lượng
                     </span>
                   </div>
 
                   {selectedVariant && (
-                    <span className="text-sm !text-maintext">
+                    <span className="text-sm !text-gray-700">
                       Còn{" "}
                       <span className="font-semibold text-primary">
                         {selectedVariant.stock}
@@ -1200,10 +1189,10 @@ export default function ProductDetail() {
                     <Icon path={mdiTruck} size={1} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-maintext">
+                    <p className="font-medium text-gray-700">
                       Miễn phí vận chuyển
                     </p>
-                    <p className="text-sm !text-maintext">Đơn hàng từ 500k</p>
+                    <p className="text-sm !text-gray-700">Đơn hàng từ 500k</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1211,10 +1200,10 @@ export default function ProductDetail() {
                     <Icon path={mdiShield} size={1} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-maintext">
+                    <p className="font-medium text-gray-700">
                       Bảo hành chính hãng
                     </p>
-                    <p className="text-sm !text-maintext">12 tháng</p>
+                    <p className="text-sm !text-gray-700">12 tháng</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1222,8 +1211,8 @@ export default function ProductDetail() {
                     <Icon path={mdiRefresh} size={1} className="text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-maintext">Đổi trả dễ dàng</p>
-                    <p className="text-sm !text-maintext">Trong 30 ngày</p>
+                    <p className="font-medium text-gray-700">Đổi trả dễ dàng</p>
+                    <p className="text-sm !text-gray-700">Trong 30 ngày</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1235,10 +1224,10 @@ export default function ProductDetail() {
                     />
                   </div>
                   <div>
-                    <p className="font-medium text-maintext">
+                    <p className="font-medium text-gray-700">
                       Thanh toán an toàn
                     </p>
-                    <p className="text-sm !text-maintext">Nhiều phương thức</p>
+                    <p className="text-sm !text-gray-700">Nhiều phương thức</p>
                   </div>
                 </div>
               </div>
@@ -1254,10 +1243,10 @@ export default function ProductDetail() {
             transition={{ duration: 0.6, delay: 0.6 }}
           >
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-maintext mb-4">
+              <h2 className="text-3xl font-bold text-gray-700 mb-4">
                 Sản phẩm tương tự
               </h2>
-              <p className="!text-maintext max-w-2xl mx-auto text-lg">
+              <p className="!text-gray-700 max-w-2xl mx-auto text-lg">
                 Khám phá những sản phẩm tương tự có thể bạn sẽ thích
               </p>
             </div>

@@ -1,20 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,17 +11,29 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { useProducts } from "@/hooks/product";
+import { usePromotionDetail, useUpdatePromotion } from "@/hooks/promotion";
+import { IPromotionUpdate } from "@/interface/request/promotion";
+import { mdiArrowLeft, mdiInformation, mdiLoading, mdiPercent } from "@mdi/js";
 import { Icon } from "@mdi/react";
-import { mdiArrowLeft, mdiLoading, mdiPercent, mdiInformation } from "@mdi/js";
+import { motion } from "framer-motion";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { usePromotionDetail, useUpdatePromotion } from "@/hooks/promotion";
-import { useProducts } from "@/hooks/product";
-import { IPromotionUpdate } from "@/interface/request/promotion";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EditPromotionPage() {
   const navigate = useNavigate();
@@ -479,7 +479,7 @@ export default function EditPromotionPage() {
                               >
                                 {product.name}
                               </Label>
-                              <div className="text-xs text-maintext">
+                              <div className="text-xs text-gray-700">
                                 Mã: {product.code} | Thương hiệu:{" "}
                                 {typeof (product as any)?.brand === "string"
                                   ? (product as any)?.brand

@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { useVoucherDetail, useUpdateVoucher } from "@/hooks/voucher";
-import { IVoucherUpdate } from "@/interface/request/voucher";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,10 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import { mdiArrowLeft, mdiLoading } from "@mdi/js";
 import {
   Select,
   SelectContent,
@@ -35,6 +28,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUpdateVoucher, useVoucherDetail } from "@/hooks/voucher";
+import { IVoucherUpdate } from "@/interface/request/voucher";
+import { mdiArrowLeft, mdiLoading } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EditVoucherPage() {
   const navigate = useNavigate();
@@ -317,22 +317,22 @@ export default function EditVoucherPage() {
               Chỉnh sửa mã giảm giá - {originalVoucher.code}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-maintext">
+          <CardContent className="space-y-4 text-gray-700">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="code" className="text-maintext">
+                <Label htmlFor="code" className="text-gray-700">
                   Mã voucher
                 </Label>
                 <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between">
                   {originalVoucher.code}
                 </div>
-                <p className="text-xs text-maintext mt-1 italic">
+                <p className="text-xs text-gray-700 mt-1 italic">
                   Mã voucher không thể thay đổi sau khi tạo
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="discountType" className="text-maintext">
+                <Label htmlFor="discountType" className="text-gray-700">
                   Loại voucher
                 </Label>
                 <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between">
@@ -340,13 +340,13 @@ export default function EditVoucherPage() {
                     ? "Phần trăm (%)"
                     : "Số tiền cố định (VNĐ)"}
                 </div>
-                <p className="text-xs text-maintext mt-1 italic">
+                <p className="text-xs text-gray-700 mt-1 italic">
                   Loại voucher không thể thay đổi sau khi tạo
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="discountValue" className="text-maintext">
+                <Label htmlFor="discountValue" className="text-gray-700">
                   Giá trị
                 </Label>
                 <div className="px-2.5 border rounded-[6px] bg-gray-50 mt-1 h-9 flex items-center justify-between flex">
@@ -357,7 +357,7 @@ export default function EditVoucherPage() {
                       : "VNĐ"}
                   </span>
                 </div>
-                <p className="text-xs text-maintext mt-1 italic">
+                <p className="text-xs text-gray-700 mt-1 italic">
                   Giá trị không thể thay đổi sau khi tạo
                 </p>
               </div>
@@ -396,7 +396,7 @@ export default function EditVoucherPage() {
                 {errors.quantity && (
                   <p className="text-red-500 text-sm">{errors.quantity}</p>
                 )}
-                <p className="text-xs text-maintext italic">
+                <p className="text-xs text-gray-700 italic">
                   Đã sử dụng: {originalVoucher.usedCount}/{voucher.quantity}{" "}
                   voucher
                 </p>
@@ -428,7 +428,7 @@ export default function EditVoucherPage() {
                   {errors.maxDiscount && (
                     <p className="text-red-500 text-sm">{errors.maxDiscount}</p>
                   )}
-                  <p className="text-xs text-maintext">
+                  <p className="text-xs text-gray-700">
                     Giới hạn số tiền giảm tối đa (để trống nếu không giới hạn)
                   </p>
                 </div>
@@ -461,7 +461,7 @@ export default function EditVoucherPage() {
                 {errors.minOrderValue && (
                   <p className="text-red-500 text-sm">{errors.minOrderValue}</p>
                 )}
-                <p className="text-xs text-maintext italic">
+                <p className="text-xs text-gray-700 italic">
                   Giá trị đơn hàng tối thiểu để áp dụng voucher (0 = không giới
                   hạn)
                 </p>
@@ -537,7 +537,7 @@ export default function EditVoucherPage() {
                 {errors.status && (
                   <p className="text-red-500 text-sm">{errors.status}</p>
                 )}
-                <p className="text-xs text-maintext">
+                <p className="text-xs text-gray-700">
                   Trạng thái của voucher (người dùng chỉ có thể sử dụng voucher
                   đang hoạt động)
                 </p>
