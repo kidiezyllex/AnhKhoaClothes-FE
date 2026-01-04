@@ -1,34 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencilCircle,
-  mdiDeleteCircle,
-  mdiFilterMultiple,
-} from "@mdi/js";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useMaterials,
-  useDeleteMaterial,
-  useMaterialDetail,
-  useUpdateMaterial,
-  useCreateMaterial,
-} from "@/hooks/attributes";
-import {
-  IMaterialFilter,
-  IMaterialCreate,
-  IMaterialUpdate,
-} from "@/interface/request/attributes";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,14 +10,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -52,17 +30,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useCreateMaterial,
+  useDeleteMaterial,
+  useMaterialDetail,
+  useMaterials,
+  useUpdateMaterial,
+} from "@/hooks/attributes";
+import { IMaterialFilter } from "@/interface/request/attributes";
+import { mdiDeleteCircle, mdiMagnify, mdiPencilCircle, mdiPlus } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function MaterialsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,8 +136,8 @@ export default function MaterialsPage() {
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
-                size={0.7}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                size={0.8}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
               <Input
                 type="text"
@@ -178,7 +167,7 @@ export default function MaterialsPage() {
               >
                 <DialogTrigger asChild>
                   <Button onClick={() => setIsCreateDialogOpen(true)}>
-                    <Icon path={mdiPlus} size={0.7} />
+                    <Icon path={mdiPlus} size={0.8} />
                     Thêm chất liệu mới
                   </Button>
                 </DialogTrigger>
@@ -198,19 +187,19 @@ export default function MaterialsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     ID
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên chất liệu
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Ngày cập nhật
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -263,19 +252,19 @@ export default function MaterialsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     ID
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên chất liệu
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Ngày cập nhật
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -287,11 +276,11 @@ export default function MaterialsPage() {
                       key={(material as any)?.id || `material-${index}`}
                       className="hover:bg-gray-50"
                     >
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {(material as any)?.id}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-maintext">
+                        <div className="text-sm font-medium text-gray-700">
                           {material.name}
                         </div>
                       </TableCell>
@@ -308,7 +297,7 @@ export default function MaterialsPage() {
                             : "Không hoạt động"}
                         </span>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {formatDate(material.updatedAt)}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
@@ -333,7 +322,7 @@ export default function MaterialsPage() {
                                   setIsEditDialogOpen(true);
                                 }}
                               >
-                                <Icon path={mdiPencilCircle} size={0.7} />
+                                <Icon path={mdiPencilCircle} size={0.8} />
                               </Button>
                             </DialogTrigger>
                             {materialToEdit === (material as any)?.id && (
@@ -364,7 +353,7 @@ export default function MaterialsPage() {
                                 }}
                                 title="Xóa"
                               >
-                                <Icon path={mdiDeleteCircle} size={0.7} />
+                                <Icon path={mdiDeleteCircle} size={0.8} />
                               </Button>
                             </DialogTrigger>
                             <DialogContent>
@@ -407,7 +396,7 @@ export default function MaterialsPage() {
                   <TableRow>
                     <TableCell
                       colSpan={5}
-                      className="px-4 py-8 text-center text-maintext"
+                      className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy chất liệu nào
                     </TableCell>

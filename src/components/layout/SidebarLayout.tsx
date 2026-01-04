@@ -1,14 +1,14 @@
-import React, { useState, useMemo, useCallback, memo } from "react";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@mdi/react";
-import { useLocation } from "react-router-dom";
-import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
-import { MenuItem, SubMenuItem } from "@/interface/types";
-import { menuItems } from "./menuItems";
-import AdminHeader from "../Common/AdminHeader";
-import { useMenuSidebar } from "@/stores/useMenuSidebar";
 import { useStableCallback } from "@/hooks/usePerformance";
+import { MenuItem, SubMenuItem } from "@/interface/types";
+import { cn } from "@/lib/utils";
+import { useMenuSidebar } from "@/stores/useMenuSidebar";
+import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { memo, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import AdminHeader from "../Common/AdminHeader";
+import { menuItems } from "./menuItems";
 
 interface SidebarLayoutProps {
   children: React.ReactNode;
@@ -118,12 +118,12 @@ const SidebarLayout = memo(function SidebarLayout({
                         <div className="flex items-center">
                           <Icon
                             path={menu.icon}
-                            size={0.7}
+                            size={0.8}
                             className={cn(
                               "mr-2",
                               isMenuActive(menu)
                                 ? "text-primary !font-medium"
-                                : "text-maintext"
+                                : "text-gray-700"
                             )}
                           />
                           <span
@@ -141,8 +141,8 @@ const SidebarLayout = memo(function SidebarLayout({
                           path={
                             openMenus[menu.id] ? mdiChevronUp : mdiChevronDown
                           }
-                          size={0.7}
-                          className="text-maintext"
+                          size={0.8}
+                          className="text-gray-700"
                         />
                       </button>
                       <AnimatePresence>
@@ -167,14 +167,14 @@ const SidebarLayout = memo(function SidebarLayout({
                                       "flex items-center rounded-[6px] p-2 text-base transition-colors font-medium",
                                       isSubMenuActive(subItem.path)
                                         ? "bg-active/10 text-active !font-medium"
-                                        : "text-maintext hover:bg-gray-100"
+                                        : "text-gray-700 hover:bg-gray-100"
                                     )}
                                   >
                                     {subItem.icon && (
                                       <Icon
                                         path={subItem.icon}
-                                        size={0.7}
-                                        className="mr-2 text-maintext"
+                                        size={0.8}
+                                        className="mr-2 text-gray-700"
                                       />
                                     )}
                                     <span
@@ -207,18 +207,18 @@ const SidebarLayout = memo(function SidebarLayout({
                             "flex items-center rounded-[6px] p-2 text-base font-medium transition-colors ",
                             isMenuActive(menu)
                               ? "bg-primary/10 text-primary !font-medium"
-                              : "text-maintext hover:bg-gray-100",
+                              : "text-gray-700 hover:bg-gray-100",
                             !isOpen && "justify-center"
                           )}
                         >
                           <Icon
                             path={menu.icon}
-                            size={0.7}
+                            size={0.8}
                             className={cn(
                               isOpen ? "mr-2" : "mr-0",
                               isMenuActive(menu)
                                 ? "text-primary !font-medium"
-                                : "text-maintext"
+                                : "text-gray-700"
                             )}
                           />
                           {isOpen && <span>{menu.name}</span>}

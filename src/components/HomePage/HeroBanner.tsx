@@ -1,15 +1,14 @@
-import { motion } from "framer-motion";
-import { Button } from "../ui/button";
-import Icon from "@mdi/react";
 import {
-  mdiSale,
   mdiArrowRightThin,
-  mdiStar,
-  mdiHeartCircle,
-  mdiTrendingUp,
+  mdiSale,
   mdiShieldCheck,
+  mdiStar,
+  mdiTrendingUp,
 } from "@mdi/js";
+import Icon from "@mdi/react";
+import { motion } from "framer-motion";
 import { InteractiveHoverButton } from "../Common/InteractiveHoverButton";
+import { Button } from "../ui/button";
 export const HeroBanner = () => {
   return (
     <main className="max-w-[1400px] mx-auto">
@@ -46,17 +45,17 @@ export const HeroBanner = () => {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary font-medium text-sm border border-primary/20"
                 >
-                  <Icon path={mdiTrendingUp} size={0.7} />
+                  <Icon path={mdiTrendingUp} size={0.8} />
                   <span>Xu hướng thời trang 2026</span>
                 </motion.div>
 
-                <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-maintext text-nowrap">
+                <h2 className="text-4xl lg:text-5xl font-bold tracking-tight text-gray-700 text-nowrap">
                   <span className="block text-primary uppercase font-extrabold">
-                    Fashion Sale <span className="text-maintext">Offer</span>
+                    Fashion Sale <span className="text-gray-700">Offer</span>
                   </span>
                 </h2>
 
-                <p className="text-lg text-maintext max-w-4xl">
+                <p className="text-lg text-gray-700 max-w-4xl">
                   Đăng ký ngay bây giờ để nhận giảm giá 20% cho đơn hàng đầu
                   tiên của bạn!
                 </p>
@@ -72,11 +71,11 @@ export const HeroBanner = () => {
                     <div className="flex items-center justify-center w-8 h-8 bg-secondary/10 rounded-full">
                       <Icon
                         path={mdiStar}
-                        size={0.7}
+                        size={0.8}
                         className="text-secondary"
                       />
                     </div>
-                    <span className="text-maintext font-medium">
+                    <span className="text-gray-700 font-medium">
                       Đánh giá 4.8/5 từ hơn 10,000 khách hàng
                     </span>
                   </div>
@@ -84,11 +83,11 @@ export const HeroBanner = () => {
                     <div className="flex items-center justify-center w-8 h-8 bg-extra/10 rounded-full">
                       <Icon
                         path={mdiShieldCheck}
-                        size={0.7}
+                        size={0.8}
                         className="text-extra"
                       />
                     </div>
-                    <span className="text-maintext font-medium">
+                    <span className="text-gray-700 font-medium">
                       Cam kết chất lượng & bảo hành 30 ngày
                     </span>
                   </div>

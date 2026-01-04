@@ -1,29 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,17 +11,38 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { useCreateReturn } from "@/hooks/return";
 import { IReturnCreate } from "@/interface/request/return";
-import { toast } from "react-toastify";
-import { Icon } from "@mdi/react";
 import {
-  mdiArrowLeft,
-  mdiPlus,
-  mdiMinus,
   mdiAccountSearch,
+  mdiArrowLeft,
+  mdiMinus,
   mdiPackageVariant,
+  mdiPlus,
 } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 interface Customer {
   id: string;
   fullName: string;
@@ -320,7 +320,7 @@ export default function CreateReturnPage() {
         </Breadcrumb>
         <a href="/admin/returns" className="mr-2">
           <Button variant="outline">
-            <Icon path={mdiArrowLeft} size={0.7} className="mr-2" />
+            <Icon path={mdiArrowLeft} size={0.8} className="mr-2" />
             Quay lại
           </Button>
         </a>
@@ -339,10 +339,10 @@ export default function CreateReturnPage() {
             <div className="flex items-center justify-between p-4 bg-[#EAEBF2] border border-green-200 rounded-lg">
               <div>
                 <h3 className="font-semibold">{selectedCustomer.fullName}</h3>
-                <p className="text-sm text-maintext">
+                <p className="text-sm text-gray-700">
                   {selectedCustomer.email}
                 </p>
-                <p className="text-sm text-maintext">
+                <p className="text-sm text-gray-700">
                   {selectedCustomer.phoneNumber}
                 </p>
               </div>
@@ -372,8 +372,8 @@ export default function CreateReturnPage() {
                       onClick={() => handleCustomerSelect(customer)}
                     >
                       <h4 className="font-medium">{customer.fullName}</h4>
-                      <p className="text-sm text-maintext">{customer.email}</p>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">{customer.email}</p>
+                      <p className="text-sm text-gray-700">
                         {customer.phoneNumber}
                       </p>
                     </div>
@@ -399,10 +399,10 @@ export default function CreateReturnPage() {
               <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div>
                   <h3 className="font-semibold">#{selectedOrder.code}</h3>
-                  <p className="text-sm text-maintext">
+                  <p className="text-sm text-gray-700">
                     Ngày đặt: {formatDate(selectedOrder.createdAt)}
                   </p>
-                  <p className="text-sm text-maintext">
+                  <p className="text-sm text-gray-700">
                     Tổng tiền: {formatCurrency(selectedOrder.totalAmount)}
                   </p>
                   <Badge
@@ -430,7 +430,7 @@ export default function CreateReturnPage() {
                       <SelectItem key={order.id} value={order.id}>
                         <div className="flex flex-col">
                           <span>#{order.code}</span>
-                          <span className="text-sm text-maintext">
+                          <span className="text-sm text-gray-700">
                             {formatDate(order.createdAt)} -{" "}
                             {formatCurrency(order.totalAmount)}
                           </span>
@@ -471,13 +471,13 @@ export default function CreateReturnPage() {
                     />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">
                         SKU: {item.product.code}
                       </p>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">
                         {item.variant.color?.name} - {item.variant.size?.name}
                       </p>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">
                         Đã mua: {item.quantity} | Giá:{" "}
                         {formatCurrency(item.price)}
                       </p>
@@ -512,7 +512,7 @@ export default function CreateReturnPage() {
                                 }
                               }}
                             >
-                              <Icon path={mdiMinus} size={0.7} />
+                              <Icon path={mdiMinus} size={0.8} />
                             </Button>
                             <Input
                               type="number"
@@ -566,7 +566,7 @@ export default function CreateReturnPage() {
                                 }
                               }}
                             >
-                              <Icon path={mdiPlus} size={0.7} />
+                              <Icon path={mdiPlus} size={0.8} />
                             </Button>
                           </div>
                         </div>
@@ -643,7 +643,7 @@ export default function CreateReturnPage() {
                           <p className="font-medium">
                             {orderItem?.product.name}
                           </p>
-                          <p className="text-sm text-maintext">
+                          <p className="text-sm text-gray-700">
                             {orderItem?.variant.color?.name} -{" "}
                             {orderItem?.variant.size?.name}
                           </p>

@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import CreateReturnRequestModal from "@/components/Returns/CreateReturnRequestModal";
+import ReturnDetailModal from "@/components/Returns/ReturnDetailModal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useReturnableOrders, useMyReturns } from "@/hooks/return";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { Icon } from "@mdi/react";
+import { useMyReturns, useReturnableOrders } from "@/hooks/return";
+import { IReturn, IReturnableOrder } from "@/interface/response/return";
 import {
   mdiCalendar,
   mdiCurrencyUsd,
-  mdiPackageVariant,
   mdiEye,
+  mdiPackageVariant,
 } from "@mdi/js";
-import { IReturnableOrder, IReturn } from "@/interface/response/return";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import CreateReturnRequestModal from "@/components/Returns/CreateReturnRequestModal";
-import ReturnDetailModal from "@/components/Returns/ReturnDetailModal";
+import { Icon } from "@mdi/react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { useState } from "react";
 
 const ReturnsPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState("returnable");
@@ -92,13 +92,13 @@ const ReturnsPage: React.FC = () => {
         <div className="flex justify-between items-start mb-3">
           <div>
             <h3 className="font-semibold text-lg">#{order.code}</h3>
-            <div className="flex items-center gap-4 text-sm text-maintext mt-1">
+            <div className="flex items-center gap-4 text-sm text-gray-700 mt-1">
               <div className="flex items-center gap-1">
-                <Icon path={mdiCalendar} size={0.7} />
+                <Icon path={mdiCalendar} size={0.8} />
                 {formatDate(order.createdAt)}
               </div>
               <div className="flex items-center gap-1">
-                <Icon path={mdiCurrencyUsd} size={0.7} />
+                <Icon path={mdiCurrencyUsd} size={0.8} />
                 {formatCurrency(order.total)}
               </div>
             </div>
@@ -110,7 +110,7 @@ const ReturnsPage: React.FC = () => {
                 size="sm"
                 onClick={() => setSelectedOrder(order)}
               >
-                <Icon path={mdiPackageVariant} size={0.7} className="mr-1" />
+                <Icon path={mdiPackageVariant} size={0.8} className="mr-1" />
                 Yêu cầu trả hàng
               </Button>
             </DialogTrigger>
@@ -131,7 +131,7 @@ const ReturnsPage: React.FC = () => {
             </div>
           ))}
           {order.items.length > 3 && (
-            <div className="flex-shrink-0 w-15 h-15 bg-gray-100 rounded-md flex items-center justify-center text-sm text-maintext">
+            <div className="flex-shrink-0 w-15 h-15 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-700">
               +{order.items.length - 3}
             </div>
           )}
@@ -146,19 +146,19 @@ const ReturnsPage: React.FC = () => {
         <div className="flex justify-between items-start mb-3">
           <div>
             <h3 className="font-semibold text-lg">#{returnItem.code}</h3>
-            <p className="text-sm text-maintext">
+            <p className="text-sm text-gray-700">
               Đơn gốc: #
               {typeof returnItem.originalOrder === "string"
                 ? returnItem.originalOrder
                 : returnItem.originalOrder.code}
             </p>
-            <div className="flex items-center gap-4 text-sm text-maintext mt-1">
+            <div className="flex items-center gap-4 text-sm text-gray-700 mt-1">
               <div className="flex items-center gap-1">
-                <Icon path={mdiCalendar} size={0.7} />
+                <Icon path={mdiCalendar} size={0.8} />
                 {formatDate(returnItem.createdAt)}
               </div>
               <div className="flex items-center gap-1">
-                <Icon path={mdiCurrencyUsd} size={0.7} />
+                <Icon path={mdiCurrencyUsd} size={0.8} />
                 {formatCurrency(returnItem.totalRefund)}
               </div>
             </div>
@@ -173,7 +173,7 @@ const ReturnsPage: React.FC = () => {
                     size="sm"
                     onClick={() => setSelectedReturn(returnItem)}
                   >
-                    <Icon path={mdiEye} size={0.7} className="mr-1" />
+                    <Icon path={mdiEye} size={0.8} className="mr-1" />
                     Chi tiết
                   </Button>
                 </DialogTrigger>
@@ -201,7 +201,7 @@ const ReturnsPage: React.FC = () => {
             </div>
           ))}
           {returnItem.items.length > 3 && (
-            <div className="flex-shrink-0 w-15 h-15 bg-gray-100 rounded-md flex items-center justify-center text-sm text-maintext">
+            <div className="flex-shrink-0 w-15 h-15 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-700">
               +{returnItem.items.length - 3}
             </div>
           )}
@@ -214,7 +214,7 @@ const ReturnsPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Quản lý trả hàng</h1>
-        <p className="text-maintext">
+        <p className="text-gray-700">
           Xem đơn hàng có thể trả và quản lý yêu cầu trả hàng của bạn
         </p>
       </div>
@@ -233,7 +233,7 @@ const ReturnsPage: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Đơn hàng có thể trả hàng</CardTitle>
-              <p className="text-sm text-maintext">
+              <p className="text-sm text-gray-700">
                 Chỉ hiển thị đơn hàng đã hoàn thành trong vòng 7 ngày qua
               </p>
             </CardHeader>
@@ -248,7 +248,7 @@ const ReturnsPage: React.FC = () => {
                   ))}
                 </div>
               ) : returnableOrders?.data.orders.length === 0 ? (
-                <div className="text-center py-8 text-maintext">
+                <div className="text-center py-8 text-gray-700">
                   Không có đơn hàng nào có thể trả hàng
                 </div>
               ) : (
@@ -266,7 +266,7 @@ const ReturnsPage: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Yêu cầu trả hàng của tôi</CardTitle>
-              <p className="text-sm text-maintext">
+              <p className="text-sm text-gray-700">
                 Xem trạng thái và chi tiết các yêu cầu trả hàng đã gửi
               </p>
             </CardHeader>
@@ -281,7 +281,7 @@ const ReturnsPage: React.FC = () => {
                   ))}
                 </div>
               ) : myReturns?.data.returns.length === 0 ? (
-                <div className="text-center py-8 text-maintext">
+                <div className="text-center py-8 text-gray-700">
                   Bạn chưa có yêu cầu trả hàng nào
                 </div>
               ) : (

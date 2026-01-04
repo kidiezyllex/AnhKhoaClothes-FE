@@ -1,11 +1,20 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { CheckCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { mdiCheckCircle } from '@mdi/js';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,17 +22,22 @@ interface SuccessModalProps {
   orderCode?: string;
 }
 
-export default function SuccessModal({ isOpen, onClose, orderId, orderCode }: SuccessModalProps) {
+export default function SuccessModal({
+  isOpen,
+  onClose,
+  orderId,
+  orderCode,
+}: SuccessModalProps) {
   const navigate = useNavigate();
 
   const handleViewOrder = () => {
     onClose();
-    navigate('/account#account-tabs?tab=orders');
+    navigate("/account#account-tabs?tab=orders");
   };
 
   const handleContinueShopping = () => {
     onClose();
-    navigate('/products');
+    navigate("/products");
   };
 
   return (
@@ -32,36 +46,44 @@ export default function SuccessModal({ isOpen, onClose, orderId, orderCode }: Su
         <DialogHeader>
           <DialogTitle className="sr-only">Đặt hàng thành công</DialogTitle>
         </DialogHeader>
-        
+
         <Card className="border-0 shadow-none">
           <CardHeader className="text-center pb-4">
             <div className="flex justify-center mb-4">
               <CheckCircle className="w-16 h-16 text-green-500" />
             </div>
-            <h2 className="text-2xl font-bold text-primary">Đặt hàng thành công!</h2>
+            <h2 className="text-2xl font-bold text-primary">
+              Đặt hàng thành công!
+            </h2>
           </CardHeader>
-          
+
           <CardContent className="space-y-4 text-center">
-            <p className="text-maintext">Cảm ơn bạn đã đặt hàng tại Clothes Shop</p>
+            <p className="text-gray-700">
+              Cảm ơn bạn đã đặt hàng tại Clothes Shop
+            </p>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-maintext mb-1">Mã đơn hàng của bạn là:</p>
-              <p className="font-bold text-lg text-maintext">{orderCode || orderId}</p>
+              <p className="text-sm text-gray-700 mb-1">
+                Mã đơn hàng của bạn là:
+              </p>
+              <p className="font-bold text-lg text-gray-700">
+                {orderCode || orderId}
+              </p>
             </div>
-            <p className="text-sm text-maintext">
+            <p className="text-sm text-gray-700">
               Chúng tôi sẽ sớm liên hệ với bạn để xác nhận đơn hàng
             </p>
           </CardContent>
-          
+
           <CardFooter className="flex flex-col space-y-4 pt-6">
-            <Button 
-              onClick={handleViewOrder} 
+            <Button
+              onClick={handleViewOrder}
               className="w-full"
               variant="default"
             >
               Xem đơn hàng
             </Button>
-            <Button 
-              onClick={handleContinueShopping} 
+            <Button
+              onClick={handleContinueShopping}
               className="w-full"
               variant="outline"
             >
@@ -72,4 +94,4 @@ export default function SuccessModal({ isOpen, onClose, orderId, orderCode }: Su
       </DialogContent>
     </Dialog>
   );
-} 
+}

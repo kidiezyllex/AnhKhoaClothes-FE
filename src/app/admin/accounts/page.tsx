@@ -1,31 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencil,
-  mdiDelete,
-  mdiAccountKey,
-  mdiCheck,
-  mdiClose,
-  mdiLock,
-  mdiLockReset,
-  mdiEmail,
-  mdiPhone,
-  mdiFilterMultiple,
-  mdiLoading,
-  mdiDotsVertical,
-} from "@mdi/js";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,16 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -58,8 +46,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { toast } from "react-toastify";
 import {
   useAccounts,
   useDeleteAccount,
@@ -70,16 +56,25 @@ import {
   IAccountStatusUpdate,
 } from "@/interface/request/account";
 import { IAccount } from "@/interface/response/account";
-import { motion, AnimatePresence } from "framer-motion";
-import { useQueryClient } from "@tanstack/react-query";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  mdiCheck,
+  mdiDelete,
+  mdiDotsVertical,
+  mdiFilterMultiple,
+  mdiLoading,
+  mdiLock,
+  mdiLockReset,
+  mdiMagnify,
+  mdiPencil,
+  mdiPhone,
+  mdiPlus,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 export default function AccountsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -203,12 +198,6 @@ export default function AccountsPage() {
       .substring(0, 2);
   };
 
-  const getRandomAvatar = () => {
-    const avatarCount = 4; // Assuming you have dfavatar1.png to dfavatar4.png
-    const randomIndex = Math.floor(Math.random() * avatarCount) + 1;
-    return `/images/dfavatar${randomIndex}.png`;
-  };
-
   const handleDeleteAccount = (account: IAccount) => {
     setAccountToDelete(account);
     setIsDeleteDialogOpen(true);
@@ -292,7 +281,7 @@ export default function AccountsPage() {
         </Breadcrumb>
         <a href="/admin/accounts/create" className="flex items-center gap-2">
           <Button className="flex items-center gap-2">
-            <Icon path={mdiPlus} size={0.7} />
+            <Icon path={mdiPlus} size={0.8} />
             Thêm tài khoản mới
           </Button>
         </a>
@@ -304,8 +293,8 @@ export default function AccountsPage() {
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
-                size={0.7}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                size={0.8}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
               <Input
                 type="text"
@@ -320,7 +309,7 @@ export default function AccountsPage() {
               className="flex items-center"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+              <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
               {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
             </Button>
           </div>
@@ -336,7 +325,7 @@ export default function AccountsPage() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Vai trò
                     </label>
                     <Select
@@ -359,7 +348,7 @@ export default function AccountsPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Trạng thái
                     </label>
                     <Select
@@ -403,7 +392,7 @@ export default function AccountsPage() {
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-64">
               <h2 className="text-xl font-bold text-red-500">Đã xảy ra lỗi</h2>
-              <p className="text-maintext">
+              <p className="text-gray-700">
                 {error.message || "Không thể tải dữ liệu tài khoản"}
               </p>
             </div>
@@ -425,7 +414,7 @@ export default function AccountsPage() {
                     <TableRow>
                       <TableCell
                         colSpan={6}
-                        className="text-center py-8 text-maintext"
+                        className="text-center py-8 text-gray-700"
                       >
                         Không có tài khoản nào được tìm thấy
                       </TableCell>
@@ -438,35 +427,40 @@ export default function AccountsPage() {
                             <div className="p-0.5 rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
                               <Avatar className="h-10 w-10 border-2 border-white rounded-full">
                                 <AvatarImage
-                                  src={getRandomAvatar()}
+                                  src={
+                                    account.avatar ||
+                                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${
+                                      account.name || account.fullName
+                                    }`
+                                  }
                                   alt={`${
                                     account.name || account.fullName
                                   } avatar`}
                                 />
-                                <AvatarFallback className="bg-gray-200 text-maintext">
-                                  {getInitials(
-                                    account.name || account.fullName
-                                  )}
+                                <AvatarFallback>
+                                  {(account.name || account.fullName)?.charAt(
+                                    0
+                                  ) || "?"}
                                 </AvatarFallback>
                               </Avatar>
                             </div>
                             <div>
-                              <div className="font-medium text-maintext">
+                              <div className="font-medium text-gray-700">
                                 {account.name || account.fullName}
                               </div>
-                              <div className="text-sm text-maintext">
+                              <div className="text-sm text-gray-700">
                                 {account.email}
                               </div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="py-3 px-4 text-sm text-maintext">
+                        <TableCell className="py-3 px-4 text-sm text-gray-700">
                           {account.phoneNumber && (
                             <div className="flex items-center">
                               <Icon
                                 path={mdiPhone}
-                                size={0.7}
-                                className="mr-2 text-maintext"
+                                size={0.8}
+                                className="mr-2 text-gray-700"
                               />
                               {account.phoneNumber}
                             </div>
@@ -482,25 +476,25 @@ export default function AccountsPage() {
                               : account.status || "INACTIVE"
                           )}
                         </TableCell>
-                        <TableCell className="py-3 px-4 text-sm text-maintext">
+                        <TableCell className="py-3 px-4 text-sm text-gray-700">
                           {formatDate(account.created_at || account.createdAt)}
                         </TableCell>
                         <TableCell className="py-3 px-4 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size="icon" variant="outline">
-                                <Icon path={mdiDotsVertical} size={0.7} />
+                                <Icon path={mdiDotsVertical} size={0.8} />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <a href={`/admin/accounts/edit/${account.id}`}>
-                                <DropdownMenuItem className="cursor-pointer text-maintext">
+                                <DropdownMenuItem className="cursor-pointer text-gray-700">
                                   <Icon
                                     path={mdiPencil}
-                                    size={0.7}
+                                    size={0.8}
                                     className="mr-2"
                                   />
-                                  <span className="text-maintext">
+                                  <span className="text-gray-700">
                                     Chỉnh sửa
                                   </span>
                                 </DropdownMenuItem>
@@ -508,33 +502,33 @@ export default function AccountsPage() {
                               <DropdownMenuSeparator />
                               {account.status === "ACTIVE" ? (
                                 <DropdownMenuItem
-                                  className="cursor-pointer text-maintext"
+                                  className="cursor-pointer text-gray-700"
                                   onClick={() =>
                                     handleUpdateStatus(account, "INACTIVE")
                                   }
                                 >
                                   <Icon
                                     path={mdiLock}
-                                    size={0.7}
+                                    size={0.8}
                                     className="mr-2"
                                   />
-                                  <span className="text-maintext">
+                                  <span className="text-gray-700">
                                     Vô hiệu hóa
                                   </span>
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
-                                  className="cursor-pointer text-maintext"
+                                  className="cursor-pointer text-gray-700"
                                   onClick={() =>
                                     handleUpdateStatus(account, "ACTIVE")
                                   }
                                 >
                                   <Icon
                                     path={mdiLockReset}
-                                    size={0.7}
+                                    size={0.8}
                                     className="mr-2"
                                   />
-                                  <span className="text-maintext">
+                                  <span className="text-gray-700">
                                     Kích hoạt
                                   </span>
                                 </DropdownMenuItem>
@@ -547,7 +541,7 @@ export default function AccountsPage() {
                               >
                                 <Icon
                                   path={mdiDelete}
-                                  size={0.7}
+                                  size={0.8}
                                   className="mr-2"
                                 />
                                 <span className="text-red-600">
@@ -565,7 +559,7 @@ export default function AccountsPage() {
 
               {data?.data.pagination && data.data.pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <div className="text-sm text-maintext">
+                  <div className="text-sm text-gray-700">
                     Hiển thị{" "}
                     {(data.data.pagination.currentPage - 1) *
                       (filters.limit || 10) +
@@ -656,12 +650,12 @@ export default function AccountsPage() {
             >
               {deleteAccount.isPending ? (
                 <>
-                  <Icon path={mdiLoading} size={0.7} className="animate-spin" />
+                  <Icon path={mdiLoading} size={0.8} className="animate-spin" />
                   Đang xử lý...
                 </>
               ) : (
                 <>
-                  <Icon path={mdiDelete} size={0.7} />
+                  <Icon path={mdiDelete} size={0.8} />
                   Xác nhận xóa
                 </>
               )}
@@ -719,17 +713,17 @@ export default function AccountsPage() {
             >
               {updateAccountStatus.isPending ? (
                 <>
-                  <Icon path={mdiLoading} size={0.7} className="animate-spin" />
+                  <Icon path={mdiLoading} size={0.8} className="animate-spin" />
                   Đang xử lý...
                 </>
               ) : newStatus === "ACTIVE" ? (
                 <>
-                  <Icon path={mdiCheck} size={0.7} />
+                  <Icon path={mdiCheck} size={0.8} />
                   Kích hoạt
                 </>
               ) : (
                 <>
-                  <Icon path={mdiLock} size={0.7} />
+                  <Icon path={mdiLock} size={0.8} />
                   Vô hiệu hóa
                 </>
               )}

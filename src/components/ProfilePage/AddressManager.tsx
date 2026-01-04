@@ -1,25 +1,57 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
- 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Loader2, Plus, Pencil, Trash2, Check, X } from "lucide-react"
-import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
-import { useAddAddress, useUpdateAddress, useDeleteAddress, useUserProfile } from "@/hooks/account"
-import { motion, AnimatePresence } from "framer-motion"
-import { Icon } from '@mdi/react'
-import { mdiMapMarker, mdiHome, mdiStar, mdiStarOutline } from '@mdi/js'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useAddAddress,
+  useDeleteAddress,
+  useUpdateAddress,
+  useUserProfile,
+} from "@/hooks/account";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { mdiHome, mdiMapMarker, mdiStar, mdiStarOutline } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { z } from "zod";
 
 const addressSchema = z.object({
   addressName: z.string().min(1, "Tên địa chỉ không được để trống"),
@@ -30,22 +62,22 @@ const addressSchema = z.object({
   ward: z.string().min(1, "Phường/Xã không được để trống"),
   addressDetail: z.string().min(5, "Địa chỉ chi tiết phải có ít nhất 5 ký tự"),
   isDefault: z.boolean().optional(),
-})
+});
 
-type AddressFormValues = z.infer<typeof addressSchema>
+type AddressFormValues = z.infer<typeof addressSchema>;
 
 export default function AddressManager() {
-  const { data: profileData, isLoading, refetch } = useUserProfile()
-  const addAddressMutation = useAddAddress()
-  const updateAddressMutation = useUpdateAddress()
-  const deleteAddressMutation = useDeleteAddress()
+  const { data: profileData, isLoading, refetch } = useUserProfile();
+  const addAddressMutation = useAddAddress();
+  const updateAddressMutation = useUpdateAddress();
+  const deleteAddressMutation = useDeleteAddress();
 
-  const [addresses, setAddresses] = useState<any[]>([])
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [currentAddressId, setCurrentAddressId] = useState<string | null>(null)
-  const [openDialog, setOpenDialog] = useState(false)
-  const [deleteId, setDeleteId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentAddressId, setCurrentAddressId] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
@@ -59,13 +91,13 @@ export default function AddressManager() {
       addressDetail: "",
       isDefault: false,
     },
-  })
+  });
 
   useEffect(() => {
     if (profileData && profileData.data && profileData.data.addresses) {
-      setAddresses(profileData.data.addresses)
+      setAddresses(profileData.data.addresses);
     }
-  }, [profileData])
+  }, [profileData]);
 
   const resetForm = () => {
     form.reset({
@@ -77,14 +109,14 @@ export default function AddressManager() {
       ward: "",
       addressDetail: "",
       isDefault: false,
-    })
-    setIsEditMode(false)
-    setCurrentAddressId(null)
-  }
+    });
+    setIsEditMode(false);
+    setCurrentAddressId(null);
+  };
 
   const handleEdit = (address: any) => {
-    setIsEditMode(true)
-    setCurrentAddressId(address.id)
+    setIsEditMode(true);
+    setCurrentAddressId(address.id);
     form.reset({
       addressName: address.addressName,
       fullName: address.fullName,
@@ -94,25 +126,25 @@ export default function AddressManager() {
       ward: address.ward,
       addressDetail: address.addressDetail,
       isDefault: address.isDefault,
-    })
-    setOpenDialog(true)
-  }
+    });
+    setOpenDialog(true);
+  };
 
   const handleDelete = async () => {
-    if (!deleteId) return
-    
-    setIsDeleting(true)
+    if (!deleteId) return;
+
+    setIsDeleting(true);
     try {
-      await deleteAddressMutation.mutateAsync(deleteId)
-      toast.success("Xóa thành công")
-      setDeleteId(null)
-      refetch()
+      await deleteAddressMutation.mutateAsync(deleteId);
+      toast.success("Xóa thành công");
+      setDeleteId(null);
+      refetch();
     } catch (error: any) {
-      toast.error("Xóa thất bại")
+      toast.error("Xóa thất bại");
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const onSubmit = async (data: AddressFormValues) => {
     try {
@@ -120,26 +152,26 @@ export default function AddressManager() {
         await updateAddressMutation.mutateAsync({
           addressId: currentAddressId,
           data: data,
-        })
-        toast.success("Cập nhật thành công")
+        });
+        toast.success("Cập nhật thành công");
       } else {
-        await addAddressMutation.mutateAsync(data as any)
-        toast.success("Thêm mới thành công")
+        await addAddressMutation.mutateAsync(data as any);
+        toast.success("Thêm mới thành công");
       }
-      setOpenDialog(false)
-      resetForm()
-      refetch()
+      setOpenDialog(false);
+      resetForm();
+      refetch();
     } catch (error: any) {
-      toast.error(isEditMode ? "Cập nhật thất bại" : "Thêm mới thất bại")
+      toast.error(isEditMode ? "Cập nhật thất bại" : "Thêm mới thất bại");
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   return (
@@ -148,7 +180,7 @@ export default function AddressManager() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-medium">Địa chỉ của tôi</h2>
           <DialogTrigger asChild>
-            <Button 
+            <Button
               className="bg-primary hover:bg-secondary transition-all duration-300 flex items-center gap-2"
               onClick={resetForm}
             >
@@ -160,12 +192,12 @@ export default function AddressManager() {
 
         {addresses.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border border-dashed border-gray-300 dark:border-gray-700 rounded-[6px]">
-            <Icon path={mdiMapMarker} size={3} className="text-maintext mb-4" />
-            <p className="text-maintext dark:text-maintext mb-4">
+            <Icon path={mdiMapMarker} size={3} className="text-gray-700 mb-4" />
+            <p className="text-gray-700 dark:text-gray-700 mb-4">
               Bạn chưa có địa chỉ nào
             </p>
             <DialogTrigger asChild>
-              <Button 
+              <Button
                 className="bg-primary hover:bg-secondary transition-all duration-300"
                 onClick={resetForm}
               >
@@ -184,25 +216,41 @@ export default function AddressManager() {
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <Card className={`overflow-hidden ${address.isDefault ? 'border-primary' : 'border-gray-200 dark:border-gray-700'}`}>
+                  <Card
+                    className={`overflow-hidden ${
+                      address.isDefault
+                        ? "border-primary"
+                        : "border-gray-200 dark:border-gray-700"
+                    }`}
+                  >
                     <CardHeader className="p-4 pb-2 flex flex-row justify-between items-start space-y-0">
                       <div className="flex items-center gap-2">
-                        <Icon path={mdiHome} size={0.7} className="text-primary" />
-                        <CardTitle className="text-base font-medium">{address.addressName}</CardTitle>
+                        <Icon
+                          path={mdiHome}
+                          size={0.8}
+                          className="text-primary"
+                        />
+                        <CardTitle className="text-base font-medium">
+                          {address.addressName}
+                        </CardTitle>
                       </div>
                       <div className="flex items-center gap-1">
                         {address.isDefault ? (
                           <div className="flex items-center text-xs text-primary bg-primary/10 px-2 py-1 rounded">
-                            <Icon path={mdiStar} size={0.7} className="mr-1" />
+                            <Icon path={mdiStar} size={0.8} className="mr-1" />
                             Mặc định
                           </div>
                         ) : (
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-2 text-xs text-maintext hover:text-primary"
+                            className="h-8 px-2 text-xs text-gray-700 hover:text-primary"
                           >
-                            <Icon path={mdiStarOutline} size={0.7} className="mr-1" />
+                            <Icon
+                              path={mdiStarOutline}
+                              size={0.8}
+                              className="mr-1"
+                            />
                             Đặt mặc định
                           </Button>
                         )}
@@ -210,9 +258,12 @@ export default function AddressManager() {
                     </CardHeader>
                     <CardContent className="p-4 pt-2">
                       <div className="text-sm space-y-1">
-                        <p className="font-medium">{address.fullName} | {address.phoneNumber}</p>
-                        <p className="text-maintext dark:text-maintext">
-                          {address.addressDetail}, {address.ward}, {address.district}, {address.province}
+                        <p className="font-medium">
+                          {address.fullName} | {address.phoneNumber}
+                        </p>
+                        <p className="text-gray-700 dark:text-gray-700">
+                          {address.addressDetail}, {address.ward},{" "}
+                          {address.district}, {address.province}
                         </p>
                       </div>
                     </CardContent>
@@ -245,18 +296,23 @@ export default function AddressManager() {
 
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{isEditMode ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}
+            </DialogTitle>
             <DialogDescription>
-              {isEditMode 
-                ? "Cập nhật thông tin địa chỉ của bạn" 
+              {isEditMode
+                ? "Cập nhật thông tin địa chỉ của bạn"
                 : "Điền đầy đủ thông tin để thêm địa chỉ mới"}
             </DialogDescription>
           </DialogHeader>
-          
+
           <ScrollArea className="max-h-[70vh]">
             <div className="p-1">
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="addressName"
@@ -264,8 +320,8 @@ export default function AddressManager() {
                       <FormItem>
                         <FormLabel>Tên địa chỉ</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Ví dụ: Nhà riêng, Văn phòng..." 
+                          <Input
+                            placeholder="Ví dụ: Nhà riêng, Văn phòng..."
                             {...field}
                           />
                         </FormControl>
@@ -273,7 +329,7 @@ export default function AddressManager() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -282,8 +338,8 @@ export default function AddressManager() {
                         <FormItem>
                           <FormLabel>Họ tên người nhận</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Nhập họ tên người nhận" 
+                            <Input
+                              placeholder="Nhập họ tên người nhận"
                               {...field}
                             />
                           </FormControl>
@@ -291,7 +347,7 @@ export default function AddressManager() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="phoneNumber"
@@ -299,8 +355,8 @@ export default function AddressManager() {
                         <FormItem>
                           <FormLabel>Số điện thoại</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Nhập số điện thoại" 
+                            <Input
+                              placeholder="Nhập số điện thoại"
                               {...field}
                             />
                           </FormControl>
@@ -309,7 +365,7 @@ export default function AddressManager() {
                       )}
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
@@ -317,8 +373,8 @@ export default function AddressManager() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tỉnh/Thành phố</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
+                          <Select
+                            onValueChange={field.onChange}
                             defaultValue={field.value}
                           >
                             <FormControl>
@@ -328,9 +384,13 @@ export default function AddressManager() {
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="Hà Nội">Hà Nội</SelectItem>
-                              <SelectItem value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</SelectItem>
+                              <SelectItem value="TP. Hồ Chí Minh">
+                                TP. Hồ Chí Minh
+                              </SelectItem>
                               <SelectItem value="Đà Nẵng">Đà Nẵng</SelectItem>
-                              <SelectItem value="Hải Phòng">Hải Phòng</SelectItem>
+                              <SelectItem value="Hải Phòng">
+                                Hải Phòng
+                              </SelectItem>
                               <SelectItem value="Cần Thơ">Cần Thơ</SelectItem>
                               {/* Thêm các tỉnh/thành phố khác tại đây */}
                             </SelectContent>
@@ -339,7 +399,7 @@ export default function AddressManager() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="district"
@@ -347,16 +407,13 @@ export default function AddressManager() {
                         <FormItem>
                           <FormLabel>Quận/Huyện</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Nhập quận/huyện" 
-                              {...field}
-                            />
+                            <Input placeholder="Nhập quận/huyện" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="ward"
@@ -364,17 +421,14 @@ export default function AddressManager() {
                         <FormItem>
                           <FormLabel>Phường/Xã</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Nhập phường/xã" 
-                              {...field}
-                            />
+                            <Input placeholder="Nhập phường/xã" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </div>
-                  
+
                   <FormField
                     control={form.control}
                     name="addressDetail"
@@ -382,8 +436,8 @@ export default function AddressManager() {
                       <FormItem>
                         <FormLabel>Địa chỉ chi tiết</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Số nhà, tên đường..." 
+                          <Textarea
+                            placeholder="Số nhà, tên đường..."
                             {...field}
                             className="min-h-[80px]"
                           />
@@ -392,7 +446,7 @@ export default function AddressManager() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="isDefault"
@@ -407,15 +461,17 @@ export default function AddressManager() {
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel className="cursor-pointer">Đặt làm địa chỉ mặc định</FormLabel>
-                          <p className="text-sm text-maintext dark:text-maintext">
+                          <FormLabel className="cursor-pointer">
+                            Đặt làm địa chỉ mặc định
+                          </FormLabel>
+                          <p className="text-sm text-gray-700 dark:text-gray-700">
                             Địa chỉ này sẽ được sử dụng mặc định khi mua hàng
                           </p>
                         </div>
                       </FormItem>
                     )}
                   />
-                  
+
                   <DialogFooter className="mt-6">
                     <Button
                       type="button"
@@ -424,12 +480,16 @@ export default function AddressManager() {
                     >
                       Hủy
                     </Button>
-                    <Button 
+                    <Button
                       type="submit"
                       className="bg-primary hover:bg-secondary"
-                      disabled={addAddressMutation.isPending || updateAddressMutation.isPending}
+                      disabled={
+                        addAddressMutation.isPending ||
+                        updateAddressMutation.isPending
+                      }
                     >
-                      {(addAddressMutation.isPending || updateAddressMutation.isPending) ? (
+                      {addAddressMutation.isPending ||
+                      updateAddressMutation.isPending ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Đang xử lý...
@@ -449,12 +509,18 @@ export default function AddressManager() {
       </Dialog>
 
       {/* Confirm Delete Dialog */}
-      <Dialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+      <Dialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+      >
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle className="text-center">Xác nhận xóa địa chỉ</DialogTitle>
+            <DialogTitle className="text-center">
+              Xác nhận xóa địa chỉ
+            </DialogTitle>
             <DialogDescription className="text-center">
-              Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể
+              hoàn tác.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center gap-4 mt-4">
@@ -489,5 +555,5 @@ export default function AddressManager() {
         </DialogContent>
       </Dialog>
     </div>
-  )
-} 
+  );
+}

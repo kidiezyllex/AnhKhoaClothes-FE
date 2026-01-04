@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Icon } from "@mdi/react";
-import {
-  mdiCartArrowRight,
-  mdiHeartCircle,
-  mdiEye,
-  mdiTagMultiple,
-  mdiPackageVariantClosed,
-  mdiAlertOctagon,
-} from "@mdi/js";
-import { checkImageUrl, calculateDiscountedPrice } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { calculateProductDiscount } from "@/lib/promotions";
+import { calculateDiscountedPrice, checkImageUrl } from "@/lib/utils";
 import { getSizeLabel } from "@/utils/sizeMapping";
+import {
+  mdiAlertOctagon,
+  mdiCartArrowRight,
+  mdiEye,
+  mdiHeartCircle,
+  mdiPackageVariantClosed,
+  mdiTagMultiple,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: any;
@@ -174,7 +174,7 @@ export const ProductCard = ({
               >
                 <Icon
                   path={mdiCartArrowRight}
-                  size={0.7}
+                  size={0.8}
                   className="group-hover/btn:animate-bounce"
                 />
               </Button>
@@ -193,7 +193,7 @@ export const ProductCard = ({
               >
                 <Icon
                   path={mdiHeartCircle}
-                  size={0.7}
+                  size={0.8}
                   className="group-hover/btn:animate-pulse"
                 />
               </Button>
@@ -212,7 +212,7 @@ export const ProductCard = ({
               >
                 <Icon
                   path={mdiEye}
-                  size={0.7}
+                  size={0.8}
                   className="group-hover/btn:animate-ping"
                 />
               </Button>
@@ -238,7 +238,7 @@ export const ProductCard = ({
               .replace(/\s+/g, "-")}-${product.id}`}
             className="hover:text-primary transition-colors group/link"
           >
-            <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-maintext group-hover/link:underline decoration-primary/50 underline-offset-2">
+            <h3 className="font-bold text-base mb-2 line-clamp-2 leading-tight group-hover:text-primary/90 transition-colors duration-300 text-gray-700 group-hover/link:underline decoration-primary/50 underline-offset-2">
               {product.productDisplayName || (product as any)?.name}
             </h3>
           </a>
@@ -254,13 +254,13 @@ export const ProductCard = ({
                   {formatPrice(discountInfo.finalPrice)}
                 </motion.div>
                 {discountInfo.isDiscounted && (
-                  <div className="text-sm text-maintext line-through font-semibold italic">
+                  <div className="text-sm text-gray-700 line-through font-semibold italic">
                     {formatPrice(basePrice)}
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-sm text-maintext italic">
+              <div className="text-sm text-gray-700 italic">
                 Giá chưa cập nhật
               </div>
             )}
@@ -268,7 +268,7 @@ export const ProductCard = ({
             {product.variants?.length > 0 && (
               <div className="flex flex-col gap-1 items-start justify-start mt-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-maintext font-semibold whitespace-nowrap">
+                  <span className="text-sm text-gray-700 font-semibold whitespace-nowrap">
                     Màu sắc:
                   </span>
                   <div className="flex flex-wrap gap-1 text-sm items-center">
@@ -292,7 +292,7 @@ export const ProductCard = ({
                         (product as any)?.variants.map((v: any) => v.color)
                       )
                     ).length > 5 && (
-                      <span className="text-[10px] text-maintext">
+                      <span className="text-[10px] text-gray-700">
                         +
                         {Array.from(
                           new Set(
@@ -304,10 +304,10 @@ export const ProductCard = ({
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-sm text-maintext font-semibold whitespace-nowrap">
+                  <span className="text-sm text-gray-700 font-semibold whitespace-nowrap">
                     Kích thước:
                   </span>
-                  <div className="flex flex-wrap gap-1 text-xs text-maintext">
+                  <div className="flex flex-wrap gap-1 text-xs text-gray-700">
                     {Array.from(
                       new Set(
                         (product as any)?.variants.map((v: any) => {

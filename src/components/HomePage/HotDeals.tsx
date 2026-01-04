@@ -1,8 +1,7 @@
-import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { mdiChevronDoubleRight, mdiStar, mdiWhatsapp } from "@mdi/js";
 import { Icon } from "@mdi/react";
-import { mdiChevronDoubleRight, mdiWhatsapp, mdiStar } from "@mdi/js";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { InteractiveHoverButton } from "../Common/InteractiveHoverButton";
 
 export const HotDeals = () => {
@@ -97,13 +96,13 @@ export const HotDeals = () => {
                 <span className="text-2xl font-bold text-primary">
                   1.300.000₫
                 </span>
-                <span className="text-lg text-maintext line-through">
+                <span className="text-lg text-gray-700 line-through">
                   3.000.000₫
                 </span>
               </div>
 
               <div className="flex items-center">
-                <span className="text-sm font-medium mr-2 text-maintext dark:text-gray-300">
+                <span className="text-sm font-medium mr-2 text-gray-700 dark:text-gray-300">
                   ĐÁNH GIÁ
                 </span>
                 <div className="flex">
@@ -111,7 +110,7 @@ export const HotDeals = () => {
                     <Icon
                       key={i}
                       path={mdiStar}
-                      size={0.7}
+                      size={0.8}
                       className="text-amber-500"
                     />
                   ))}
@@ -129,17 +128,17 @@ export const HotDeals = () => {
                 <li key={index} className="flex items-start">
                   <Icon
                     path={mdiChevronDoubleRight}
-                    size={0.7}
+                    size={0.8}
                     className="mt-1 mr-2 text-[#88C140]"
                   />
-                  <span className="text-maintext dark:text-gray-300 text-sm">
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">
                     {text}
                   </span>
                 </li>
               ))}
             </motion.ul>
 
-            <motion.p className="text-maintext dark:text-maintext text-sm leading-relaxed">
+            <motion.p className="text-gray-700 dark:text-gray-700 text-sm leading-relaxed">
               Giày thể thao phiên bản giới hạn với thiết kế độc đáo và công nghệ
               tiên tiến. Sự kết hợp hoàn hảo giữa phong cách hiện đại và hiệu
               suất cao cấp mang đến trải nghiệm thoải mái nhất cho người sử

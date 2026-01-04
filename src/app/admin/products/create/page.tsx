@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { useCreateProduct } from "@/hooks/product";
-import { useUploadImage } from "@/hooks/upload";
-import { IProductCreate, IProductVariant } from "@/interface/request/product";
+import ProductVariantForm from "@/components/ProductPage/ProductVariantForm";
+import VariantGenerator from "@/components/ProductPage/VariantGenerator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,22 +22,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createFormData } from "@/utils/cloudinary";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import {
-  mdiPlus,
-  mdiTrashCan,
-  mdiArrowLeft,
-  mdiLoading,
-  mdiAutoFix,
-} from "@mdi/js";
-import { AnimatePresence, motion } from "framer-motion";
-import ProductVariantForm from "@/components/ProductPage/ProductVariantForm";
-import VariantGenerator from "@/components/ProductPage/VariantGenerator";
 import {
   Select,
   SelectContent,
@@ -47,13 +29,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useBrands, useCategories, useMaterials } from "@/hooks/attributes";
+import { useCreateProduct } from "@/hooks/product";
+import { useUploadImage } from "@/hooks/upload";
+import { IProductCreate, IProductVariant } from "@/interface/request/product";
+import { createFormData } from "@/utils/cloudinary";
 import {
-  useBrands,
-  useCategories,
-  useColors,
-  useMaterials,
-  useSizes,
-} from "@/hooks/attributes";
+  mdiArrowLeft,
+  mdiAutoFix,
+  mdiLoading,
+  mdiPlus,
+  mdiTrashCan,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const initialProduct: IProductCreate = {
   name: "",
@@ -273,7 +267,7 @@ export default function CreateProductPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2"
         >
-          <Icon path={mdiArrowLeft} size={0.7} />
+          <Icon path={mdiArrowLeft} size={0.8} />
           Quay lại
         </Button>
       </div>
@@ -294,7 +288,7 @@ export default function CreateProductPage() {
               <CardHeader>
                 <CardTitle>Thông tin cơ bản</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 text-maintext">
+              <CardContent className="space-y-4 text-gray-700">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">
@@ -471,7 +465,7 @@ export default function CreateProductPage() {
                           : ""
                       }
                     >
-                      <Icon path={mdiAutoFix} size={0.7} />
+                      <Icon path={mdiAutoFix} size={0.8} />
                       Generate tất cả biến thể
                     </Button>
                     <Button
@@ -480,7 +474,7 @@ export default function CreateProductPage() {
                       onClick={handleAddVariant}
                       className="flex items-center gap-1"
                     >
-                      <Icon path={mdiPlus} size={0.7} />
+                      <Icon path={mdiPlus} size={0.8} />
                       Thêm biến thể
                     </Button>
                     <Button
@@ -492,7 +486,7 @@ export default function CreateProductPage() {
                         <>
                           <Icon
                             path={mdiLoading}
-                            size={0.7}
+                            size={0.8}
                             className="animate-spin"
                           />
                           Đang xử lý...
@@ -504,7 +498,7 @@ export default function CreateProductPage() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 text-maintext">
+              <CardContent className="space-y-4 text-gray-700">
                 <AnimatePresence>
                   {product.variants.map((variant, index) => (
                     <motion.div
@@ -527,7 +521,7 @@ export default function CreateProductPage() {
                             onClick={() => handleRemoveVariant(index)}
                             className="flex items-center gap-1"
                           >
-                            <Icon path={mdiTrashCan} size={0.7} />
+                            <Icon path={mdiTrashCan} size={0.8} />
                             Xóa
                           </Button>
                         )}

@@ -1,16 +1,16 @@
-import React, { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@mdi/react";
 import {
+  mdiArrowRight,
   mdiCartArrowRight,
+  mdiEye,
   mdiHeartCircle,
   mdiStar,
-  mdiEye,
-  mdiArrowRight,
 } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 import { InteractiveHoverButton } from "../Common/InteractiveHoverButton";
-import { Badge } from "@/components/ui/badge";
 
 //                                                                                                                     Dữ liệu sản phẩm mới
 const newArrivalsData = [
@@ -88,11 +88,11 @@ const RatingStars = ({ rating }: { rating: number }) => {
         <Icon
           key={i}
           path={mdiStar}
-          size={0.7}
+          size={0.8}
           className={i < rating ? "text-amber-500" : "text-gray-300"}
         />
       ))}
-      <span className="text-xs text-maintext ml-1">({rating}.0)</span>
+      <span className="text-xs text-gray-700 ml-1">({rating}.0)</span>
     </div>
   );
 };
@@ -198,7 +198,7 @@ const ProductCard = ({
             className="rounded-full w-9 h-9 bg-white/80 hover:bg-white shadow-sm backdrop-blur-sm flex items-center justify-center"
             title="Xem nhanh"
           >
-            <Icon path={mdiEye} size={0.7} className="text-maintext" />
+            <Icon path={mdiEye} size={0.8} className="text-gray-700" />
           </Button>
           <Button
             size="sm"
@@ -206,7 +206,7 @@ const ProductCard = ({
             className="rounded-full w-9 h-9 bg-white/80 hover:bg-white shadow-sm backdrop-blur-sm flex items-center justify-center"
             title="Yêu thích"
           >
-            <Icon path={mdiHeartCircle} size={0.7} className="text-maintext" />
+            <Icon path={mdiHeartCircle} size={0.8} className="text-gray-700" />
           </Button>
           <Button
             size="sm"
@@ -216,8 +216,8 @@ const ProductCard = ({
           >
             <Icon
               path={mdiCartArrowRight}
-              size={0.7}
-              className="text-maintext"
+              size={0.8}
+              className="text-gray-700"
             />
           </Button>
         </div>
@@ -227,7 +227,7 @@ const ProductCard = ({
         <div className="text-xs font-medium text-[#2C8B3D] uppercase tracking-wider">
           {product.brand}
         </div>
-        <h3 className="text-maintext dark:text-white font-semibold text-lg truncate group-hover:text-[#2C8B3D] transition-colors duration-200">
+        <h3 className="text-gray-700 dark:text-white font-semibold text-lg truncate group-hover:text-[#2C8B3D] transition-colors duration-200">
           <a href={`/products/${product.slug}`}>{product.name}</a>
         </h3>
         <div className="">
@@ -238,7 +238,7 @@ const ProductCard = ({
             {formatPrice((product as any)?.price)}
           </span>
           {product.discount > 0 && (
-            <span className="text-sm text-maintext line-through">
+            <span className="text-sm text-gray-700 line-through">
               {formatPrice((product as any)?.originalPrice)}
             </span>
           )}
@@ -258,7 +258,7 @@ const ProductCard = ({
           Xem chi tiết
           <Icon
             path={mdiArrowRight}
-            size={0.7}
+            size={0.8}
             className="ml-2 group-hover:translate-x-1 transition-transform"
           />
         </InteractiveHoverButton>
@@ -309,7 +309,7 @@ export const NewArrivals = () => {
               <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
             </span>
           </h2>
-          <p className="text-maintext dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
             Khám phá bộ sưu tập thời trang mới nhất với chất liệu cao cấp và
             thiết kế hiện đại
           </p>

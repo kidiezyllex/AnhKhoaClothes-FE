@@ -1,34 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencilOutline,
-  mdiTrashCan,
-  mdiFilterMultiple,
-  mdiLoading,
-  mdiEmailFast,
-  mdiPencilCircle,
-  mdiDeleteCircle,
-} from "@mdi/js";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useProducts, useDeleteProduct } from "@/hooks/product";
-import { useBrands, useCategories } from "@/hooks/attributes";
-import { usePromotions } from "@/hooks/promotion";
-import {
-  applyPromotionsToProducts,
-  calculateProductDiscount,
-} from "@/lib/promotions";
-import { IProductFilter } from "@/interface/request/product";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -37,15 +10,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { checkImageUrl } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -53,20 +28,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Lightbox from "yet-another-react-lightbox";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import Download from "yet-another-react-lightbox/plugins/download";
-import "yet-another-react-lightbox/styles.css";
-import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useBrands, useCategories } from "@/hooks/attributes";
+import { useDeleteProduct, useProducts } from "@/hooks/product";
+import { usePromotions } from "@/hooks/promotion";
+import { IProductFilter } from "@/interface/request/product";
+import {
+  applyPromotionsToProducts,
+  calculateProductDiscount,
+} from "@/lib/promotions";
+import { checkImageUrl } from "@/lib/utils";
+import {
+  mdiDeleteCircle,
+  mdiFilterMultiple,
+  mdiMagnify,
+  mdiPencilCircle,
+  mdiPlus,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Lightbox from "yet-another-react-lightbox";
+import Download from "yet-another-react-lightbox/plugins/download";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import "yet-another-react-lightbox/styles.css";
 export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IProductFilter>({
@@ -222,7 +217,7 @@ export default function ProductsPage() {
         </Breadcrumb>
         <a href="/admin/products/create">
           <Button>
-            <Icon path={mdiPlus} size={0.7} />
+            <Icon path={mdiPlus} size={0.8} />
             Thêm sản phẩm mới
           </Button>
         </a>
@@ -234,8 +229,8 @@ export default function ProductsPage() {
             <div className="relative flex-1">
               <Icon
                 path={mdiMagnify}
-                size={0.7}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                size={0.8}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
               <Input
                 type="text"
@@ -250,7 +245,7 @@ export default function ProductsPage() {
               className="flex items-center"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+              <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
               {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
             </Button>
           </div>
@@ -266,7 +261,7 @@ export default function ProductsPage() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Thương hiệu
                     </label>
                     <Select
@@ -303,7 +298,7 @@ export default function ProductsPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Danh mục
                     </label>
                     <Select
@@ -340,7 +335,7 @@ export default function ProductsPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Trạng thái
                     </label>
                     <Select
@@ -421,28 +416,28 @@ export default function ProductsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Hình ảnh
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Sản phẩm
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Thương hiệu
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Danh mục
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Giá
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Ngày cập nhật
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -468,19 +463,19 @@ export default function ProductsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-maintext">
+                        <div className="text-sm font-medium text-gray-700">
                           {product.name}
                         </div>
-                        <div className="text-xs text-maintext">
+                        <div className="text-xs text-gray-700">
                           {product.variants.length} biến thể
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {typeof (product as any)?.brand === "string"
                           ? (product as any)?.brand
                           : (product as any)?.brand.name}
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {typeof (product as any)?.category === "string"
                           ? (product as any)?.category
                           : (product as any)?.category.name}
@@ -507,7 +502,7 @@ export default function ProductsPage() {
                                 className={`font-medium ${
                                   discount.discountPercent > 0
                                     ? "text-primary"
-                                    : "text-maintext"
+                                    : "text-gray-700"
                                 }`}
                               >
                                 {new Intl.NumberFormat("vi-VN", {
@@ -516,7 +511,7 @@ export default function ProductsPage() {
                                 }).format(discount.discountedPrice)}
                               </div>
                               {discount.discountPercent > 0 && (
-                                <div className="text-xs text-maintext line-through">
+                                <div className="text-xs text-gray-700 line-through">
                                   {new Intl.NumberFormat("vi-VN", {
                                     style: "currency",
                                     currency: "VND",
@@ -545,14 +540,14 @@ export default function ProductsPage() {
                             : "Không hoạt động"}
                         </span>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-maintext">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                         {formatDate((product as any)?.updatedAt)}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <a href={`/admin/products/edit/${product.id}`}>
                             <Button variant="outline" size="icon" title="Sửa">
-                              <Icon path={mdiPencilCircle} size={0.7} />
+                              <Icon path={mdiPencilCircle} size={0.8} />
                             </Button>
                           </a>
                           <Dialog>
@@ -566,7 +561,7 @@ export default function ProductsPage() {
                                 }}
                                 title="Xóa"
                               >
-                                <Icon path={mdiDeleteCircle} size={0.7} />
+                                <Icon path={mdiDeleteCircle} size={0.8} />
                               </Button>
                             </DialogTrigger>
                             {isDeleteDialogOpen &&
@@ -615,7 +610,7 @@ export default function ProductsPage() {
                   <TableRow>
                     <TableCell
                       colSpan={8}
-                      className="px-4 py-8 text-center text-maintext"
+                      className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy sản phẩm nào
                     </TableCell>
@@ -628,7 +623,7 @@ export default function ProductsPage() {
           {data?.data.pagination && data.data.pagination.totalPages > 1 && (
             <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
               <div className="hidden sm:block">
-                <p className="text-sm text-maintext">
+                <p className="text-sm text-gray-700">
                   Hiển thị{" "}
                   <span className="font-medium">
                     {(data.data.pagination.currentPage - 1) *

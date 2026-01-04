@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 
-import { useValidateVoucher } from "@/hooks/voucher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useValidateVoucher } from "@/hooks/voucher";
+import { mdiCheck, mdiClose, mdiLoading, mdiTicket } from "@mdi/js";
 import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { motion, AnimatePresence } from "framer-motion";
-import { mdiTicket, mdiClose, mdiLoading, mdiCheck } from "@mdi/js";
 interface VoucherFormProps {
   orderValue: number;
   onApplyVoucher: (voucherData: {
@@ -67,10 +67,10 @@ const VoucherForm = ({
             className="flex items-center justify-between p-2 border border-green-200 bg-[#EAEBF2] rounded-[6px]"
           >
             <div className="flex items-center gap-2">
-              <Icon path={mdiTicket} size={0.7} className="text-primary" />
+              <Icon path={mdiTicket} size={0.8} className="text-primary" />
               <div>
                 <div className="font-medium text-sm">{appliedVoucher.code}</div>
-                <div className="text-xs text-maintext">
+                <div className="text-xs text-gray-700">
                   Giảm{" "}
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
@@ -83,9 +83,9 @@ const VoucherForm = ({
               size="sm"
               variant="ghost"
               onClick={onRemoveVoucher}
-              className="h-8 w-8 p-0 rounded-full text-maintext hover:bg-red-50 hover:text-red-600"
+              className="h-8 w-8 p-0 rounded-full text-gray-700 hover:bg-red-50 hover:text-red-600"
             >
-              <Icon path={mdiClose} size={0.7} />
+              <Icon path={mdiClose} size={0.8} />
             </Button>
           </motion.div>
         ) : (
@@ -105,8 +105,8 @@ const VoucherForm = ({
               />
               <Icon
                 path={mdiTicket}
-                size={0.7}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                size={0.8}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
             </div>
             <Button
@@ -115,9 +115,9 @@ const VoucherForm = ({
               className="whitespace-nowrap flex items-center gap-1"
             >
               {validateVoucher.isPending ? (
-                <Icon path={mdiLoading} size={0.7} className="animate-spin" />
+                <Icon path={mdiLoading} size={0.8} className="animate-spin" />
               ) : (
-                <Icon path={mdiCheck} size={0.7} />
+                <Icon path={mdiCheck} size={0.8} />
               )}
               Áp dụng
             </Button>

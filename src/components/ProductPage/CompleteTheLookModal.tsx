@@ -37,6 +37,7 @@ import {
 } from "react-icons/fa";
 import { PiPants } from "react-icons/pi";
 import { checkImageUrl, formatPriceVND } from "@/lib/utils";
+import { useSaveOutfit } from "@/hooks/outfit";
 import {
   IModelRecommendationResponse,
   IPersonalizedProduct,
@@ -224,18 +225,6 @@ const LazyProductImage = ({
   );
 };
 
-// Mock useSaveOutfit if not found
-const useSaveOutfit = () => {
-  return {
-    mutateAsync: async (params: any) => {
-      // Mock implementation
-      console.log("Saving outfit:", params);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    },
-    isLoading: false,
-  };
-};
-
 const getScoreChip = (score: number) => {
   // Determine color based on score
   let colorClass = "bg-gray-100 text-gray-700 border-gray-200";
@@ -245,7 +234,7 @@ const getScoreChip = (score: number) => {
 
   return (
     <Badge variant="outline" className={`${colorClass} whitespace-nowrap`}>
-      Score: {(score * 100).toFixed(0)}%
+      Điểm: {(score * 100).toFixed(0)}%
     </Badge>
   );
 };
@@ -264,8 +253,6 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
     Record<string, number>
   >({});
   const [savedOutfits, setSavedOutfits] = useState<Set<string>>(new Set());
-
-  // Use the mock or real hook
   const saveOutfitMutation = useSaveOutfit();
 
   const personalizedData = useMemo(() => {
@@ -348,13 +335,13 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
   const handleSaveOutfit = async (outfit: any, outfitIndex: number) => {
     if (!userId) {
-      toast.warning("Please login to save outfits");
+      toast.warning("Vui lòng đăng nhập để lưu bộ phối đồ");
       return;
     }
 
     const outfitKey = `outfit-${outfitIndex}`;
     if (savedOutfits.has(outfitKey)) {
-      toast.info("This outfit is already saved");
+      toast.info("Bộ phối đồ này đã được lưu");
       return;
     }
 
@@ -399,9 +386,9 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
       await saveOutfitMutation.mutateAsync({ userId, body: payload });
       setSavedOutfits((prev) => new Set(prev).add(outfitKey));
-      toast.success("Outfit saved successfully!");
+      toast.success("Đã lưu bộ phối đồ thành công!");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to save outfit");
+      toast.error(err?.message || "Không thể lưu bộ phối đồ");
     }
   };
 
@@ -487,7 +474,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
             className="w-full mt-2 bg-green-50"
             variant="outline"
           >
-            View Details <ArrowUpRight className="w-3 h-3 ml-1" />
+            Xem chi tiết <ArrowUpRight className="w-3 h-3 ml-1" />
           </Button>
         </div>
       </Card>
@@ -499,7 +486,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
       <DialogContent className="max-w-[95vw] gap-0 h-[90vh] p-0 overflow-hidden flex flex-col bg-gray-50">
         <DialogHeader className="px-6 py-3 bg-white border-b flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-primary pl-4 text-xl font-bold">
-            <FaMagic /> Complete The Look
+            <FaMagic /> Gợi ý sản phẩm dành cho bạn
           </DialogTitle>
         </DialogHeader>
 
@@ -508,12 +495,12 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
             <div className="w-full h-full flex flex-col items-center justify-center gap-4">
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
               <p className="text-gray-500">
-                Generating fashion recommendations...
+                Đang tạo gợi ý thời trang phù hợp với bạn...
               </p>
             </div>
           ) : error ? (
             <div className="w-full h-full flex items-center justify-center text-red-500">
-              Failed to load recommendations: {error.message}
+              Lỗi khi tải gợi ý: {error.message}
             </div>
           ) : (
             <Tabs
@@ -526,13 +513,13 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                   value="personalized"
                   className="px-6 py-3 rounded-none border-b-2 border-transparent text-gray-500 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
                 >
-                  Personalized
+                  Gợi ý cá nhân
                 </TabsTrigger>
                 <TabsTrigger
                   value="outfit"
                   className="px-6 py-3 rounded-none border-b-2 border-transparent text-gray-500 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent"
                 >
-                  Outfit Sets
+                  Bộ phối đồ (Outfits)
                 </TabsTrigger>
               </TabsList>
 
@@ -551,7 +538,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                         ))
                       ) : (
                         <div className="col-span-full h-64 flex items-center justify-center text-gray-400">
-                          No personalized items found.
+                          Không tìm thấy sản phẩm gợi ý cá nhân nào.
                         </div>
                       )}
                     </div>
@@ -628,14 +615,14 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                                           variant="outline"
                                           className="bg-primary/10 text-primary border-primary/20"
                                         >
-                                          Score:{" "}
+                                          Điểm:{" "}
                                           {(
                                             outfit.compatibilityScore * 100
                                           ).toFixed(0)}
                                           %
                                         </Badge>
                                         <span className="text-sm text-gray-500">
-                                          Total:{" "}
+                                          Tổng cộng:{" "}
                                           <span className="font-semibold text-primary">
                                             {formatPriceVND(outfit.totalPrice)}
                                           </span>
@@ -659,7 +646,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                                         {isSaved ? (
                                           <>
                                             <BookmarkCheck className="w-4 h-4 mr-2" />{" "}
-                                            Saved
+                                            Đã lưu
                                           </>
                                         ) : (
                                           <>
@@ -731,7 +718,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                                         ) : (
                                           <div className="h-full w-full border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-300 p-4 text-center">
                                             <span className="text-xs">
-                                              No items in this category
+                                              Không có sản phẩm nào
                                             </span>
                                           </div>
                                         )}
@@ -748,7 +735,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                               colSpan={5}
                               className="text-center py-20 text-gray-400"
                             >
-                              No outfits found
+                              Không tìm thấy bộ phối đồ nào
                             </TableCell>
                           </TableRow>
                         )}

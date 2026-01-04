@@ -1,9 +1,14 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Icon } from '@mdi/react';
-import { mdiAlertCircle } from '@mdi/js';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Button } from "@/components/ui/button";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { mdiAlertCircle } from "@mdi/js";
+import { Icon } from "@mdi/react";
 
 interface ConfirmCancelModalProps {
   onConfirm: () => void;
@@ -11,7 +16,11 @@ interface ConfirmCancelModalProps {
   isLoading?: boolean;
 }
 
-export default function ConfirmCancelModal({ onConfirm, onCancel, isLoading = false }: ConfirmCancelModalProps) {
+export default function ConfirmCancelModal({
+  onConfirm,
+  onCancel,
+  isLoading = false,
+}: ConfirmCancelModalProps) {
   return (
     <DialogContent className="max-w-4xl">
       <DialogHeader>
@@ -22,9 +31,9 @@ export default function ConfirmCancelModal({ onConfirm, onCancel, isLoading = fa
       </DialogHeader>
 
       <div className="py-4">
-        <p className="text-maintext">
-          Bạn có chắc chắn muốn hủy yêu cầu trả hàng này không? 
-          Hành động này không thể hoàn tác.
+        <p className="text-gray-700">
+          Bạn có chắc chắn muốn hủy yêu cầu trả hàng này không? Hành động này
+          không thể hoàn tác.
         </p>
       </div>
 
@@ -33,9 +42,9 @@ export default function ConfirmCancelModal({ onConfirm, onCancel, isLoading = fa
           Không, giữ lại
         </Button>
         <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
-          {isLoading ? 'Đang hủy...' : 'Có, hủy yêu cầu'}
+          {isLoading ? "Đang hủy..." : "Có, hủy yêu cầu"}
         </Button>
       </DialogFooter>
     </DialogContent>
   );
-} 
+}

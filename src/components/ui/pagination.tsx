@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cn } from "@/lib/utils";
+import * as React from "react";
 export function Pagination({
   className,
   children,
@@ -47,7 +47,7 @@ export function PaginationLink({
         "px-3 h-9 flex items-center justify-center rounded border text-sm font-medium transition-colors",
         isActive
           ? "bg-primary text-white border-primary shadow"
-          : "bg-white text-maintext border-gray-300 hover:bg-primary/10 hover:text-primary",
+          : "bg-white text-gray-700 border-gray-300 hover:bg-primary/10 hover:text-primary",
         className
       )}
       aria-current={isActive ? "page" : undefined}
@@ -69,8 +69,8 @@ export function PaginationPrevious({
         className={cn(
           "px-3 h-9 flex items-center justify-center rounded border text-sm font-medium transition-colors",
           disabled
-            ? "bg-gray-100 text-maintext border-gray-200 cursor-not-allowed"
-            : "bg-white text-maintext border-gray-300 hover:bg-primary/10 hover:text-primary"
+            ? "bg-gray-100 text-gray-700 border-gray-200 cursor-not-allowed"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-primary/10 hover:text-primary"
         )}
         aria-disabled={disabled}
         tabIndex={disabled ? -1 : 0}
@@ -95,8 +95,8 @@ export function PaginationNext({
         className={cn(
           "px-3 h-9 flex items-center justify-center rounded border text-sm font-medium transition-colors",
           disabled
-            ? "bg-gray-100 text-maintext border-gray-200 cursor-not-allowed"
-            : "bg-white text-maintext border-gray-300 hover:bg-primary/10 hover:text-primary"
+            ? "bg-gray-100 text-gray-700 border-gray-200 cursor-not-allowed"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-primary/10 hover:text-primary"
         )}
         aria-disabled={disabled}
         tabIndex={disabled ? -1 : 0}
@@ -112,7 +112,7 @@ export function PaginationEllipsis({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "px-2 h-9 flex items-center justify-center text-maintext text-lg select-none",
+        "px-2 h-9 flex items-center justify-center text-gray-700 text-lg select-none",
         className
       )}
     >

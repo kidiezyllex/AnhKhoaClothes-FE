@@ -1,15 +1,14 @@
-import { motion, useInView } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@mdi/react";
 import {
+  mdiArrowRight,
   mdiCartArrowRight,
   mdiHeartCircle,
-  mdiArrowRight,
-  mdiShareVariantOutline,
   mdiTagMultiple,
 } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Badge } from "@/components/ui/badge";
 
 const featuredProducts = [
   {
@@ -110,7 +109,7 @@ const ProductCard = ({
             <Icon
               path={mdiHeartCircle}
               size={1}
-              className="text-maintext dark:text-gray-300"
+              className="text-gray-700 dark:text-gray-300"
             />
           </Button>
           <Button
@@ -121,17 +120,17 @@ const ProductCard = ({
             <Icon
               path={mdiCartArrowRight}
               size={1}
-              className="text-maintext dark:text-gray-300"
+              className="text-gray-700 dark:text-gray-300"
             />
           </Button>
         </div>
       </div>
 
       <div className="p-4">
-        <div className="text-sm text-maintext dark:text-maintext mb-2">
+        <div className="text-sm text-gray-700 dark:text-gray-700 mb-2">
           {product.category}
         </div>
-        <h3 className="font-semibold text-maintext dark:text-white text-lg mb-3 group-hover:text-primary transition-colors duration-300">
+        <h3 className="font-semibold text-gray-700 dark:text-white text-lg mb-3 group-hover:text-primary transition-colors duration-300">
           {product.name}
         </h3>
 
@@ -141,7 +140,7 @@ const ProductCard = ({
               {formatPrice(discountedPrice)}
             </span>
             {product.discount > 0 && (
-              <span className="text-sm text-maintext dark:text-maintext line-through block">
+              <span className="text-sm text-gray-700 dark:text-gray-700 line-through block">
                 {formatPrice((product as any)?.price)}
               </span>
             )}
@@ -166,10 +165,10 @@ export const FeaturedProducts = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-maintext dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-700 dark:text-white mb-4">
             Sản phẩm nổi bật
           </h2>
-          <p className="text-maintext dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
             Khám phá những mẫu giày mới nhất và bán chạy nhất từ các thương hiệu
             hàng đầu
           </p>

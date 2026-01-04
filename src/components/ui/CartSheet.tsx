@@ -1,55 +1,53 @@
 import React from "react";
 
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useCartStore } from "@/stores/useCartStore";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/useToast";
-import { checkImageUrl } from "@/lib/utils";
-import { toast } from "react-toastify";
-import {
-  formatPrice,
-  formatCurrency,
-  formatDate,
-  formatDiscountValue,
-} from "@/utils/formatters";
-import { useUser } from "@/context/useUserContext";
-import {
-  useAvailableVouchersForUser,
-  useValidateVoucher,
-} from "@/hooks/voucher";
-import { IVoucher } from "@/interface/response/voucher";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
-  mdiTicket,
-  mdiContentCopy,
-  mdiMinus,
-  mdiPlus,
-  mdiDelete,
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useUser } from "@/context/useUserContext";
+import { useToast } from "@/hooks/useToast";
+import {
+  useAvailableVouchersForUser,
+  useValidateVoucher,
+} from "@/hooks/voucher";
+import { IVoucher } from "@/interface/response/voucher";
+import { checkImageUrl } from "@/lib/utils";
+import { useCartStore } from "@/stores/useCartStore";
+import {
+  formatCurrency,
+  formatDate,
+  formatDiscountValue,
+  formatPrice,
+} from "@/utils/formatters";
+import {
   mdiCheck,
   mdiClose,
+  mdiContentCopy,
+  mdiDelete,
+  mdiMinus,
+  mdiPlus,
+  mdiTicket,
 } from "@mdi/js";
-import { motion, AnimatePresence } from "framer-motion";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface CartSheetProps {
   open: boolean;
@@ -65,8 +63,8 @@ const VouchersListDialog = ({
   onOpenChange: (open: boolean) => void;
   onSelectVoucher: (code: string) => void;
 }) => {
-  const { profile } = useUser();
-  const userId = profile?.data?.id;
+  const { user } = useUser();
+  const userId = user?.id;
   const {
     data: vouchersData,
     isLoading,
@@ -236,8 +234,8 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
   const location = useLocation();
   const pathname = location.pathname;
   const { showToast } = useToast();
-  const { profile } = useUser();
-  const userId = profile?.data?.id;
+  const { user } = useUser();
+  const userId = user?.id;
   const {
     items,
     removeFromCart,
@@ -459,7 +457,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
-          className="w-full sm:max-w-2xl flex flex-col text-maintext p-4 pr-3"
+          className="w-full sm:max-w-2xl flex flex-col text-gray-700 p-4 pr-3"
           side="right"
         >
           <SheetHeader className="border-b pb-4">

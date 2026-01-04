@@ -1,10 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,20 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Icon } from "@mdi/react";
-import { mdiArrowLeft, mdiPlus, mdiTrashCan } from "@mdi/js";
-import { useCreateOrder } from "@/hooks/order";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { useProducts } from "@/hooks/product";
 import {
   Table,
   TableBody,
@@ -37,13 +37,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { useCreateOrder } from "@/hooks/order";
+import { useProducts } from "@/hooks/product";
+import { mdiArrowLeft, mdiPlus, mdiTrashCan } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 interface OrderItemType {
   product: string;
   variant: {
@@ -216,7 +216,7 @@ export default function CreateOrderPage() {
           </BreadcrumbList>
         </Breadcrumb>
         <Button variant="outline" onClick={() => navigate(-1)}>
-          <Icon path={mdiArrowLeft} size={0.7} className="mr-2" />
+          <Icon path={mdiArrowLeft} size={0.8} className="mr-2" />
           Quay lại
         </Button>
       </div>
@@ -228,14 +228,14 @@ export default function CreateOrderPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Sản phẩm</CardTitle>
                 <Button type="button" onClick={() => setProductListOpen(true)}>
-                  <Icon path={mdiPlus} size={0.7} className="mr-2" />
+                  <Icon path={mdiPlus} size={0.8} className="mr-2" />
                   Thêm sản phẩm
                 </Button>
               </CardHeader>
               <CardContent>
                 {selectedProducts.length === 0 ? (
                   <div className="text-center py-4 border rounded-[6px]">
-                    <p className="text-maintext">
+                    <p className="text-gray-700">
                       Chưa có sản phẩm nào. Vui lòng thêm sản phẩm vào đơn hàng.
                     </p>
                   </div>
@@ -319,7 +319,7 @@ export default function CreateOrderPage() {
                                 size="icon"
                                 onClick={() => handleRemoveProduct(index)}
                               >
-                                <Icon path={mdiTrashCan} size={0.7} />
+                                <Icon path={mdiTrashCan} size={0.8} />
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -536,13 +536,13 @@ export default function CreateOrderPage() {
 
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Tổng tiền sản phẩm:
                     </span>
                     <span>{formatCurrency(subTotal)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">Giảm giá:</span>
+                    <span className="text-sm text-gray-700">Giảm giá:</span>
                     <span>{formatCurrency(discount)}</span>
                   </div>
                   <div className="flex justify-between font-medium pt-3 border-t">
@@ -583,7 +583,7 @@ export default function CreateOrderPage() {
 
             {!productsData || productsData.data.products.length === 0 ? (
               <div className="text-center py-4">
-                <p className="text-maintext">
+                <p className="text-gray-700">
                   Không tìm thấy sản phẩm phù hợp.
                 </p>
               </div>
@@ -611,7 +611,7 @@ export default function CreateOrderPage() {
                             )}
                             <div>
                               <div className="font-medium">{product.name}</div>
-                              <div className="text-sm text-maintext">
+                              <div className="text-sm text-gray-700">
                                 {product.code}
                               </div>
                             </div>

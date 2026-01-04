@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Icon from '@mdi/react';
-import { mdiEarth } from '@mdi/js';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { mdiEarth } from "@mdi/js";
+import Icon from "@mdi/react";
+import { useState } from "react";
 
 interface Language {
   code: string;
@@ -18,15 +18,17 @@ interface Language {
 }
 
 const languages: Language[] = [
-  { code: 'vi', name: 'Tiếng Việt', flag: 'fi-vn' },
-  { code: 'en', name: 'English', flag: 'fi-us' },
-  { code: 'zh', name: '中文', flag: 'fi-cn' },
-  { code: 'ja', name: '日本語', flag: 'fi-jp' },
-  { code: 'ko', name: '한국어', flag: 'fi-kr' },
+  { code: "vi", name: "Tiếng Việt", flag: "fi-vn" },
+  { code: "en", name: "English", flag: "fi-us" },
+  { code: "zh", name: "中文", flag: "fi-cn" },
+  { code: "ja", name: "日本語", flag: "fi-jp" },
+  { code: "ko", name: "한국어", flag: "fi-kr" },
 ];
 
 export default function LanguageSelector() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(languages[0]); //                                                                                                                     Mặc định là tiếng Việt
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(
+    languages[0]
+  ); //                                                                                                                     Mặc định là tiếng Việt
 
   const handleSelectLanguage = (language: Language) => {
     setCurrentLanguage(language);
@@ -35,10 +37,11 @@ export default function LanguageSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-        variant="ghost"
-        className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 bg-gray-100">
-          <Icon path={mdiEarth} size={0.7} className='text-maintext' />
+        <Button
+          variant="ghost"
+          className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 bg-gray-100"
+        >
+          <Icon path={mdiEarth} size={0.8} className="text-gray-700" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -59,4 +62,4 @@ export default function LanguageSelector() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-} 
+}

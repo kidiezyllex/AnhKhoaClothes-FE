@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@mdi/react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export const NewsletterPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,7 +63,7 @@ export const NewsletterPopup = () => {
           >
             {/* Nút đóng */}
             <button
-              className="absolute top-3 right-3 z-10 text-maintext hover:text-maintext"
+              className="absolute top-3 right-3 z-10 text-gray-700 hover:text-gray-700"
               onClick={handleClose}
             >
               <Icon path={mdiClose} size={1} />
@@ -84,10 +84,10 @@ export const NewsletterPopup = () => {
               {/* Phần nội dung */}
               <div className="p-4 md:p-8 md:col-span-3">
                 <div className="text-center md:text-left">
-                  <h3 className="text-xl md:text-2xl font-bold text-maintext mb-2">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-700 mb-2">
                     Nhận ngay ưu đãi 20%
                   </h3>
-                  <p className="text-maintext mb-4">
+                  <p className="text-gray-700 mb-4">
                     Đăng ký nhận thông tin để không bỏ lỡ các ưu đãi đặc biệt và
                     sản phẩm mới nhất từ AllwearStudio.
                   </p>
@@ -119,7 +119,7 @@ export const NewsletterPopup = () => {
                     </form>
                   )}
 
-                  <p className="text-xs text-maintext mt-4">
+                  <p className="text-xs text-gray-700 mt-4">
                     Chúng tôi cam kết bảo mật thông tin của bạn. Bằng cách đăng
                     ký, bạn đồng ý với Chính sách bảo mật của chúng tôi.
                   </p>

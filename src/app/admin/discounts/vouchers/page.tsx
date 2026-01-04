@@ -1,32 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencilCircle,
-  mdiDeleteCircle,
-  mdiFilterMultiple,
-  mdiLoading,
-  mdiEmailFast,
-  mdiFilterRemove,
-} from "@mdi/js";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useVouchers,
-  useDeleteVoucher,
-  useNotifyVoucher,
-  useValidateVoucher,
-} from "@/hooks/voucher";
-import { IVoucherFilter } from "@/interface/request/voucher";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,14 +11,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -50,17 +30,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useDeleteVoucher,
+  useNotifyVoucher,
+  useValidateVoucher,
+  useVouchers,
+} from "@/hooks/voucher";
+import { IVoucherFilter } from "@/interface/request/voucher";
+import {
+  mdiDeleteCircle,
+  mdiEmailFast,
+  mdiFilterMultiple,
+  mdiFilterRemove,
+  mdiLoading,
+  mdiMagnify,
+  mdiPencilCircle,
+  mdiPlus,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function VouchersPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -211,7 +211,7 @@ export default function VouchersPage() {
             onClick={() => setIsValidateDialogOpen(true)}
             className="flex items-center gap-2"
           >
-            <Icon path={mdiTagCheckOutline} size={0.7} />
+            <Icon path={mdiTagCheckOutline} size={0.8} />
             Kiểm tra mã
           </Button> */}
           <a
@@ -219,7 +219,7 @@ export default function VouchersPage() {
             className="flex items-center gap-2"
           >
             <Button className="flex items-center gap-2">
-              <Icon path={mdiPlus} size={0.7} />
+              <Icon path={mdiPlus} size={0.8} />
               Thêm mã giảm giá mới
             </Button>
           </a>
@@ -232,8 +232,8 @@ export default function VouchersPage() {
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
-                size={0.7}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                size={0.8}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
               />
               <Input
                 type="text"
@@ -254,7 +254,7 @@ export default function VouchersPage() {
                   className="flex items-center"
                   onClick={handleClearFilters}
                 >
-                  <Icon path={mdiFilterRemove} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterRemove} size={0.8} className="mr-2" />
                   Clear bộ lọc
                 </Button>
               )}
@@ -263,7 +263,7 @@ export default function VouchersPage() {
                 className="flex items-center"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+                <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
                 {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>
@@ -280,7 +280,7 @@ export default function VouchersPage() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Mã voucher
                     </label>
                     <Input
@@ -294,7 +294,7 @@ export default function VouchersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Trạng thái
                     </label>
                     <Select
@@ -319,7 +319,7 @@ export default function VouchersPage() {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm text-maintext mb-2 font-semibold">
+                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
                       Thời gian
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -387,28 +387,28 @@ export default function VouchersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Mã
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Loại
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Giá trị
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Sử dụng
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Thời gian
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Trạng thái
                   </TableHead>
-                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-maintext">
+                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-gray-700">
                     Thao tác
                   </TableHead>
                 </TableRow>
@@ -465,7 +465,7 @@ export default function VouchersPage() {
                           }}
                           title="Gửi thông báo"
                         >
-                          <Icon path={mdiEmailFast} size={0.7} />
+                          <Icon path={mdiEmailFast} size={0.8} />
                         </Button>
                         <a
                           href={`/admin/discounts/vouchers/edit/${
@@ -473,7 +473,7 @@ export default function VouchersPage() {
                           }`}
                         >
                           <Button variant="outline" size="icon" title="Sửa">
-                            <Icon path={mdiPencilCircle} size={0.7} />
+                            <Icon path={mdiPencilCircle} size={0.8} />
                           </Button>
                         </a>
                         <Button
@@ -485,7 +485,7 @@ export default function VouchersPage() {
                           }}
                           title="Xóa"
                         >
-                          <Icon path={mdiDeleteCircle} size={0.7} />
+                          <Icon path={mdiDeleteCircle} size={0.8} />
                         </Button>
                       </div>
                     </TableCell>
@@ -606,7 +606,7 @@ export default function VouchersPage() {
                 <>
                   <Icon
                     path={mdiLoading}
-                    size={0.7}
+                    size={0.8}
                     className="mr-2 animate-spin"
                   />
                   Đang xóa...
@@ -643,7 +643,7 @@ export default function VouchersPage() {
                 <>
                   <Icon
                     path={mdiLoading}
-                    size={0.7}
+                    size={0.8}
                     className="mr-2 animate-spin"
                   />
                   Đang gửi...
@@ -696,19 +696,19 @@ export default function VouchersPage() {
                 </h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-maintext">Mã giảm giá:</span>
+                    <span className="text-gray-700">Mã giảm giá:</span>
                     <span className="font-medium">
                       {validationResult.data.voucher.code}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-maintext">Tên:</span>
+                    <span className="text-gray-700">Tên:</span>
                     <span className="font-medium">
                       {validationResult.data.voucher.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-maintext">Loại:</span>
+                    <span className="text-gray-700">Loại:</span>
                     <span className="font-medium">
                       {validationResult.data.discountType === "PERCENTAGE"
                         ? "Phần trăm"
@@ -716,13 +716,13 @@ export default function VouchersPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-maintext">Giá trị giảm:</span>
+                    <span className="text-gray-700">Giá trị giảm:</span>
                     <span className="font-medium text-primary">
                       {formatCurrency(validationResult.data.discountValue)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-maintext">Thời hạn:</span>
+                    <span className="text-gray-700">Thời hạn:</span>
                     <span className="font-medium">
                       {formatDate(validationResult.data.voucher.startDate)} -{" "}
                       {formatDate(validationResult.data.voucher.endDate)}

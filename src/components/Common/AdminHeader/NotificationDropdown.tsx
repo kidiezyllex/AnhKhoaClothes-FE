@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { IconBell } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +11,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { mdiBell } from "@mdi/js";
 import Icon from "@mdi/react";
+import { useState } from "react";
 
 interface Notification {
   id: string;
@@ -91,7 +90,7 @@ export default function NotificationDropdown() {
       case "error":
         return "bg-red-50 text-red-600";
       default:
-        return "bg-gray-50 text-maintext";
+        return "bg-gray-50 text-gray-700";
     }
   };
 
@@ -102,7 +101,7 @@ export default function NotificationDropdown() {
           variant="ghost"
           className="relative flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 bg-gray-100"
         >
-          <Icon path={mdiBell} size={0.7} className="text-maintext" />
+          <Icon path={mdiBell} size={0.8} className="text-gray-700" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-white text-xs rounded-full">
               {unreadCount}
@@ -143,17 +142,17 @@ export default function NotificationDropdown() {
                   >
                     {notification.title}
                   </span>
-                  <span className="text-xs text-maintext">
+                  <span className="text-xs text-gray-700">
                     {notification.time}
                   </span>
                 </div>
-                <p className="text-sm text-maintext mt-1">
+                <p className="text-sm text-gray-700 mt-1">
                   {notification.content}
                 </p>
               </DropdownMenuItem>
             ))
           ) : (
-            <div className="p-4 text-center text-maintext">
+            <div className="p-4 text-center text-gray-700">
               Không có thông báo nào
             </div>
           )}

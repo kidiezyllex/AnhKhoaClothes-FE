@@ -1,23 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  useProductDetail,
-  useUpdateProduct,
-  useUpdateProductStatus,
-  useUpdateProductStock,
-  useUpdateProductImages,
-} from "@/hooks/product";
-import { useUploadImage } from "@/hooks/upload";
-import {
-  IProductUpdate,
-  IProductVariant,
-  IProductStockUpdate,
-  IProductStatusUpdate,
-  IProductImageUpdate,
-} from "@/interface/request/product";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,23 +20,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
-import { createFormData } from "@/utils/cloudinary";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import {
-  mdiPlus,
-  mdiTrashCan,
-  mdiArrowLeft,
-  mdiLoading,
-  mdiUpload,
-  mdiImageMultiple,
-} from "@mdi/js";
-import { AnimatePresence, motion } from "framer-motion";
 import {
   Select,
   SelectContent,
@@ -60,6 +27,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useProductDetail,
+  useUpdateProduct,
+  useUpdateProductImages,
+  useUpdateProductStatus,
+  useUpdateProductStock,
+} from "@/hooks/product";
+import { useUploadImage } from "@/hooks/upload";
+import {
+  IProductImageUpdate,
+  IProductStatusUpdate,
+  IProductStockUpdate,
+  IProductUpdate,
+} from "@/interface/request/product";
+import { createFormData } from "@/utils/cloudinary";
+import {
+  mdiArrowLeft,
+  mdiImageMultiple,
+  mdiLoading,
+  mdiTrashCan,
+  mdiUpload,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EditProductPage() {
   const params = useParams<{ id: string }>();
@@ -307,7 +305,7 @@ export default function EditProductPage() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2"
           >
-            <Icon path={mdiArrowLeft} size={0.7} />
+            <Icon path={mdiArrowLeft} size={0.8} />
             Quay lại
           </Button>
         </div>
@@ -353,7 +351,7 @@ export default function EditProductPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2"
         >
-          <Icon path={mdiArrowLeft} size={0.7} />
+          <Icon path={mdiArrowLeft} size={0.8} />
           Quay lại
         </Button>
       </div>
@@ -368,13 +366,13 @@ export default function EditProductPage() {
           <TabsTrigger value="status">Trạng thái</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="info" className="space-y-4 text-maintext">
+        <TabsContent value="info" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Thông tin cơ bản</CardTitle>
             </CardHeader>
             <form onSubmit={handleUpdateInfo}>
-              <CardContent className="space-y-4 text-maintext">
+              <CardContent className="space-y-4 text-gray-700">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Tên sản phẩm</Label>
@@ -499,7 +497,7 @@ export default function EditProductPage() {
                     <>
                       <Icon
                         path={mdiLoading}
-                        size={0.7}
+                        size={0.8}
                         className="animate-spin"
                       />
                       Đang cập nhật...
@@ -513,7 +511,7 @@ export default function EditProductPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="variants" className="space-y-4 text-maintext">
+        <TabsContent value="variants" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Biến thể sản phẩm</CardTitle>
@@ -533,7 +531,7 @@ export default function EditProductPage() {
                         <h3 className="text-lg font-medium">
                           {variant.colorId.name} - {variant.sizeId.name}
                         </h3>
-                        <p className="text-sm text-maintext">
+                        <p className="text-sm text-gray-700">
                           Giá:{" "}
                           {new Intl.NumberFormat("vi-VN", {
                             style: "currency",
@@ -548,7 +546,7 @@ export default function EditProductPage() {
                       <div className="space-y-2">
                         <Label
                           htmlFor={`stock-${variant.id}`}
-                          className="text-maintext"
+                          className="text-gray-700"
                         >
                           Số lượng tồn kho
                         </Label>
@@ -577,7 +575,7 @@ export default function EditProductPage() {
                               .variantUpdates[0]?.variantId === variant.id ? (
                               <Icon
                                 path={mdiLoading}
-                                size={0.7}
+                                size={0.8}
                                 className="animate-spin"
                               />
                             ) : (
@@ -589,7 +587,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-maintext">Hình ảnh sản phẩm</Label>
+                      <Label className="text-gray-700">Hình ảnh sản phẩm</Label>
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-2">
                           <Input
@@ -622,14 +620,14 @@ export default function EditProductPage() {
                               <>
                                 <Icon
                                   path={mdiLoading}
-                                  size={0.7}
+                                  size={0.8}
                                   className="animate-spin"
                                 />
                                 Đang tải...
                               </>
                             ) : (
                               <>
-                                <Icon path={mdiUpload} size={0.7} />
+                                <Icon path={mdiUpload} size={0.8} />
                                 Tải lên hình ảnh
                               </>
                             )}
@@ -663,11 +661,11 @@ export default function EditProductPage() {
                                     {updateProductImages.isPending ? (
                                       <Icon
                                         path={mdiLoading}
-                                        size={0.7}
+                                        size={0.8}
                                         className="animate-spin"
                                       />
                                     ) : (
-                                      <Icon path={mdiTrashCan} size={0.7} />
+                                      <Icon path={mdiTrashCan} size={0.8} />
                                     )}
                                   </Button>
                                 </div>
@@ -675,7 +673,7 @@ export default function EditProductPage() {
                             ))
                           ) : (
                             <div
-                              className="flex items-center justify-center border border-dashed border-gray-300 rounded-[6px] text-maintext"
+                              className="flex items-center justify-center border border-dashed border-gray-300 rounded-[6px] text-gray-700"
                               style={{ aspectRatio: "1/1" }}
                             >
                               <div className="flex flex-col items-center p-4">
@@ -694,7 +692,7 @@ export default function EditProductPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="status" className="space-y-4 text-maintext">
+        <TabsContent value="status" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Trạng thái sản phẩm</CardTitle>
@@ -702,10 +700,10 @@ export default function EditProductPage() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between px-4 py-3 border rounded-[6px]">
                 <div>
-                  <h3 className="font-medium text-maintext">
+                  <h3 className="font-medium text-gray-700">
                     Trạng thái hoạt động
                   </h3>
-                  <p className="text-sm text-maintext">
+                  <p className="text-sm text-gray-700">
                     {productUpdate.status === "ACTIVE"
                       ? "Sản phẩm đang được hiển thị và có thể mua"
                       : "Sản phẩm đang bị ẩn và không thể mua"}

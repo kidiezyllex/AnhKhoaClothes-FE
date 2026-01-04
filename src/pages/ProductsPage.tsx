@@ -1,24 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Icon } from "@mdi/react";
-import { mdiFilterMultiple, mdiClose, mdiMagnify } from "@mdi/js";
-import { useProducts, useSearchProducts } from "@/hooks/product";
-import { usePromotions } from "@/hooks/promotion";
-import {
-  applyPromotionsToProducts,
-  calculateProductDiscount,
-} from "@/lib/promotions";
-import { getSizeLabel } from "@/utils/sizeMapping";
-import type { IProductFilter } from "@/interface/request/product";
+import { ProductCard } from "@/components/ProductPage/ProductCard";
+import { ProductFilters } from "@/components/ProductPage/ProductFilters";
+import { ProductsListSkeleton } from "@/components/ProductPage/ProductsListSkeleton";
+import VoucherForm from "@/components/ProductPage/VoucherForm";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,26 +12,40 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
-import { checkImageUrl } from "@/lib/utils";
-import { useCartStore } from "@/stores/useCartStore";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { motion, AnimatePresence } from "framer-motion";
-import VoucherForm from "@/components/ProductPage/VoucherForm";
+import { Button } from "@/components/ui/button";
 import CartIcon from "@/components/ui/CartIcon";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { ProductCard } from "@/components/ProductPage/ProductCard";
-import { ProductFilters } from "@/components/ProductPage/ProductFilters";
-import { ProductsListSkeleton } from "@/components/ProductPage/ProductsListSkeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useProducts, useSearchProducts } from "@/hooks/product";
+import { usePromotions } from "@/hooks/promotion";
+import type { IProductFilter } from "@/interface/request/product";
+import {
+  applyPromotionsToProducts,
+  calculateProductDiscount,
+} from "@/lib/promotions";
+import { checkImageUrl } from "@/lib/utils";
+import { useCartStore } from "@/stores/useCartStore";
+import { getSizeLabel } from "@/utils/sizeMapping";
+import { mdiFilterMultiple, mdiMagnify } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -391,8 +390,8 @@ export default function ProductsPage() {
     }
 
     const cartItem = {
-      id: firstVariant.id,
-      productId: (product as any)?.id,
+      id: String(firstVariant._id || firstVariant.id),
+      productId: String((product as any)?.id),
       name: (product as any)?.productDisplayName || (product as any)?.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -405,7 +404,7 @@ export default function ProductsPage() {
             firstVariant.images?.[0]
         ) || "",
       quantity: 1,
-      slug: (product as any)?.code,
+      slug: (product as any)?.code || String((product as any)?.id),
       brand:
         typeof (product as any)?.brand === "string"
           ? (product as any)?.brand
@@ -461,14 +460,14 @@ export default function ProductsPage() {
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/"
-              className="!text-maintext hover:!text-maintext"
+              className="!text-gray-700 hover:!text-gray-700"
             >
               Trang chủ
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator className="!text-maintext hover:!text-maintext" />
+          <BreadcrumbSeparator className="!text-gray-700 hover:!text-gray-700" />
           <BreadcrumbItem>
-            <BreadcrumbPage className="!text-maintext hover:!text-maintext">
+            <BreadcrumbPage className="!text-gray-700 hover:!text-gray-700">
               Tất cả sản phẩm
             </BreadcrumbPage>
           </BreadcrumbItem>
@@ -511,14 +510,14 @@ export default function ProductsPage() {
                 onClick={toggleFilter}
                 className="lg:hidden flex items-center gap-2"
               >
-                <Icon path={mdiFilterMultiple} size={0.7} />
+                <Icon path={mdiFilterMultiple} size={0.8} />
                 Bộ lọc
               </Button>
               <div className="relative flex-1">
                 <Icon
                   path={mdiMagnify}
-                  size={0.7}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                  size={0.8}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
                 />
                 <Input
                   placeholder="Tìm kiếm sản phẩm..."
@@ -559,7 +558,7 @@ export default function ProductsPage() {
           ) : filteredProducts.length > 0 ? (
             <>
               <div className="flex justify-between items-center mb-4">
-                <p className="text-sm text-maintext font-semibold">
+                <p className="text-sm text-gray-700 font-semibold">
                   Tìm thấy{" "}
                   <span className="text-primary text-lg">
                     {data?.data?.count || filteredProducts.length}
@@ -732,7 +731,7 @@ export default function ProductsPage() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-maintext mb-4">Không tìm thấy sản phẩm nào</p>
+              <p className="text-gray-700 mb-4">Không tìm thấy sản phẩm nào</p>
               {(searchQuery || Object.keys(filters).length > 0) && (
                 <Button
                   onClick={() => {

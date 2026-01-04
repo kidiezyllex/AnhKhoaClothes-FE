@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
- 
-import { IconSearch } from '@tabler/icons-react';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { IconSearch } from "@tabler/icons-react";
 export default function SearchBar() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
   return (
-    <form 
-      onSubmit={handleSearch}
-      className="relative w-full max-w-4xl"
-    >
+    <form onSubmit={handleSearch} className="relative w-full max-w-4xl">
       <div className="relative">
-        <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext" size={18} />
+        <IconSearch
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
+          size={18}
+        />
         <Input
           type="text"
           placeholder="Tìm kiếm..."
@@ -28,4 +28,4 @@ export default function SearchBar() {
       </div>
     </form>
   );
-} 
+}

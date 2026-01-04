@@ -1,15 +1,14 @@
 "use client";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 export default function NotFound() {
   const navigate = useNavigate();
   return (
     <div>
-
       <div className="text-center mt-20">
-        <h1 className="text-3xl font-bold text-maintext mb-4">
+        <h1 className="text-3xl font-bold text-gray-700 mb-4">
           Page Not Found
         </h1>
-        <p className="text-maintext mb-4">
+        <p className="text-gray-700 mb-4">
           Nội dung bạn tìm kiếm không có. Vui lòng quay lại!
         </p>
         <button
@@ -19,7 +18,6 @@ export default function NotFound() {
           Quay lại
         </button>
       </div>
-
     </div>
   );
 }

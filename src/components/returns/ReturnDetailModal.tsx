@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -12,24 +19,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { useMyReturnDetail, useCancelMyReturn } from "@/hooks/return";
+import { useCancelMyReturn, useMyReturnDetail } from "@/hooks/return";
 import { IReturn } from "@/interface/response/return";
-import { toast } from "react-toastify";
+import { mdiCancel, mdiCheckCircle, mdiClockTimeFour } from "@mdi/js";
+import { Icon } from "@mdi/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Icon } from "@mdi/react";
+import { useState } from "react";
+import { toast } from "react-toastify";
 import ConfirmCancelModal from "./ConfirmCancelModal";
-import { mdiCheckCircle, mdiClockTimeFour, mdiCancel } from "@mdi/js";
 interface ReturnDetailModalProps {
   returnItem: IReturn | null;
 }
@@ -64,7 +63,7 @@ export default function ReturnDetailModal({
             variant="outline"
             className="bg-yellow-50 text-yellow-600 border-yellow-200"
           >
-            <Icon path={mdiClockTimeFour} size={0.7} className="mr-1" />
+            <Icon path={mdiClockTimeFour} size={0.8} className="mr-1" />
             Chờ xử lý
           </Badge>
         );
@@ -74,7 +73,7 @@ export default function ReturnDetailModal({
             variant="outline"
             className="bg-[#EAEBF2] text-green-600 border-green-200"
           >
-            <Icon path={mdiCheckCircle} size={0.7} className="mr-1" />
+            <Icon path={mdiCheckCircle} size={0.8} className="mr-1" />
             Đã hoàn tiền
           </Badge>
         );
@@ -84,7 +83,7 @@ export default function ReturnDetailModal({
             variant="outline"
             className="bg-red-50 text-red-600 border-red-200"
           >
-            <Icon path={mdiCancel} size={0.7} className="mr-1" />
+            <Icon path={mdiCancel} size={0.8} className="mr-1" />
             Đã hủy
           </Badge>
         );
@@ -124,11 +123,11 @@ export default function ReturnDetailModal({
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   isCompleted
                     ? "bg-primary text-white"
-                    : "bg-gray-200 text-maintext"
+                    : "bg-gray-200 text-gray-700"
                 }`}
               >
                 {isCompleted ? (
-                  <Icon path={mdiCheckCircle} size={0.7} />
+                  <Icon path={mdiCheckCircle} size={0.8} />
                 ) : (
                   <span className="text-sm">{index + 1}</span>
                 )}
@@ -136,13 +135,13 @@ export default function ReturnDetailModal({
               <div className="flex-1">
                 <p
                   className={`font-medium ${
-                    isCompleted ? "text-gray-900" : "text-maintext"
+                    isCompleted ? "text-gray-900" : "text-gray-700"
                   }`}
                 >
                   {step.label}
                 </p>
                 {step.date && (
-                  <p className="text-sm text-maintext">
+                  <p className="text-sm text-gray-700">
                     {formatDate(step.date)}
                   </p>
                 )}
@@ -202,11 +201,11 @@ export default function ReturnDetailModal({
             <CardContent>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-maintext">Mã yêu cầu:</span>
+                  <span className="text-gray-700">Mã yêu cầu:</span>
                   <span className="ml-2 font-medium">#{returnData.code}</span>
                 </div>
                 <div>
-                  <span className="text-maintext">Đơn hàng gốc:</span>
+                  <span className="text-gray-700">Đơn hàng gốc:</span>
                   <span className="ml-2 font-medium">
                     #
                     {typeof returnData.originalOrder === "string"
@@ -215,13 +214,13 @@ export default function ReturnDetailModal({
                   </span>
                 </div>
                 <div>
-                  <span className="text-maintext">Ngày tạo:</span>
+                  <span className="text-gray-700">Ngày tạo:</span>
                   <span className="ml-2 font-medium">
                     {formatDate(returnData.createdAt)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-maintext">Tổng tiền hoàn trả:</span>
+                  <span className="text-gray-700">Tổng tiền hoàn trả:</span>
                   <span className="ml-2 font-medium text-primary">
                     {formatCurrency(returnData.totalRefund)}
                   </span>
@@ -280,7 +279,7 @@ export default function ReturnDetailModal({
                                 ? item.product.name
                                 : "Sản phẩm"}
                             </p>
-                            <p className="text-sm text-maintext">
+                            <p className="text-sm text-gray-700">
                               {typeof item === "object" &&
                               "product" in item &&
                               typeof item.product === "object"
@@ -319,7 +318,7 @@ export default function ReturnDetailModal({
             >
               <DialogTrigger asChild>
                 <Button variant="destructive">
-                  <Icon path={mdiCancel} size={0.7} className="mr-1" />
+                  <Icon path={mdiCancel} size={0.8} className="mr-1" />
                   Hủy yêu cầu
                 </Button>
               </DialogTrigger>

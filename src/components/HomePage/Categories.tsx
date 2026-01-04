@@ -1,14 +1,14 @@
-import { motion, useInView } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { mdiArrowRight, mdiChevronLeft, mdiChevronRight } from "@mdi/js";
 import Icon from "@mdi/react";
-import { mdiChevronLeft, mdiChevronRight, mdiArrowRight } from "@mdi/js";
-import { Button } from "../ui/button";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { motion, useInView } from "framer-motion";
+import { useEffect, useRef } from "react";
 import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
 import "swiper/css/effect-cards";
-import { Pagination, Navigation, Autoplay } from "swiper/modules";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import { Autoplay, Navigation, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Button } from "../ui/button";
 
 const categories = [
   {
@@ -419,13 +419,13 @@ export const Categories = () => {
                   Xem tất cả danh mục
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.8}
                     className="ml-2 group-hover:translate-x-1 transition-transform"
                   />
                 </Button>
               </motion.div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-maintext dark:text-white">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-700 dark:text-white">
               THỜI TRANG <span className="text-extra">HOT TREND 2026</span>
             </h2>
           </motion.div>

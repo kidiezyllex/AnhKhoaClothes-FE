@@ -59,6 +59,7 @@ export interface IAddressUpdate extends Partial<IAddressCreate> {}
 
 export interface IProfileUpdate {
   fullName?: string;
+  email?: string;
   phoneNumber?: string;
   gender?: 'Nam' | 'Nữ' | 'Khác';
   birthday?: string | Date;

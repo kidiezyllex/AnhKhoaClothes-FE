@@ -24,133 +24,64 @@ export interface IOrderStaff {
 
 // Define IOrderItem locally for IPopulatedOrderItem
 export interface IOrderItem {
-  id: string;
-  product: string; // This will be replaced by IOrderProduct in IPopulatedOrderItem
-  variant?: { // Assuming variant is optional here and might have colorId/sizeId
-    colorId?: string;
-    sizeId?: string;
-  };
-  quantity: number;
-  price: number;
-  // Add other necessary fields if IOrderItem is used elsewhere or has more props
-}
-
-export interface IProductVariant {
-  id: number;
-  productId: number;
-  colorId: number;
-  sizeId: number;
-  price: string;
-  stock: number;
-  createdAt: string;
-  updatedAt: string;
-  product: {
-    id: number;
-    code: string;
-    name: string;
-    description: string;
-    weight: string;
-    status: string;
-    brand: {
-      id: number;
-      name: string;
-    };
-    category: {
-      id: number;
-      name: string;
-    };
-    material: {
-      id: number;
-      name: string;
-    };
-  };
-  color: {
-    id: number;
-    name: string;
-    code: string;
-  };
-  size: {
-    id: number;
-    value: string;
-  };
-  images: Array<{
-    id: number;
-    imageUrl: string;
-  }>;
-}
-
-export interface IPopulatedOrderItem extends Omit<IOrderItem, 'product'> {
-  product?: IOrderProduct;
-  productVariant?: IProductVariant;
-}
-
-// Define IShippingAddress locally for IOrder
-export interface IShippingAddress {
+  id?: string;
+  product_id: number;
   name: string;
-  phoneNumber: string;
-  provinceId: string; // Or full Province object if populated
-  districtId: string; // Or full District object
-  wardId: string;     // Or full Ward object
-  specificAddress: string;
-  // country?: string;
-  // zipCode?: string;
+  qty: number;
+  size_selected: string;
+  color_selected: string;
+  images: string[];
+  price_sale: number;
+}
+
+export interface IShippingAddress {
+  address: string;
+  city: string;
+  postal_code: string;
+  country: string;
+  recipient_phone_number: string;
 }
 
 export interface IOrder {
   id: string;
-  orderNumber?: string;
-  code: string;
-  customerId?: number;
-  staffId?: number;
-  voucherId?: number | null;
-  customer: IOrderCustomer;
-  staff?: IOrderStaff;
-  items: IPopulatedOrderItem[];
-  voucher?: any;
-  subTotal: number;
-  discount: number;
-  total: number;
-  shippingAddress?: IShippingAddress;
-  shippingName: string;
-  shippingPhoneNumber: string;
-  shippingProvinceId: string;
-  shippingDistrictId: string;
-  shippingWardId: string;
-  shippingSpecificAddress: string;
-  paymentMethod: 'CASH' | 'BANK_TRANSFER' | 'COD' | 'MIXED';
-  paymentStatus: 'PENDING' | 'PARTIAL_PAID' | 'PAID';
-  orderStatus: 'CHO_XAC_NHAN' | 'CHO_GIAO_HANG' | 'DANG_VAN_CHUYEN' | 'DA_GIAO_HANG' | 'HOAN_THANH' | 'DA_HUY';
-  paymentUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface IOrderResponse {
-  success: boolean;
-  data: {
-    id: string;
-    orderNumber: string;
-    customer: any;
-    items: any[];
-    voucher: any;
-    subTotal: number;
-    discount: number;
-    total: number;
-    shippingAddress: any;
-    paymentMethod: string;
-    orderStatus: 'CHO_XAC_NHAN' | 'CHO_GIAO_HANG' | 'DANG_VAN_CHUYEN' | 'DA_GIAO_HANG' | 'HOAN_THANH' | 'DA_HUY';
-    paymentStatus: 'PENDING' | 'PARTIAL_PAID' | 'PAID';
-    createdAt: string;
-    updatedAt: string;
-  };
+  user_id: string;
+  payment_method: string;
+  payment_result?: any;
+  tax_price: number;
+  shipping_price: number;
+  total_price: number;
+  is_paid: boolean;
+  paid_at: string | null;
+  is_delivered: boolean;
+  delivered_at: string | null;
+  is_cancelled: boolean;
+  is_processing: boolean;
+  is_outfit_purchase: boolean;
+  status: 'CHO_XAC_NHAN' | 'CHO_GIAO_HANG' | 'DANG_VAN_CHUYEN' | 'DA_GIAO_HANG' | 'HOAN_THANH' | 'DA_HUY';
+  created_at: string;
+  updated_at: string;
+  items: IOrderItem[];
+  shipping_address: IShippingAddress;
+  // Compatibility fields
+  code?: string;
+  createdAt?: string;
+  total?: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  orderStatus?: string;
 }
 
 export interface IOrdersResponse {
-  success: boolean;
+  status: string;
   message: string;
   data: {
     orders: IOrder[];
-    pagination: {
+    page: number;
+    pages: number;
+    perPage: number;
+    count: number;
+    // Compatibility pagination
+    pagination?: {
       totalItems: number;
       totalPages: number;
       currentPage: number;
@@ -159,14 +90,14 @@ export interface IOrdersResponse {
   };
 }
 
-export interface IActionResponse {
-  success: boolean;
-  message: string;
-  data?: any;
-}
-
-export interface IPOSOrderCreateResponse {
-  success: boolean;
+export interface IOrderResponse {
+  status: string;
   message: string;
   data: IOrder;
+}
+
+export interface IActionResponse {
+  status: string;
+  message: string;
+  data?: any;
 } 

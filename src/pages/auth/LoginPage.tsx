@@ -1,20 +1,14 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useUser } from "@/context/useUserContext";
+import { useLogin } from "@/hooks/authentication";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useUser } from "@/context/useUserContext";
-import { motion } from "framer-motion";
-import { useLogin } from "@/hooks/authentication";
 
 interface LoginFormValues {
   email: string;
@@ -74,7 +68,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4 h-full">
       <div>
-        <label className="text-maintext dark:text-gray-300 font-semibold block mb-2 text-sm">
+        <label className="text-gray-700 dark:text-gray-300 font-semibold block mb-2 text-sm">
           Email
         </label>
         <Input
@@ -88,7 +82,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         />
       </div>
       <div>
-        <label className="text-maintext dark:text-gray-300 font-semibold block mb-2 text-sm">
+        <label className="text-gray-700 dark:text-gray-300 font-semibold block mb-2 text-sm">
           Mật khẩu
         </label>
         <div className="relative">
@@ -104,7 +98,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
           <button
             type="button"
             onClick={togglePasswordVisibility}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-maintext hover:text-maintext focus:outline-none"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-700 hover:text-gray-700 focus:outline-none"
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -176,7 +170,7 @@ const LoginPage: React.FC = () => {
         >
           <Card className="flex flex-col w-full h-full shadow-sm bg-white dark:bg-gray-800/40 backdrop-blur-md border border-white/20 dark:border-gray-700/30 backdrop-filter">
             <CardHeader>
-              <CardTitle className="text-xl font-bold text-maintext dark:text-white flex items-center justify-between">
+              <CardTitle className="text-xl font-bold text-gray-700 dark:text-white flex items-center justify-between">
                 Đăng nhập tài khoản
                 <img
                   draggable="false"

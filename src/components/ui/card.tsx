@@ -36,7 +36,7 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-xl font-semibold leading-none tracking-tight p-4 py-3 border-b border-b-[#ccc] bg-white text-maintext dark:text-white flex items-center gap-1",
+      "text-xl font-semibold leading-none tracking-tight p-4 py-3 border-b border-b-[#ccc] bg-white text-gray-700 dark:text-white flex items-center gap-1",
       className
     )}
     {...props}
@@ -81,9 +81,9 @@ CardFooter.displayName = "CardFooter";
 
 export {
   Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
   CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 };

@@ -1,8 +1,8 @@
-import React, { useRef } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@mdi/react";
 import { mdiArrowRight } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 //                                                                                                                     Dữ liệu cho các bộ sưu tập
 const collectionsData = [
@@ -99,7 +99,7 @@ const CollectionCard = ({
                   Khám phá ngay
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.8}
                     className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
                   />
                 </span>
@@ -170,13 +170,13 @@ export const Collections = () => {
                   Xem tất cả bộ sưu tập
                   <Icon
                     path={mdiArrowRight}
-                    size={0.7}
+                    size={0.8}
                     className="ml-2 group-hover:translate-x-1 transition-transform"
                   />
                 </Button>
               </motion.div>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-maintext dark:text-white">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-700 dark:text-white">
               BỘ SƯU TẬP <span className="text-extra">THỜI TRANG</span>
             </h2>
           </motion.div>
@@ -214,7 +214,7 @@ export const Collections = () => {
             Xem tất cả bộ sưu tập
             <Icon
               path={mdiArrowRight}
-              size={0.7}
+              size={0.8}
               className="ml-2 group-hover:translate-x-1 transition-transform"
             />
           </Button>

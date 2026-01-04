@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  useAccount,
-  useUpdateAccount,
-  useUpdateAccountStatus,
-} from "@/hooks/account";
-import {
-  IAccountUpdate,
-  IAccountStatusUpdate,
-} from "@/interface/request/account";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,30 +12,26 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  useAccount,
+  useUpdateAccount,
+  useUpdateAccountStatus,
+} from "@/hooks/account";
+import {
+  IAccountStatusUpdate,
+  IAccountUpdate,
+} from "@/interface/request/account";
+import { mdiArrowLeft, mdiLoading } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Icon } from "@mdi/react";
-import { mdiArrowLeft, mdiLoading } from "@mdi/js";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function EditAccountPage() {
   const params = useParams<{ id: string }>();
@@ -194,7 +181,7 @@ export default function EditAccountPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full">
         <h2 className="text-xl font-bold">Không thể tải thông tin tài khoản</h2>
-        <p className="text-maintext">
+        <p className="text-gray-700">
           Có lỗi xảy ra: {error?.message || "Không tìm thấy tài khoản"}
         </p>
         <Button variant="outline" onClick={() => navigate(-1)} className="mt-4">
@@ -231,21 +218,24 @@ export default function EditAccountPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2"
         >
-          <Icon path={mdiArrowLeft} size={0.7} />
+          <Icon path={mdiArrowLeft} size={0.8} />
           Quay lại
         </Button>
       </div>
 
       <div className="flex items-center space-x-4 bg-white p-8 rounded-[6px] shadow-sm">
         <Avatar className="w-24 h-24 border-2 border-primary">
-          <AvatarImage src={formData.avatar} />
-          <AvatarFallback className="text-2xl">
-            {getInitials(formData.fullName || "")}
-          </AvatarFallback>
+          <AvatarImage
+            src={
+              formData.avatar ||
+              `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.fullName}`
+            }
+          />
+          <AvatarFallback>{formData.fullName?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
         <div className="space-y-1">
           <h2 className="text-3xl font-bold">{formData.fullName}</h2>
-          <p className="text-maintext text-lg">
+          <p className="text-gray-700 text-lg">
             {accountData.data.role === "ADMIN"
               ? "Quản trị viên"
               : accountData.data.role === "STAFF"
@@ -278,10 +268,10 @@ export default function EditAccountPage() {
           className="space-y-4 bg-white"
         >
           <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="info" className="text-maintext">
+            <TabsTrigger value="info" className="text-gray-700">
               Thông tin cơ bản
             </TabsTrigger>
-            <TabsTrigger value="advanced" className="text-maintext">
+            <TabsTrigger value="advanced" className="text-gray-700">
               Thông tin bổ sung
             </TabsTrigger>
           </TabsList>
@@ -434,7 +424,7 @@ export default function EditAccountPage() {
           >
             {updateAccount.isPending ? (
               <>
-                <Icon path={mdiLoading} size={0.7} className="animate-spin" />
+                <Icon path={mdiLoading} size={0.8} className="animate-spin" />
                 Đang xử lý...
               </>
             ) : (

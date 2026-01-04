@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@mdi/react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 //                                                                                                                     Dữ liệu mẫu cho kết quả tìm kiếm
 const searchResults = [
@@ -73,7 +73,7 @@ export const SearchBox = () => {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(true)}
-        className="text-maintext hover:text-primary transition-colors"
+        className="text-gray-700 hover:text-primary transition-colors"
       >
         <Icon path={mdiMagnify} size={1} />
       </Button>
@@ -105,12 +105,12 @@ export const SearchBox = () => {
           >
             <div className="container mx-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-maintext">Tìm kiếm</h3>
+                <h3 className="text-xl font-bold text-gray-700">Tìm kiếm</h3>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsOpen(false)}
-                  className="text-maintext hover:text-maintext"
+                  className="text-gray-700 hover:text-gray-700"
                 >
                   <Icon path={mdiClose} size={1} />
                 </Button>
@@ -121,12 +121,12 @@ export const SearchBox = () => {
                   <Icon
                     path={mdiMagnify}
                     size={1}
-                    className="text-maintext mr-2"
+                    className="text-gray-700 mr-2"
                   />
                   <Input
                     type="text"
                     placeholder="Tìm kiếm sản phẩm, danh mục..."
-                    className="w-full py-3 outline-none text-maintext"
+                    className="w-full py-3 outline-none text-gray-700"
                     value={searchValue}
                     onChange={(e) => handleSearch(e.target.value)}
                     autoFocus
@@ -135,12 +135,12 @@ export const SearchBox = () => {
 
                 {searchValue.trim() !== "" && (
                   <div className="mt-6">
-                    <h4 className="text-sm text-maintext mb-2">
+                    <h4 className="text-sm text-gray-700 mb-2">
                       Kết quả ({filteredResults.length})
                     </h4>
 
                     {filteredResults.length === 0 ? (
-                      <p className="text-maintext italic">
+                      <p className="text-gray-700 italic">
                         Không tìm thấy kết quả nào phù hợp.
                       </p>
                     ) : (
@@ -155,10 +155,10 @@ export const SearchBox = () => {
                           >
                             <div className="flex justify-between">
                               <div>
-                                <p className="font-medium text-maintext">
+                                <p className="font-medium text-gray-700">
                                   {result.name}
                                 </p>
-                                <span className="text-xs text-maintext">
+                                <span className="text-xs text-gray-700">
                                   {result.category}
                                 </span>
                               </div>

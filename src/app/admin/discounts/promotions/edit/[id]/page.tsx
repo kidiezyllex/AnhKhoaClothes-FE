@@ -268,7 +268,7 @@ export default function EditPromotionPage() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-2"
         >
-          <Icon path={mdiArrowLeft} size={0.7} />
+          <Icon path={mdiArrowLeft} size={0.8} />
           Quay lại
         </Button>
       </div>
@@ -595,7 +595,7 @@ export default function EditPromotionPage() {
                     <>
                       <Icon
                         path={mdiLoading}
-                        size={0.7}
+                        size={0.8}
                         className="mr-2 animate-spin"
                       />
                       Đang cập nhật...

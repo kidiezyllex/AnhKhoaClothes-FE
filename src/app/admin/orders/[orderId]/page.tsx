@@ -1,55 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@mdi/react";
-import {
-  mdiPrinter,
-  mdiFileDocument,
-  mdiDelete,
-  mdiFileSign,
-  mdiPackageVariantClosedPlus,
-  mdiTruckFast,
-  mdiMapMarker,
-  mdiCheckDecagram,
-} from "@mdi/js";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useOrderDetail,
-  useUpdateOrderStatus,
-  useCancelOrder,
-} from "@/hooks/order";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { motion } from "framer-motion";
-import { CheckCircle, Circle } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -58,10 +9,59 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  useCancelOrder,
+  useOrderDetail,
+  useUpdateOrderStatus,
+} from "@/hooks/order";
 import { getSizeLabel } from "@/utils/sizeMapping";
-import jsPDF from "jspdf";
+import {
+  mdiCheckDecagram,
+  mdiDelete,
+  mdiFileDocument,
+  mdiFileSign,
+  mdiMapMarker,
+  mdiPackageVariantClosedPlus,
+  mdiPrinter,
+  mdiTruckFast,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { motion } from "framer-motion";
 import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
+import { CheckCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ProductInfo {
   name: string;
@@ -218,9 +218,9 @@ const OrderStepper = ({ currentStatus }: { currentStatus: string }) => {
             const isActive = index <= currentStepIdx;
 
             let circleClasses =
-              "bg-gray-100 dark:bg-gray-700 text-maintext dark:text-maintext border-gray-300 dark:border-gray-600";
+              "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-700 border-gray-300 dark:border-gray-600";
             let iconToShow;
-            let labelClasses = "text-maintext dark:text-maintext font-medium";
+            let labelClasses = "text-gray-700 dark:text-gray-700 font-medium";
 
             if (isActive) {
               circleClasses = `${step.colors.bgClass} ${step.colors.textClass} ${step.colors.borderClass} border-2 shadow-sm`;
@@ -243,7 +243,7 @@ const OrderStepper = ({ currentStatus }: { currentStatus: string }) => {
                 <Icon
                   path={step.icon}
                   size={1}
-                  className="text-maintext dark:text-maintext"
+                  className="text-gray-700 dark:text-gray-700"
                 />
               );
             }
@@ -328,7 +328,7 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
       default:
         return {
           label: "Không xác định",
-          className: "!bg-gray-50 !text-maintext !border-gray-500",
+          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
         };
     }
   };
@@ -353,7 +353,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
       default:
         return {
           label: "Không xác định",
-          className: "!bg-gray-50 !text-maintext !border-gray-500",
+          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
         };
     }
   };
@@ -827,7 +827,7 @@ export default function OrderDetailPage() {
   }
   const order = orderDetail.data as any;
   return (
-    <div className="space-y-4 text-maintext">
+    <div className="space-y-4 text-gray-700">
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div className="mb-0 md:mb-0">
           <Breadcrumb>
@@ -857,7 +857,7 @@ export default function OrderDetailPage() {
             variant="outline"
             onClick={() => setIsInvoiceDialogOpen(true)}
           >
-            <Icon path={mdiFileDocument} size={0.7} />
+            <Icon path={mdiFileDocument} size={0.8} />
             Xem hóa đơn
           </Button>
           <Button
@@ -866,7 +866,7 @@ export default function OrderDetailPage() {
             disabled={["DA_HUY", "HOAN_THANH"].includes(order.orderStatus)}
             onClick={() => setIsConfirmCancelDialogOpen(true)}
           >
-            <Icon path={mdiDelete} size={0.7} />
+            <Icon path={mdiDelete} size={0.8} />
             Hủy đơn hàng
           </Button>
           <Button
@@ -895,28 +895,28 @@ export default function OrderDetailPage() {
             <CardContent className="p-4">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Mã đơn hàng:</span>
-                  <span className="font-medium text-maintext">
+                  <span className="text-gray-700">Mã đơn hàng:</span>
+                  <span className="font-medium text-gray-700">
                     {order.code}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Ngày tạo:</span>
-                  <span className="text-maintext">
+                  <span className="text-gray-700">Ngày tạo:</span>
+                  <span className="text-gray-700">
                     {formatDate(order.createdAt)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Trạng thái đơn hàng:</span>
+                  <span className="text-gray-700">Trạng thái đơn hàng:</span>
                   <OrderStatusBadge status={order.orderStatus} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Trạng thái thanh toán:</span>
+                  <span className="text-gray-700">Trạng thái thanh toán:</span>
                   <PaymentStatusBadge status={order.paymentStatus} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Phương thức thanh toán:</span>
-                  <span className="text-maintext">
+                  <span className="text-gray-700">Phương thức thanh toán:</span>
+                  <span className="text-gray-700">
                     {getPaymentMethodName(order.paymentMethod)}
                   </span>
                 </div>
@@ -933,28 +933,28 @@ export default function OrderDetailPage() {
                 {typeof order.customer === "object" ? (
                   <>
                     <div className="flex justify-between items-center">
-                      <span className="text-maintext">Tên khách hàng:</span>
-                      <span className="font-medium text-maintext">
+                      <span className="text-gray-700">Tên khách hàng:</span>
+                      <span className="font-medium text-gray-700">
                         {order.customer?.fullName}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-maintext">Email:</span>
-                      <span className="text-maintext">
+                      <span className="text-gray-700">Email:</span>
+                      <span className="text-gray-700">
                         {formatEmailDisplay(order.customer?.email)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-maintext">Số điện thoại:</span>
-                      <span className="text-maintext">
+                      <span className="text-gray-700">Số điện thoại:</span>
+                      <span className="text-gray-700">
                         {formatPhoneDisplay(order.customer?.phoneNumber)}
                       </span>
                     </div>
                   </>
                 ) : (
                   <div className="flex justify-between items-center">
-                    <span className="text-maintext">Tên khách hàng:</span>
-                    <span className="font-medium text-maintext">
+                    <span className="text-gray-700">Tên khách hàng:</span>
+                    <span className="font-medium text-gray-700">
                       {order.customer}
                     </span>
                   </div>
@@ -972,8 +972,8 @@ export default function OrderDetailPage() {
               <CardContent className="p-4">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-maintext">Tên nhân viên:</span>
-                    <span className="font-medium text-maintext">
+                    <span className="text-gray-700">Tên nhân viên:</span>
+                    <span className="font-medium text-gray-700">
                       {order.staff.fullName}
                     </span>
                   </div>
@@ -990,21 +990,21 @@ export default function OrderDetailPage() {
             <CardContent className="p-4">
               <div className="space-y-2">
                 {order.shippingSpecificAddress === "Tại quầy" ? (
-                  <p className="text-maintext">Tại quầy</p>
+                  <p className="text-gray-700">Tại quầy</p>
                 ) : (
                   <>
                     {order.shippingName && (
-                      <p className="text-maintext">
+                      <p className="text-gray-700">
                         Người nhận: {order.shippingName}
                       </p>
                     )}
                     {order.shippingPhoneNumber && (
-                      <p className="text-maintext">
+                      <p className="text-gray-700">
                         Số điện thoại:{" "}
                         {formatPhoneDisplay(order.shippingPhoneNumber)}
                       </p>
                     )}
-                    <p className="text-maintext">
+                    <p className="text-gray-700">
                       Địa chỉ:{" "}
                       {order.shippingSpecificAddress ||
                         "Không có thông tin địa chỉ"}
@@ -1052,16 +1052,16 @@ export default function OrderDetailPage() {
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
-                              <div className="font-semibold text-sm text-maintext line-clamp-2">
+                              <div className="font-semibold text-sm text-gray-700 line-clamp-2">
                                 {productInfo.name}
                               </div>
-                              <div className="text-sm text-maintext mt-0.5">
+                              <div className="text-sm text-gray-700 mt-0.5">
                                 Thương hiệu: {productInfo.brand}
                               </div>
-                              <div className="text-sm text-maintext mt-0.5">
+                              <div className="text-sm text-gray-700 mt-0.5">
                                 Mã: {productInfo.code}
                               </div>
-                              <div className="text-sm text-maintext mt-0.5">
+                              <div className="text-sm text-gray-700 mt-0.5">
                                 Màu: {productInfo.colorName} | Size:{" "}
                                 {productInfo.sizeName}
                               </div>
@@ -1093,14 +1093,14 @@ export default function OrderDetailPage() {
             <CardContent className="p-4">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-maintext">Tổng tiền hàng:</span>
-                  <span className="text-maintext">
+                  <span className="text-gray-700">Tổng tiền hàng:</span>
+                  <span className="text-gray-700">
                     {formatCurrency(order.subTotal)}
                   </span>
                 </div>
                 {order.voucher && (
                   <div className="flex justify-between items-center">
-                    <span className="text-maintext">
+                    <span className="text-gray-700">
                       Mã giảm giá ({order.voucher.code}):
                     </span>
                     <span className="text-red-500">
@@ -1109,7 +1109,7 @@ export default function OrderDetailPage() {
                   </div>
                 )}
                 <div className="flex justify-between items-center pt-3 border-t">
-                  <span className="font-bold text-maintext">
+                  <span className="font-bold text-gray-700">
                     Tổng thanh toán:
                   </span>
                   <span className="text-lg font-bold text-primary">
@@ -1235,8 +1235,8 @@ export default function OrderDetailPage() {
                         className="w-auto mx-auto h-10 select-none cursor-pointer"
                       />
                     </div>
-                    <p className="text-sm text-maintext">Hóa đơn bán hàng</p>
-                    <p className="text-sm text-maintext">
+                    <p className="text-sm text-gray-700">Hóa đơn bán hàng</p>
+                    <p className="text-sm text-gray-700">
                       Ngày: {formatDate(order.createdAt)}
                     </p>
                   </div>
@@ -1244,7 +1244,7 @@ export default function OrderDetailPage() {
                     <h3 className="font-bold text-xl mb-2">
                       Mã hóa đơn: {generateInvoiceCode(order.code)}
                     </h3>
-                    <p className="text-sm text-maintext">
+                    <p className="text-sm text-gray-700">
                       <OrderStatusBadge status={order.orderStatus} />
                     </p>
                   </div>
@@ -1316,13 +1316,13 @@ export default function OrderDetailPage() {
                               <div className="font-medium text-sm">
                                 {productInfo.name}
                               </div>
-                              <div className="text-xs text-maintext mt-0.5">
+                              <div className="text-xs text-gray-700 mt-0.5">
                                 {productInfo.brand}
                               </div>
-                              <div className="text-xs text-maintext mt-0.5">
+                              <div className="text-xs text-gray-700 mt-0.5">
                                 Mã: {productInfo.code}
                               </div>
-                              <div className="text-xs text-maintext mt-0.5">
+                              <div className="text-xs text-gray-700 mt-0.5">
                                 {productInfo.colorName} / {productInfo.sizeName}
                               </div>
                             </div>
@@ -1366,7 +1366,7 @@ export default function OrderDetailPage() {
                 </div>
               </div>
 
-              <div className="mt-8 text-center text-sm text-maintext">
+              <div className="mt-8 text-center text-sm text-gray-700">
                 <p>Cảm ơn quý khách đã mua hàng tại Clothes Shop</p>
                 <p>Hotline: 1900 1234</p>
               </div>
@@ -1380,7 +1380,7 @@ export default function OrderDetailPage() {
               Đóng
             </Button>
             <Button onClick={handlePrintInvoice} disabled={isProcessingPrint}>
-              <Icon path={mdiPrinter} size={0.7} className="mr-2" />
+              <Icon path={mdiPrinter} size={0.8} className="mr-2" />
               {isProcessingPrint ? "Đang xử lý..." : "In hóa đơn"}
             </Button>
           </DialogFooter>

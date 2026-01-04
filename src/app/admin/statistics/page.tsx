@@ -1,39 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import {
-  mdiCashMultiple,
-  mdiPackageVariantClosed,
-  mdiAccountGroup,
-  mdiTrendingUp,
-  mdiCalendarRange,
-  mdiChartBar,
-  mdiSync,
-  mdiFilterMultiple,
-  mdiLoading,
-  mdiEye,
-} from "@mdi/js";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useStatistics,
-  useRevenueReport,
-  useTopProducts,
-  useGenerateDailyStatistics,
-  useStatisticsDetail,
-} from "@/hooks/statistics";
-import { useAccounts } from "@/hooks/account";
-import {
-  IStatisticsFilter,
-  IRevenueReportFilter,
-  ITopProductsFilter,
-} from "@/interface/request/statistics";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,22 +11,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -65,24 +30,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  BarChart,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAccounts } from "@/hooks/account";
+import {
+  useGenerateDailyStatistics,
+  useRevenueReport,
+  useStatistics,
+  useStatisticsDetail,
+  useTopProducts,
+} from "@/hooks/statistics";
+import {
+  IRevenueReportFilter,
+  IStatisticsFilter,
+  ITopProductsFilter,
+} from "@/interface/request/statistics";
+import {
+  mdiAccountGroup,
+  mdiCashMultiple,
+  mdiEye,
+  mdiLoading,
+  mdiPackageVariantClosed,
+  mdiSync,
+  mdiTrendingUp,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
+  BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
 } from "recharts";
 
 const COLORS = [
@@ -258,12 +255,12 @@ export default function StatisticsPage() {
         <CardContent className="p-4">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-base text-maintext">{title}</p>
-              <h3 className="text-2xl font-bold mt-2 text-maintext">{value}</h3>
+              <p className="text-base text-gray-700">{title}</p>
+              <h3 className="text-2xl font-bold mt-2 text-gray-700">{value}</h3>
               <div className="flex items-center mt-2">
                 <Icon
                   path={change >= 0 ? mdiTrendingUp : mdiTrendingUp}
-                  size={0.7}
+                  size={0.8}
                   className={change >= 0 ? "text-primary" : "text-red-600"}
                 />
                 <span
@@ -384,7 +381,7 @@ export default function StatisticsPage() {
         >
           <DialogTrigger asChild>
             <Button variant="outline">
-              <Icon path={mdiSync} size={0.7} className="mr-2" />
+              <Icon path={mdiSync} size={0.8} className="mr-2" />
               Tạo thống kê
             </Button>
           </DialogTrigger>
@@ -402,7 +399,7 @@ export default function StatisticsPage() {
                   onChange={(e) => setGenerateDate(e.target.value)}
                 />
               </div>
-              <p className="text-sm text-maintext">
+              <p className="text-sm text-gray-700">
                 Lưu ý: Chức năng này thường được hệ thống tự động thực hiện. Chỉ
                 sử dụng khi cần thiết.
               </p>
@@ -422,7 +419,7 @@ export default function StatisticsPage() {
                   <>
                     <Icon
                       path={mdiLoading}
-                      size={0.7}
+                      size={0.8}
                       className="mr-2 animate-spin"
                     />
                     Đang xử lý...
@@ -667,7 +664,7 @@ export default function StatisticsPage() {
               <div className="p-4 bg-slate-50 rounded-[6px] mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-maintext">
+                    <h3 className="text-lg font-semibold text-gray-700">
                       Tổng doanh thu
                     </h3>
                     <p className="text-2xl font-bold text-green-500 mt-2">
@@ -675,7 +672,7 @@ export default function StatisticsPage() {
                     </p>
                   </div>
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-maintext">
+                    <h3 className="text-lg font-semibold text-gray-700">
                       Số đơn hàng
                     </h3>
                     <p className="text-2xl font-bold mt-2 text-blue-500">
@@ -739,7 +736,7 @@ export default function StatisticsPage() {
         </TabsContent>
 
         {/* Tab Sản phẩm bán chạy */}
-        <TabsContent value="products" className="space-y-4 text-maintext">
+        <TabsContent value="products" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Sản phẩm bán chạy</CardTitle>
@@ -894,16 +891,16 @@ export default function StatisticsPage() {
                   <TableBody>
                     {mockTopProductsData.map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium text-maintext">
+                        <TableCell className="font-medium text-gray-700">
                           {item.product?.name || `Sản phẩm ${index + 1}`}
                         </TableCell>
-                        <TableCell className="text-maintext">
+                        <TableCell className="text-gray-700">
                           {item.product?.brand?.name || "Uniqlo"}
                         </TableCell>
-                        <TableCell className="text-right text-maintext">
+                        <TableCell className="text-right text-gray-700">
                           {item.totalQuantity}
                         </TableCell>
-                        <TableCell className="text-right text-maintext">
+                        <TableCell className="text-right text-gray-700">
                           {formatCurrency(item.totalRevenue)}
                         </TableCell>
                       </TableRow>
@@ -916,7 +913,7 @@ export default function StatisticsPage() {
         </TabsContent>
 
         {/* Tab Lịch sử thống kê */}
-        <TabsContent value="statistics" className="space-y-4 text-maintext">
+        <TabsContent value="statistics" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
               <CardTitle>Lịch sử thống kê</CardTitle>
@@ -1004,7 +1001,7 @@ export default function StatisticsPage() {
               ) : statisticsError ? (
                 <p className="text-red-600">Lỗi khi tải dữ liệu thống kê</p>
               ) : !statisticsData?.data?.statistics?.length ? (
-                <div className="flex items-center justify-center h-80 text-maintext">
+                <div className="flex items-center justify-center h-80 text-gray-700">
                   <p>Không có dữ liệu thống kê</p>
                 </div>
               ) : (
@@ -1032,10 +1029,10 @@ export default function StatisticsPage() {
                       <TableBody>
                         {statisticsData?.data?.statistics?.map((item) => (
                           <TableRow key={item.id || item.date}>
-                            <TableCell className="font-medium text-maintext">
+                            <TableCell className="font-medium text-gray-700">
                               {formatDate(item.date)}
                             </TableCell>
-                            <TableCell className="text-maintext">
+                            <TableCell className="text-gray-700">
                               <Badge variant="outline">
                                 {item.type === "DAILY"
                                   ? "Ngày"
@@ -1046,13 +1043,13 @@ export default function StatisticsPage() {
                                   : "Năm"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right text-maintext">
+                            <TableCell className="text-right text-gray-700">
                               {item.totalOrders}
                             </TableCell>
-                            <TableCell className="text-right text-maintext">
+                            <TableCell className="text-right text-gray-700">
                               {formatCurrency(item.totalRevenue)}
                             </TableCell>
-                            <TableCell className="text-right text-maintext">
+                            <TableCell className="text-right text-gray-700">
                               {formatCurrency(item.totalProfit)}
                             </TableCell>
                             <TableCell className="text-center">
@@ -1095,7 +1092,7 @@ export default function StatisticsPage() {
                         >
                           Trước
                         </Button>
-                        <span className="text-sm text-maintext">
+                        <span className="text-sm text-gray-700">
                           Trang {statisticsData.data.pagination.currentPage} /{" "}
                           {statisticsData.data.pagination.totalPages}
                         </span>
@@ -1228,7 +1225,7 @@ export default function StatisticsPage() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-maintext">
+              <div className="text-center py-8 text-gray-700">
                 <p>Không thể tải chi tiết thống kê</p>
               </div>
             )}

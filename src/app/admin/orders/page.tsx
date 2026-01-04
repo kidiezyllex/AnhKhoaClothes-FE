@@ -1,48 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiFilterMultiple,
-  mdiEye,
-  mdiPencil,
-  mdiFileExport,
-  mdiPrinter,
-  mdiCheck,
-  mdiDelete,
-} from "@mdi/js";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import type { DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -51,36 +11,75 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
   TableCell,
   TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  useOrders,
-  useOrderDetail,
-  useUpdateOrderStatus,
   useCancelOrder,
+  useOrderDetail,
+  useOrders,
+  useUpdateOrderStatus,
 } from "@/hooks/order";
 import type { IOrderFilter } from "@/interface/request/order";
+import { cn } from "@/lib/utils";
+import {
+  mdiDelete,
+  mdiEye,
+  mdiFileExport,
+  mdiFilterMultiple,
+  mdiMagnify,
+  mdiPencil,
+  mdiPrinter,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
 import { useQueryClient } from "@tanstack/react-query";
-import * as XLSX from "xlsx";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { AnimatePresence, motion } from "framer-motion";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import { CalendarIcon } from "lucide-react";
+import type { DateRange } from "react-day-picker";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import * as XLSX from "xlsx";
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IOrderFilter>({
@@ -422,7 +421,7 @@ export default function OrdersPage() {
               <TabsList className="h-9">
                 <TabsTrigger
                   value="all"
-                  className="px-4 text-maintext"
+                  className="px-4 text-gray-700"
                   onClick={() => {
                     setDateRange(undefined);
                     setSelectedTab("all");
@@ -432,7 +431,7 @@ export default function OrdersPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="today"
-                  className="px-4 text-maintext"
+                  className="px-4 text-gray-700"
                   onClick={() => {
                     setDateRange(undefined);
                     setSelectedTab("today");
@@ -442,7 +441,7 @@ export default function OrdersPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="week"
-                  className="px-4 text-maintext"
+                  className="px-4 text-gray-700"
                   onClick={() => {
                     setDateRange(undefined);
                     setSelectedTab("week");
@@ -452,7 +451,7 @@ export default function OrdersPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="month"
-                  className="px-4 text-maintext"
+                  className="px-4 text-gray-700"
                   onClick={() => {
                     setDateRange(undefined);
                     setSelectedTab("month");
@@ -467,8 +466,8 @@ export default function OrdersPage() {
               <div className="relative w-full md:w-96">
                 <Icon
                   path={mdiMagnify}
-                  size={0.7}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                  size={0.8}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
                 />
                 <Input
                   type="text"
@@ -521,7 +520,7 @@ export default function OrdersPage() {
                   className="flex items-center"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
                   {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
                 </Button>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -530,7 +529,7 @@ export default function OrdersPage() {
                       <Button variant="outline">
                         <Icon
                           path={mdiFileExport}
-                          size={0.7}
+                          size={0.8}
                           className="mr-2"
                         />
                         Xuất dữ liệu
@@ -770,7 +769,7 @@ export default function OrdersPage() {
     if (!data?.data.orders || data.data.orders.length === 0) {
       return (
         <div className="text-center py-10">
-          <p className="text-maintext">Không tìm thấy đơn hàng nào.</p>
+          <p className="text-gray-700">Không tìm thấy đơn hàng nào.</p>
         </div>
       );
     }
@@ -806,7 +805,7 @@ export default function OrdersPage() {
                       <div className="font-medium">
                         {order.customer?.fullName || order.shippingName}
                       </div>
-                      <div className="text-sm text-maintext italic">
+                      <div className="text-sm text-gray-700 italic">
                         {order.customer?.phoneNumber === "0000000000"
                           ? "Chưa có SĐT"
                           : order.customer?.phoneNumber}
@@ -835,7 +834,7 @@ export default function OrdersPage() {
                         size="icon"
                         onClick={() => handleViewOrder(order.id)}
                       >
-                        <Icon path={mdiEye} size={0.7} />
+                        <Icon path={mdiEye} size={0.8} />
                       </Button>
                       <Button
                         variant="outline"
@@ -849,7 +848,7 @@ export default function OrdersPage() {
                           setIsConfirmCancelDialogOpen(true);
                         }}
                       >
-                        <Icon path={mdiDelete} size={0.7} />
+                        <Icon path={mdiDelete} size={0.8} />
                       </Button>
                     </div>
                   </TableCell>
@@ -978,7 +977,7 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
       default:
         return {
           label: "Không xác định",
-          className: "!bg-gray-50 !text-maintext !border-gray-500",
+          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
         };
     }
   };
@@ -1009,7 +1008,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
       default:
         return {
           label: "Không xác định",
-          className: "!bg-gray-50 !text-maintext !border-gray-500",
+          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
         };
     }
   };
@@ -1034,7 +1033,7 @@ const OrderTypeBadge = ({ orderCode }: { orderCode: string }) => {
     } else {
       return {
         label: "Không xác định",
-        className: "!bg-gray-50 !text-maintext !border-gray-500",
+        className: "!bg-gray-50 !text-gray-700 !border-gray-500",
       };
     }
   };
@@ -1091,12 +1090,12 @@ const OrderDetailDialog = ({
             <div className="flex space-x-2">
               <a href={`/admin/orders/edit/${orderId}`}>
                 <Button variant="outline" size="sm">
-                  <Icon path={mdiPencil} size={0.7} className="mr-2" />
+                  <Icon path={mdiPencil} size={0.8} className="mr-2" />
                   Chỉnh sửa
                 </Button>
               </a>
               <Button variant="outline" size="sm">
-                <Icon path={mdiPrinter} size={0.7} className="mr-2" />
+                <Icon path={mdiPrinter} size={0.8} className="mr-2" />
                 In đơn
               </Button>
             </div>
@@ -1107,36 +1106,36 @@ const OrderDetailDialog = ({
           <div>
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-maintext">
+                <h3 className="text-sm font-medium text-gray-700">
                   Thông tin đơn hàng
                 </h3>
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">Mã đơn hàng:</span>
+                    <span className="text-sm text-gray-700">Mã đơn hàng:</span>
                     <span className="text-sm font-medium">
                       {orderDetail.orderNumber}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">Ngày tạo:</span>
+                    <span className="text-sm text-gray-700">Ngày tạo:</span>
                     <span className="text-sm font-medium">
                       {formatDate(orderDetail.createdAt)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Trạng thái đơn hàng:
                     </span>
                     <OrderStatusBadge status={orderDetail.orderStatus} />
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Trạng thái thanh toán:
                     </span>
                     <PaymentStatusBadge status={orderDetail.paymentStatus} />
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Phương thức thanh toán:
                     </span>
                     <span className="text-sm font-medium">
@@ -1147,12 +1146,12 @@ const OrderDetailDialog = ({
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-maintext">
+                <h3 className="text-sm font-medium text-gray-700">
                   Thông tin khách hàng
                 </h3>
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Tên khách hàng:
                     </span>
                     <span className="text-sm font-medium">
@@ -1161,14 +1160,14 @@ const OrderDetailDialog = ({
                   </div>
                   {orderDetail.customer?.email && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-maintext">Email:</span>
+                      <span className="text-sm text-gray-700">Email:</span>
                       <span className="text-sm font-medium">
                         {orderDetail.customer.email}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Số điện thoại:
                     </span>
                     <span className="text-sm font-medium">
@@ -1179,7 +1178,7 @@ const OrderDetailDialog = ({
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-maintext">
+                <h3 className="text-sm font-medium text-gray-700">
                   Địa chỉ giao hàng
                 </h3>
                 <div className="mt-2 rounded-[6px] border p-4">
@@ -1199,7 +1198,7 @@ const OrderDetailDialog = ({
                       </p>
                     </div>
                   ) : (
-                    <p className="text-sm text-maintext">
+                    <p className="text-sm text-gray-700">
                       Không có thông tin địa chỉ giao hàng
                     </p>
                   )}
@@ -1211,7 +1210,7 @@ const OrderDetailDialog = ({
           <div>
             <div className="space-y-4">
               <div>
-                <h3 className="text-sm font-medium text-maintext">
+                <h3 className="text-sm font-medium text-gray-700">
                   Sản phẩm đã đặt
                 </h3>
                 <div className="mt-2 rounded-[6px]">
@@ -1243,7 +1242,7 @@ const OrderDetailDialog = ({
                                   <div className="font-medium text-sm">
                                     {item.product?.name}
                                   </div>
-                                  <div className="text-xs text-maintext">
+                                  <div className="text-xs text-gray-700">
                                     {item.variant?.colorName &&
                                       item.variant?.sizeName &&
                                       `${item.variant.colorName} / ${item.variant.sizeName}`}
@@ -1269,10 +1268,10 @@ const OrderDetailDialog = ({
               </div>
 
               <div>
-                <h3 className="text-sm font-medium text-maintext">Tổng tiền</h3>
+                <h3 className="text-sm font-medium text-gray-700">Tổng tiền</h3>
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-maintext">
+                    <span className="text-sm text-gray-700">
                       Tổng tiền hàng:
                     </span>
                     <span className="text-sm font-medium">
@@ -1281,7 +1280,7 @@ const OrderDetailDialog = ({
                   </div>
                   {orderDetail.voucher && (
                     <div className="flex justify-between">
-                      <span className="text-sm text-maintext">
+                      <span className="text-sm text-gray-700">
                         Mã giảm giá ({orderDetail.voucher.code}):
                       </span>
                       <span className="text-sm font-medium text-red-500">

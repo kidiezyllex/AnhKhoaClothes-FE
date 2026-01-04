@@ -1,20 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
- 
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { useCreateReturnRequest } from '@/hooks/return';
-import { IReturnableOrder } from '@/interface/response/return';
-import { ICustomerReturnRequest } from '@/interface/request/return';
-import { toast } from 'react-toastify';
-import { useQueryClient } from '@tanstack/react-query';
-import { Icon } from '@mdi/react';
-import { mdiMinus, mdiPlus } from '@mdi/js';
-import { DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useCreateReturnRequest } from "@/hooks/return";
+import { ICustomerReturnRequest } from "@/interface/request/return";
+import { IReturnableOrder } from "@/interface/response/return";
+import { mdiMinus, mdiPlus } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 interface CreateReturnRequestModalProps {
   order: IReturnableOrder | null;
@@ -34,9 +39,11 @@ interface SelectedItem {
   variantInfo: string;
 }
 
-export default function CreateReturnRequestModal({ order }: CreateReturnRequestModalProps) {
+export default function CreateReturnRequestModal({
+  order,
+}: CreateReturnRequestModalProps) {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createReturnRequest = useCreateReturnRequest();
   const queryClient = useQueryClient();
@@ -44,14 +51,14 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
   useEffect(() => {
     if (order) {
       setSelectedItems([]);
-      setReason('');
+      setReason("");
     }
   }, [order]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
       maximumFractionDigits: 0,
     }).format(amount);
   };
@@ -65,40 +72,58 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
         maxQuantity: item.quantity,
         price: item.price,
         productName: item.product.name,
-        productImage: item.product.images[0] || '/placeholder.jpg',
-        variantInfo: `${item.variant.color?.name || ''} - ${item.variant.size?.name || ''}`
+        productImage: item.product.images[0] || "/placeholder.jpg",
+        variantInfo: `${item.variant.color?.name || ""} - ${
+          item.variant.size?.name || ""
+        }`,
       };
-      setSelectedItems(prev => [...prev, newItem]);
+      setSelectedItems((prev) => [...prev, newItem]);
     } else {
-      setSelectedItems(prev => prev.filter(selected => 
-        !(selected.product === item.product.id && 
-          selected.variant.colorId === item.variant.colorId && 
-          selected.variant.sizeId === item.variant.sizeId)
-      ));
+      setSelectedItems((prev) =>
+        prev.filter(
+          (selected) =>
+            !(
+              selected.product === item.product.id &&
+              selected.variant.colorId === item.variant.colorId &&
+              selected.variant.sizeId === item.variant.sizeId
+            )
+        )
+      );
     }
   };
 
   const handleQuantityChange = (index: number, newQuantity: number) => {
-    setSelectedItems(prev => prev.map((item, i) => 
-      i === index ? { ...item, quantity: Math.max(1, Math.min(newQuantity, item.maxQuantity)) } : item
-    ));
+    setSelectedItems((prev) =>
+      prev.map((item, i) =>
+        i === index
+          ? {
+              ...item,
+              quantity: Math.max(1, Math.min(newQuantity, item.maxQuantity)),
+            }
+          : item
+      )
+    );
   };
 
   const isItemSelected = (item: any) => {
-    return selectedItems.some(selected => 
-      selected.product === item.product?.id && 
-      selected.variant.colorId === item.variant.colorId && 
-      selected.variant.sizeId === item.variant.sizeId
+    return selectedItems.some(
+      (selected) =>
+        selected.product === item.product?.id &&
+        selected.variant.colorId === item.variant.colorId &&
+        selected.variant.sizeId === item.variant.sizeId
     );
   };
 
   const getTotalRefund = () => {
-    return selectedItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return selectedItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
   const handleSubmit = async () => {
     if (!order || selectedItems.length === 0 || !reason.trim()) {
-      toast.error('Vui lòng chọn sản phẩm và nhập lý do trả hàng');
+      toast.error("Vui lòng chọn sản phẩm và nhập lý do trả hàng");
       return;
     }
 
@@ -106,24 +131,24 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
     try {
       const payload: ICustomerReturnRequest = {
         originalOrder: order.id,
-        items: selectedItems.map(item => ({
+        items: selectedItems.map((item) => ({
           product: item.product,
           variant: item.variant,
-          quantity: item.quantity
+          quantity: item.quantity,
         })),
-        reason: reason.trim()
+        reason: reason.trim(),
       };
 
       await createReturnRequest.mutateAsync(payload);
-      toast.success('Yêu cầu trả hàng đã được gửi thành công');
-      queryClient.invalidateQueries({ queryKey: ['myReturns'] });
-      queryClient.invalidateQueries({ queryKey: ['returnableOrders'] });
-      
+      toast.success("Yêu cầu trả hàng đã được gửi thành công");
+      queryClient.invalidateQueries({ queryKey: ["myReturns"] });
+      queryClient.invalidateQueries({ queryKey: ["returnableOrders"] });
+
       // Reset form
       setSelectedItems([]);
-      setReason('');
+      setReason("");
     } catch (error) {
-      toast.error('Gửi yêu cầu trả hàng thất bại');
+      toast.error("Gửi yêu cầu trả hàng thất bại");
     } finally {
       setIsSubmitting(false);
     }
@@ -144,20 +169,26 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
             <h3 className="font-semibold mb-2">Thông tin đơn hàng</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-maintext">Mã đơn hàng:</span>
+                <span className="text-gray-700">Mã đơn hàng:</span>
                 <span className="ml-2 font-medium">#{order.code}</span>
               </div>
               <div>
-                <span className="text-maintext">Tổng tiền:</span>
-                <span className="ml-2 font-medium">{formatCurrency(order.total)}</span>
+                <span className="text-gray-700">Tổng tiền:</span>
+                <span className="ml-2 font-medium">
+                  {formatCurrency(order.total)}
+                </span>
               </div>
               <div>
-                <span className="text-maintext">Ngày đặt:</span>
-                <span className="ml-2 font-medium">{new Date(order.createdAt).toLocaleDateString('vi-VN')}</span>
+                <span className="text-gray-700">Ngày đặt:</span>
+                <span className="ml-2 font-medium">
+                  {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                </span>
               </div>
               <div>
-                <span className="text-maintext">Trạng thái:</span>
-                <span className="ml-2 font-medium text-green-600">Đã hoàn thành</span>
+                <span className="text-gray-700">Trạng thái:</span>
+                <span className="ml-2 font-medium text-green-600">
+                  Đã hoàn thành
+                </span>
               </div>
             </div>
           </CardContent>
@@ -173,10 +204,12 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                   <div className="flex items-start gap-4">
                     <Checkbox
                       checked={isItemSelected(item)}
-                      onCheckedChange={(checked) => handleItemSelect(item, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleItemSelect(item, checked as boolean)
+                      }
                     />
                     <img
-                      src={item.product.images[0] || '/placeholder.jpg'}
+                      src={item.product.images[0] || "/placeholder.jpg"}
                       alt={item.product.name}
                       width={80}
                       height={80}
@@ -184,11 +217,12 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                     />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">
                         {item.variant.color?.name} - {item.variant.size?.name}
                       </p>
-                      <p className="text-sm text-maintext">
-                        Đã mua: {item.quantity} | Giá: {formatCurrency(item.price)}
+                      <p className="text-sm text-gray-700">
+                        Đã mua: {item.quantity} | Giá:{" "}
+                        {formatCurrency(item.price)}
                       </p>
                     </div>
                     {isItemSelected(item) && (
@@ -199,35 +233,52 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product?.id && 
-                                selected.variant.colorId === item.variant.colorId && 
-                                selected.variant.sizeId === item.variant.sizeId
+                              const selectedIndex = selectedItems.findIndex(
+                                (selected) =>
+                                  selected.product === item.product?.id &&
+                                  selected.variant.colorId ===
+                                    item.variant.colorId &&
+                                  selected.variant.sizeId ===
+                                    item.variant.sizeId
                               );
                               if (selectedIndex !== -1) {
-                                handleQuantityChange(selectedIndex, selectedItems[selectedIndex].quantity - 1);
+                                handleQuantityChange(
+                                  selectedIndex,
+                                  selectedItems[selectedIndex].quantity - 1
+                                );
                               }
                             }}
                           >
-                            <Icon path={mdiMinus} size={0.7} />
+                            <Icon path={mdiMinus} size={0.8} />
                           </Button>
                           <Input
                             type="number"
                             min="1"
                             max={item.quantity}
-                            value={selectedItems.find(selected => 
-                              selected.product === item.product?.id && 
-                              selected.variant.colorId === item.variant.colorId && 
-                              selected.variant.sizeId === item.variant.sizeId
-                            )?.quantity || 1}
+                            value={
+                              selectedItems.find(
+                                (selected) =>
+                                  selected.product === item.product?.id &&
+                                  selected.variant.colorId ===
+                                    item.variant.colorId &&
+                                  selected.variant.sizeId ===
+                                    item.variant.sizeId
+                              )?.quantity || 1
+                            }
                             onChange={(e) => {
-                              const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product?.id && 
-                                selected.variant.colorId === item.variant.colorId && 
-                                selected.variant.sizeId === item.variant.sizeId
+                              const selectedIndex = selectedItems.findIndex(
+                                (selected) =>
+                                  selected.product === item.product?.id &&
+                                  selected.variant.colorId ===
+                                    item.variant.colorId &&
+                                  selected.variant.sizeId ===
+                                    item.variant.sizeId
                               );
                               if (selectedIndex !== -1) {
-                                handleQuantityChange(selectedIndex, parseInt(e.target.value) || 1);
+                                handleQuantityChange(
+                                  selectedIndex,
+                                  parseInt(e.target.value) || 1
+                                );
                               }
                             }}
                             className="w-16 text-center"
@@ -236,17 +287,23 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              const selectedIndex = selectedItems.findIndex(selected => 
-                                selected.product === item.product?.id && 
-                                selected.variant.colorId === item.variant.colorId && 
-                                selected.variant.sizeId === item.variant.sizeId
+                              const selectedIndex = selectedItems.findIndex(
+                                (selected) =>
+                                  selected.product === item.product?.id &&
+                                  selected.variant.colorId ===
+                                    item.variant.colorId &&
+                                  selected.variant.sizeId ===
+                                    item.variant.sizeId
                               );
                               if (selectedIndex !== -1) {
-                                handleQuantityChange(selectedIndex, selectedItems[selectedIndex].quantity + 1);
+                                handleQuantityChange(
+                                  selectedIndex,
+                                  selectedItems[selectedIndex].quantity + 1
+                                );
                               }
                             }}
                           >
-                            <Icon path={mdiPlus} size={0.7} />
+                            <Icon path={mdiPlus} size={0.8} />
                           </Button>
                         </div>
                       </div>
@@ -280,13 +337,17 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
               <div className="space-y-2">
                 {selectedItems.map((item, index) => (
                   <div key={index} className="flex justify-between text-sm">
-                    <span>{item.productName} ({item.variantInfo}) x{item.quantity}</span>
+                    <span>
+                      {item.productName} ({item.variantInfo}) x{item.quantity}
+                    </span>
                     <span>{formatCurrency(item.price * item.quantity)}</span>
                   </div>
                 ))}
                 <div className="border-t pt-2 flex justify-between font-semibold">
                   <span>Tổng tiền hoàn trả:</span>
-                  <span className="text-primary">{formatCurrency(getTotalRefund())}</span>
+                  <span className="text-primary">
+                    {formatCurrency(getTotalRefund())}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -298,13 +359,15 @@ export default function CreateReturnRequestModal({ order }: CreateReturnRequestM
         <Button variant="outline" disabled={isSubmitting}>
           Hủy
         </Button>
-        <Button 
-          onClick={handleSubmit} 
-          disabled={isSubmitting || selectedItems.length === 0 || !reason.trim()}
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            isSubmitting || selectedItems.length === 0 || !reason.trim()
+          }
         >
-          {isSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu'}
+          {isSubmitting ? "Đang gửi..." : "Gửi yêu cầu"}
         </Button>
       </DialogFooter>
     </DialogContent>
   );
-} 
+}

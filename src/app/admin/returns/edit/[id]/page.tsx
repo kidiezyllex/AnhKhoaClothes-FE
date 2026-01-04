@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,19 +11,32 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { useReturnDetail, useUpdateReturn } from "@/hooks/return";
 import { IReturnUpdate } from "@/interface/request/return";
-import { toast } from "react-toastify";
-import { Icon } from "@mdi/react";
 import {
   mdiArrowLeft,
-  mdiPlus,
-  mdiMinus,
-  mdiContentSave,
   mdiCancel,
+  mdiContentSave,
+  mdiMinus,
+  mdiPlus,
 } from "@mdi/js";
+import { Icon } from "@mdi/react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface EditReturnPageProps {
   params: {
@@ -254,7 +254,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
         </Breadcrumb>
         <a href="/admin/returns" className="mr-2">
           <Button variant="outline">
-            <Icon path={mdiArrowLeft} size={0.7} className="mr-2" />
+            <Icon path={mdiArrowLeft} size={0.8} className="mr-2" />
             Quay lại
           </Button>
         </a>
@@ -288,21 +288,21 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
               <h3 className="font-semibold">Thông tin yêu cầu</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-maintext">Mã yêu cầu:</span>
+                  <span className="text-gray-700">Mã yêu cầu:</span>
                   <span className="ml-2 font-medium">#{returnInfo.code}</span>
                 </div>
                 <div>
-                  <span className="text-maintext">Ngày tạo:</span>
+                  <span className="text-gray-700">Ngày tạo:</span>
                   <span className="ml-2 font-medium">
                     {formatDate(returnInfo.createdAt)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-maintext">Đơn hàng gốc:</span>
+                  <span className="text-gray-700">Đơn hàng gốc:</span>
                   <span className="ml-2 font-medium">#{order.code}</span>
                 </div>
                 <div>
-                  <span className="text-maintext">Tổng tiền hiện tại:</span>
+                  <span className="text-gray-700">Tổng tiền hiện tại:</span>
                   <span className="ml-2 font-medium text-primary">
                     {formatCurrency(returnInfo.totalRefund)}
                   </span>
@@ -314,17 +314,17 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
               <h3 className="font-semibold">Thông tin khách hàng</h3>
               <div className="grid grid-cols-1 gap-4 text-sm">
                 <div>
-                  <span className="text-maintext">Tên khách hàng:</span>
+                  <span className="text-gray-700">Tên khách hàng:</span>
                   <span className="ml-2 font-medium">{customer.fullName}</span>
                 </div>
                 <div>
-                  <span className="text-maintext">Email:</span>
+                  <span className="text-gray-700">Email:</span>
                   <span className="ml-2 font-medium">
                     {customer.email || "Không có"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-maintext">Số điện thoại:</span>
+                  <span className="text-gray-700">Số điện thoại:</span>
                   <span className="ml-2 font-medium">
                     {customer.phoneNumber || "Không có"}
                   </span>
@@ -340,7 +340,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
         <CardHeader>
           <CardTitle>Sản phẩm trả hàng</CardTitle>
           {canEdit && (
-            <p className="text-sm text-maintext">
+            <p className="text-sm text-gray-700">
               Bạn có thể chỉnh sửa số lượng và lý do trả hàng cho từng sản phẩm
             </p>
           )}
@@ -359,11 +359,11 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium">{item.productName}</h4>
-                    <p className="text-sm text-maintext">
+                    <p className="text-sm text-gray-700">
                       SKU: {item.productCode}
                     </p>
-                    <p className="text-sm text-maintext">{item.variantInfo}</p>
-                    <p className="text-sm text-maintext">
+                    <p className="text-sm text-gray-700">{item.variantInfo}</p>
+                    <p className="text-sm text-gray-700">
                       Giá: {formatCurrency(item.price)}
                     </p>
                   </div>
@@ -380,7 +380,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                           }
                           disabled={item.quantity <= 1}
                         >
-                          <Icon path={mdiMinus} size={0.7} />
+                          <Icon path={mdiMinus} size={0.8} />
                         </Button>
                         <Input
                           type="number"
@@ -403,7 +403,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                           }
                           disabled={item.quantity >= item.maxQuantity}
                         >
-                          <Icon path={mdiPlus} size={0.7} />
+                          <Icon path={mdiPlus} size={0.8} />
                         </Button>
                       </div>
                     </div>
@@ -411,7 +411,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
 
                   {!canEdit && (
                     <div className="text-right">
-                      <p className="text-sm text-maintext">Số lượng</p>
+                      <p className="text-sm text-gray-700">Số lượng</p>
                       <p className="font-medium">{item.quantity}</p>
                     </div>
                   )}
@@ -438,7 +438,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                     <label className="text-sm font-medium mb-1 block">
                       Lý do trả hàng
                     </label>
-                    <p className="text-sm text-maintext p-2 bg-gray-50 rounded">
+                    <p className="text-sm text-gray-700 p-2 bg-gray-50 rounded">
                       {item.reason}
                     </p>
                   </div>
@@ -446,7 +446,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
 
                 <div className="mt-2 pt-2 border-t">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-maintext">Thành tiền:</span>
+                    <span className="text-sm text-gray-700">Thành tiền:</span>
                     <span className="font-medium">
                       {formatCurrency(item.price * item.quantity)}
                     </span>
@@ -479,7 +479,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
                   <TableCell>
                     <div>
                       <p className="font-medium">{item.productName}</p>
-                      <p className="text-sm text-maintext">
+                      <p className="text-sm text-gray-700">
                         {item.variantInfo}
                       </p>
                     </div>
@@ -502,7 +502,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
               </span>
             </div>
             {getTotalRefund() !== returnInfo.totalRefund && (
-              <div className="flex justify-between items-center text-sm text-maintext mt-1">
+              <div className="flex justify-between items-center text-sm text-gray-700 mt-1">
                 <span>Tổng tiền cũ:</span>
                 <span>{formatCurrency(returnInfo.totalRefund)}</span>
               </div>
@@ -523,7 +523,7 @@ export default function EditReturnPage({ params }: EditReturnPageProps) {
             onClick={handleSubmit}
             disabled={isSubmitting || editableItems.length === 0}
           >
-            <Icon path={mdiContentSave} size={0.7} className="mr-2" />
+            <Icon path={mdiContentSave} size={0.8} className="mr-2" />
             {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
           </Button>
         </div>

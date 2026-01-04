@@ -272,7 +272,7 @@ const ImageZoom = ({
           animate={{ opacity: 0.7, y: 0 }}
           transition={{ delay: 1, duration: 0.5 }}
         >
-          <Icon path={mdiMagnify} size={0.7} className="inline mr-1" />
+          <Icon path={mdiMagnify} size={0.8} className="inline mr-1" />
           Nhấn để phóng to
         </motion.div>
       )}
@@ -285,7 +285,7 @@ const ImageZoom = ({
           animate={{ opacity: 0, y: 0 }}
           whileHover={{ opacity: 0.7 }}
         >
-          <Icon path={mdiMagnify} size={0.7} className="inline mr-1" />
+          <Icon path={mdiMagnify} size={0.8} className="inline mr-1" />
           Hover để phóng to
         </motion.div>
       )}
@@ -477,8 +477,8 @@ export default function ProductDetail() {
         : undefined;
 
     const cartItem = {
-      id: selectedVariant._id || selectedVariant.id, // Use _id or id
-      productId: (product as any)?.id,
+      id: String(selectedVariant._id || selectedVariant.id),
+      productId: String((product as any)?.id),
       name: (product as any)?.productDisplayName || (product as any)?.name,
       price: finalPrice,
       originalPrice: originalPrice,
@@ -865,7 +865,7 @@ export default function ProductDetail() {
                           ? mdiStar
                           : mdiStarOutline
                       }
-                      size={0.7}
+                      size={0.8}
                       className={
                         i < Math.floor((product as any)?.rating || 4)
                           ? "text-yellow-400"
@@ -1309,8 +1309,8 @@ export default function ProductDetail() {
                       }
 
                       const cartItem = {
-                        id: firstVariant._id || firstVariant.id,
-                        productId: similarProduct.id,
+                        id: String(firstVariant._id || firstVariant.id),
+                        productId: String(similarProduct.id),
                         name:
                           similarProduct.productDisplayName ||
                           similarProduct.name,

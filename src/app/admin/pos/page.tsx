@@ -1,39 +1,7 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  lazy,
-  Suspense,
-} from "react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiInformationSlabCircle,
-  mdiChevronLeft,
-  mdiPalette,
-  mdiCheck,
-  mdiRuler,
-  mdiCurrencyUsd,
-  mdiPackageVariant,
-  mdiCartPlus,
-  mdiBarcode,
-  mdiInvoicePlus,
-  mdiClose,
-  mdiCart,
-  mdiChevronDown,
-  mdiViewGrid,
-  mdiTableLarge,
-  mdiEye,
-  mdiBankTransfer,
-} from "@mdi/js";
-import { checkImageUrl, cn } from "@/lib/utils";
+import { getAllVouchers } from "@/api/voucher";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,38 +10,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -83,39 +27,54 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { useVouchers, useIncrementVoucherUsage } from "@/hooks/voucher";
-import { getAllVouchers } from "@/api/voucher";
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useAccounts } from "@/hooks/account";
+import { useCreatePOSOrder } from "@/hooks/order";
 import { useProducts, useSearchProducts } from "@/hooks/product";
 import { usePromotions } from "@/hooks/promotion";
+import { useIncrementVoucherUsage } from "@/hooks/voucher";
+import { IPOSOrderCreateRequest } from "@/interface/request/order";
+import { IProductFilter } from "@/interface/request/product";
+import { IAccount } from "@/interface/response/account";
 import {
   applyPromotionsToProducts,
   filterActivePromotions,
 } from "@/lib/promotions";
-import { IProductFilter } from "@/interface/request/product";
+import { checkImageUrl, cn } from "@/lib/utils";
 import { usePosStore } from "@/stores/posStore";
-import { useCreatePOSOrder } from "@/hooks/order";
-import { IPOSOrderCreateRequest } from "@/interface/request/order";
-import { usePOSCartStore, POSCartItem } from "@/stores/usePOSCartStore";
-import {
-  usePendingCartsStore,
-  PendingCart,
-} from "@/stores/usePendingCartsStore";
-import { useAccounts } from "@/hooks/account";
-import { IAccount } from "@/interface/response/account";
+import { POSCartItem, usePOSCartStore } from "@/stores/usePOSCartStore";
+import { usePendingCartsStore } from "@/stores/usePendingCartsStore";
 import { getSizeLabel } from "@/utils/sizeMapping";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import VouchersDialog from "./components/VouchersDialog";
-import InvoiceDialog from "./components/InvoiceDialog";
+import {
+  mdiCart,
+  mdiCartPlus,
+  mdiCheck,
+  mdiChevronDown,
+  mdiChevronLeft,
+  mdiClose,
+  mdiEye,
+  mdiInformationSlabCircle,
+  mdiInvoicePlus,
+  mdiMagnify,
+  mdiPackageVariant,
+  mdiPalette,
+  mdiPlus,
+  mdiRuler,
+  mdiTableLarge,
+  mdiViewGrid,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const QRCodeComponent = ({
   value,
@@ -1391,7 +1350,7 @@ export default function POSPage() {
       {/* Phần quản lý các giỏ hàng đang chờ */}
       <div className="bg-white rounded-[6px] p-4 mb-4 shadow-sm border border-border">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-maintext flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
             <Icon path={mdiCart} size={1} className="text-primary" />
             Hoá đơn chờ ({pendingCarts.length}/5)
           </h3>
@@ -1399,7 +1358,7 @@ export default function POSPage() {
             onClick={handleCreateNewCart}
             disabled={pendingCarts.length >= 5}
           >
-            <Icon path={mdiInvoicePlus} size={0.7} />
+            <Icon path={mdiInvoicePlus} size={0.8} />
             Thêm mới
           </Button>
         </div>
@@ -1417,7 +1376,7 @@ export default function POSPage() {
                   "relative flex items-center gap-2 p-2 rounded-sm border-2 transition-all duration-200 min-w-[140px] group",
                   activeCartId === cart.id
                     ? "border-primary bg-primary/5 text-primary shadow-sm"
-                    : "border-border bg-white text-maintext hover:border-primary/50 hover:bg-primary/5"
+                    : "border-border bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5"
                 )}
                 onClick={() => handleSwitchCart(cart.id)}
               >
@@ -1431,7 +1390,7 @@ export default function POSPage() {
                   />
                   <span className="text-sm font-medium truncate">
                     {cart.name}{" "}
-                    <span className="text-sm text-maintext font-semibold">
+                    <span className="text-sm text-gray-700 font-semibold">
                       (
                       {cart.items.reduce((sum, item) => sum + item.quantity, 0)}
                       )
@@ -1448,7 +1407,7 @@ export default function POSPage() {
                 >
                   <Icon
                     path={mdiClose}
-                    size={0.7}
+                    size={0.8}
                     className="hover:!text-white"
                   />
                 </button>
@@ -1465,7 +1424,7 @@ export default function POSPage() {
                     className="min-w-[100px] h-[46px] border-2 border-primary/50 flex items-center justify-center text-sm"
                   >
                     +{pendingCarts.length - 4} khác
-                    <Icon path={mdiChevronDown} size={0.7} className="ml-1" />
+                    <Icon path={mdiChevronDown} size={0.8} className="ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -1527,7 +1486,7 @@ export default function POSPage() {
                 <Icon
                   path={mdiMagnify}
                   size={1}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-700"
                 />
                 <Input
                   id="product-search"
@@ -1549,7 +1508,7 @@ export default function POSPage() {
                     "whitespace-nowrap px-4 py-2 rounded-[6px] text-sm font-medium transition-all duration-200",
                     activeCategoryName === category.name
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-gray-50 text-maintext hover:bg-gray-100 hover:text-primary"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-primary"
                   )}
                   onClick={() => {
                     setActiveCategoryName(category.name);
@@ -1577,7 +1536,7 @@ export default function POSPage() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Icon path={mdiChevronLeft} size={0.7} />
+                  <Icon path={mdiChevronLeft} size={0.8} />
                   Quay lại danh sách sản phẩm
                 </motion.button>
               </div>
@@ -1616,7 +1575,7 @@ export default function POSPage() {
                           onClick={addToCart}
                           disabled={selectedApiVariant.stock === 0}
                         >
-                          <Icon path={mdiCartPlus} size={0.7} />
+                          <Icon path={mdiCartPlus} size={0.8} />
                           Thêm vào giỏ hàng POS
                         </Button>
                       </motion.div>
@@ -1639,7 +1598,7 @@ export default function POSPage() {
                         >
                           {getBrandName(selectedProduct.brand)}
                         </Badge>
-                        <Badge variant="outline" className="text-maintext">
+                        <Badge variant="outline" className="text-gray-700">
                           Admin POS
                         </Badge>
                         {(selectedProduct as any).hasDiscount && (
@@ -1652,7 +1611,7 @@ export default function POSPage() {
                         )}
                       </div>
 
-                      <h2 className="text-2xl font-bold text-maintext leading-tight">
+                      <h2 className="text-2xl font-bold text-gray-700 leading-tight">
                         {selectedProduct.name}
                       </h2>
 
@@ -1680,7 +1639,7 @@ export default function POSPage() {
                         </div>
                         {(selectedProduct as any).hasDiscount && (
                           <div className="flex items-center gap-2">
-                            <span className="text-xl text-maintext line-through">
+                            <span className="text-xl text-gray-700 line-through">
                               {formatCurrency(
                                 (selectedProduct as any).originalPrice
                               )}
@@ -1709,7 +1668,7 @@ export default function POSPage() {
                             size={1}
                             className="text-primary"
                           />
-                          <h3 className="text-base font-semibold text-maintext">
+                          <h3 className="text-base font-semibold text-gray-700">
                             Màu sắc
                           </h3>
                           {selectedApiVariant?.colorId && (
@@ -1766,7 +1725,7 @@ export default function POSPage() {
                               size={1}
                               className="text-primary"
                             />
-                            <h3 className="text-base font-semibold text-maintext">
+                            <h3 className="text-base font-semibold text-gray-700">
                               Kích thước
                             </h3>
                             {selectedApiVariant?.sizeId && (
@@ -1840,7 +1799,7 @@ export default function POSPage() {
                         size={1}
                         className="text-primary"
                       />
-                      <h3 className="text-base font-semibold text-maintext">
+                      <h3 className="text-base font-semibold text-gray-700">
                         Tồn kho
                       </h3>
                       <Badge
@@ -1874,21 +1833,21 @@ export default function POSPage() {
                   <TabsList>
                     <TabsTrigger
                       value="grid"
-                      className="flex items-center gap-1 text-maintext"
+                      className="flex items-center gap-1 text-gray-700"
                     >
                       <Icon path={mdiViewGrid} size={0.8} />
                       Lưới
                     </TabsTrigger>
                     <TabsTrigger
                       value="table"
-                      className="flex items-center gap-1 text-maintext"
+                      className="flex items-center gap-1 text-gray-700"
                     >
                       <Icon path={mdiTableLarge} size={0.8} />
                       Bảng
                     </TabsTrigger>
                   </TabsList>
 
-                  <div className="text-sm text-maintext">
+                  <div className="text-sm text-gray-700">
                     Hiển thị{" "}
                     {apiIsLoading ? (
                       <Skeleton className="h-4 w-5 inline-block" />
@@ -1910,7 +1869,7 @@ export default function POSPage() {
                     Lỗi khi tải sản phẩm. Vui lòng thử lại.
                   </div>
                 ) : processedProducts.length === 0 ? (
-                  <div className="text-center py-10 text-maintext">
+                  <div className="text-center py-10 text-gray-700">
                     Không tìm thấy sản phẩm nào.
                   </div>
                 ) : (
@@ -1954,12 +1913,12 @@ export default function POSPage() {
                               </div>
                               <div className="p-4">
                                 <h3
-                                  className="font-medium text-maintext group-hover:text-primary transition-colors truncate cursor-pointer"
+                                  className="font-medium text-gray-700 group-hover:text-primary transition-colors truncate cursor-pointer"
                                   onClick={() => handleProductSelect(product)}
                                 >
                                   {product.name}
                                 </h3>
-                                <p className="text-maintext text-sm mb-2 truncate">
+                                <p className="text-gray-700 text-sm mb-2 truncate">
                                   {getBrandName((product as any)?.brand)}
                                 </p>
                                 <div className="flex justify-between items-center">
@@ -1981,7 +1940,7 @@ export default function POSPage() {
                                         : "N/A"}
                                     </p>
                                     {(product as any).hasDiscount && (
-                                      <p className="text-xs text-maintext line-through">
+                                      <p className="text-xs text-gray-700 line-through">
                                         {formatCurrency(
                                           (product as any)?.originalPrice
                                         )}
@@ -2003,7 +1962,7 @@ export default function POSPage() {
                                           />
                                         ))}
                                       {uniqueColors.length > 3 && (
-                                        <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-maintext">
+                                        <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-gray-700">
                                           +{uniqueColors.length - 3}
                                         </div>
                                       )}
@@ -2018,7 +1977,7 @@ export default function POSPage() {
                                     (v) => v.stock === 0
                                   )}
                                 >
-                                  <Icon path={mdiEye} size={0.7} />
+                                  <Icon path={mdiEye} size={0.8} />
                                   Xem chi tiết
                                 </Button>
                               </div>
@@ -2033,22 +1992,22 @@ export default function POSPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="bg-muted/50">
-                              <th className="text-left py-3 px-4 font-medium text-maintext">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Sản phẩm
                               </th>
-                              <th className="text-left py-3 px-4 font-medium text-maintext">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Thương hiệu
                               </th>
-                              <th className="text-left py-3 px-4 font-medium text-maintext">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Giá
                               </th>
-                              <th className="text-left py-3 px-4 font-medium text-maintext">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Màu sắc
                               </th>
-                              <th className="text-left py-3 px-4 font-medium text-maintext">
+                              <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Kho
                               </th>
-                              <th className="text-center py-3 px-4 font-medium text-maintext">
+                              <th className="text-center py-3 px-4 font-medium text-gray-700">
                                 Thao tác
                               </th>
                             </tr>
@@ -2088,13 +2047,13 @@ export default function POSPage() {
                                           className="object-contain"
                                         />
                                       </div>
-                                      <span className="font-medium text-maintext truncate max-w-[150px]">
+                                      <span className="font-medium text-gray-700 truncate max-w-[150px]">
                                         {product.name}
                                       </span>
                                     </div>
                                   </td>
                                   <td
-                                    className="py-3 px-4 text-maintext truncate max-w-[100px]"
+                                    className="py-3 px-4 text-gray-700 truncate max-w-[100px]"
                                     onClick={() => handleProductSelect(product)}
                                   >
                                     {getBrandName((product as any)?.brand)}
@@ -2121,7 +2080,7 @@ export default function POSPage() {
                                           : "N/A"}
                                       </span>
                                       {(product as any).hasDiscount && (
-                                        <span className="text-xs text-maintext line-through">
+                                        <span className="text-xs text-gray-700 line-through">
                                           {formatCurrency(
                                             (product as any)?.originalPrice
                                           )}
@@ -2165,7 +2124,7 @@ export default function POSPage() {
                                               )
                                           )}
                                         {uniqueColorsCount > 3 && (
-                                          <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-maintext">
+                                          <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-gray-700">
                                             +{uniqueColorsCount - 3}
                                           </div>
                                         )}
@@ -2211,8 +2170,8 @@ export default function POSPage() {
                                             >
                                               <Icon
                                                 path={mdiInformationSlabCircle}
-                                                size={0.7}
-                                                className="text-maintext"
+                                                size={0.8}
+                                                className="text-gray-700"
                                               />
                                             </Button>
                                           </TooltipTrigger>
@@ -2255,8 +2214,8 @@ export default function POSPage() {
                                             >
                                               <Icon
                                                 path={mdiPlus}
-                                                size={0.7}
-                                                className="text-maintext"
+                                                size={0.8}
+                                                className="text-gray-700"
                                               />
                                             </Button>
                                           </TooltipTrigger>

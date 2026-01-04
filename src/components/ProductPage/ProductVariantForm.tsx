@@ -2,20 +2,9 @@
 
 import React, { useRef } from "react";
 
-import { IProductVariant } from "@/interface/request/product";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@mdi/react";
-import {
-  mdiUpload,
-  mdiLoading,
-  mdiTrashCan,
-  mdiImageMultiple,
-  mdiTransferRight,
-} from "@mdi/js";
-import { checkImageUrl } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,7 +13,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useColors, useSizes } from "@/hooks/attributes";
+import { IProductVariant } from "@/interface/request/product";
+import { checkImageUrl } from "@/lib/utils";
 import { getSizeLabel } from "@/utils/sizeMapping";
+import {
+  mdiImageMultiple,
+  mdiLoading,
+  mdiTransferRight,
+  mdiTrashCan,
+  mdiUpload,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface ProductVariantFormProps {
   variant: IProductVariant;
@@ -190,7 +190,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
               onClick={convertToVND}
               title="Chuyển đổi từ USD sang VNĐ (1 USD = 25,912.04 VNĐ)"
             >
-              <Icon path={mdiTransferRight} size={0.7} className="text-white" />
+              <Icon path={mdiTransferRight} size={0.8} className="text-white" />
               Chuyển sang đơn vị VNĐ
             </Button>
           </div>
@@ -231,12 +231,12 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
             >
               {uploading ? (
                 <>
-                  <Icon path={mdiLoading} size={0.7} className="animate-spin" />
+                  <Icon path={mdiLoading} size={0.8} className="animate-spin" />
                   Đang tải...
                 </>
               ) : (
                 <>
-                  <Icon path={mdiUpload} size={0.7} />
+                  <Icon path={mdiUpload} size={0.8} />
                   Tải lên hình ảnh
                 </>
               )}
@@ -269,7 +269,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => onRemoveImage(index)}
                       >
-                        <Icon path={mdiTrashCan} size={0.7} />
+                        <Icon path={mdiTrashCan} size={0.8} />
                       </Button>
                     </div>
                   </motion.div>
@@ -277,7 +277,7 @@ const ProductVariantForm: React.FC<ProductVariantFormProps> = ({
               </AnimatePresence>
             ) : (
               <div
-                className="flex items-center justify-center border border-dashed border-gray-300 rounded-[6px] text-maintext"
+                className="flex items-center justify-center border border-dashed border-gray-300 rounded-[6px] text-gray-700"
                 style={{ aspectRatio: "1/1" }}
               >
                 <div className="flex flex-col items-center p-4">

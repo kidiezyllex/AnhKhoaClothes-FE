@@ -122,7 +122,14 @@ export const useCartStore = create(
       
       addToCart: (product, quantity) => {
         const currentItems = [...get().items];
-        const existingItemIndex = currentItems.findIndex(item => item.id === (product as any)?.id);
+        const productId = String((product as any)?.id);
+        
+        if (!productId || productId === 'undefined' || productId === 'null') {
+          console.error("Attempting to add product without valid ID to cart", product);
+          return;
+        }
+
+        const existingItemIndex = currentItems.findIndex(item => String(item.id) === productId);
         
         if (existingItemIndex !== -1) {
           const existingItem = currentItems[existingItemIndex];
@@ -130,19 +137,22 @@ export const useCartStore = create(
           
           // Check stock limit
           if (existingItem.stock && newQuantity > existingItem.stock) {
-            return; // Don't add if exceeds stock
+            return;
           }
           
-          currentItems[existingItemIndex].quantity = newQuantity;
+          currentItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: newQuantity
+          };
         } else {
           // Check stock for new item
           if ((product as any)?.stock && quantity > (product as any)?.stock) {
-            return; // Don't add if exceeds stock
+            return;
           }
           
           currentItems.push({
-            id: (product as any)?.id,
-            productId: (product as any)?.productId || (product as any)?.id, // Default to id if productId not provided
+            id: productId,
+            productId: String((product as any)?.productId || (product as any)?.id),
             name: (product as any)?.name,
             price: (product as any)?.price,
             originalPrice: (product as any)?.originalPrice,

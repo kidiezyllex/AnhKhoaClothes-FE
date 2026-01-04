@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Icon } from "@mdi/react";
-import { mdiCart } from "@mdi/js";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/useUserContext";
-import AccountDropdown from "./AccountDropdown";
 import { useCartStore } from "@/stores/useCartStore";
+import { mdiCart } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import CartSheet from "../ui/CartSheet";
+import AccountDropdown from "./AccountDropdown";
 
 const tabs = [
   { text: "Trang chủ", href: "/" },
@@ -27,7 +27,7 @@ const Tab = ({ text, selected, setSelected }: TabProps) => {
       className={`${
         selected
           ? "text-white"
-          : "text-maintext hover:text-maintext dark:hover:text-gray-100"
+          : "text-gray-700 hover:text-gray-700 dark:hover:text-gray-100"
       } relative rounded-[6px] px-3 py-1 text-sm font-medium transition-colors`}
     >
       <span className="relative z-10">{text}</span>
@@ -99,10 +99,10 @@ export const NavigationBar = () => {
             </div>
           ) : (
             <div className="hidden md:flex items-center gap-2">
-              <span className="text-sm font-medium text-maintext">
+              <span className="text-sm font-medium text-gray-700">
                 Xin chào,{" "}
                 <span className="text-primary font-bold">
-                  {user?.name || user?.fullName || "Khách hàng"}
+                  {user?.fullName || user?.name || "Khách hàng"}
                 </span>
               </span>
             </div>
@@ -110,9 +110,9 @@ export const NavigationBar = () => {
           <div className="flex items-center">
             <button
               onClick={() => setIsOpen(true)}
-              className="relative p-2 text-maintext hover:text-primary transition-colors"
+              className="relative p-2 text-gray-700 hover:text-primary transition-colors"
             >
-              <Icon path={mdiCart} size={0.7} />
+              <Icon path={mdiCart} size={0.8} />
               <span className="absolute -top-1 -right-1 bg-extra text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                 {totalItems}
               </span>

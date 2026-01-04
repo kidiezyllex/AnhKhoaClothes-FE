@@ -1,23 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Icon } from "@mdi/react";
-import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import {
-  useReturns,
-  useDeleteReturn,
-  useUpdateReturnStatus,
-  useReturnStats,
-  useSearchReturn,
-} from "@/hooks/return";
-import { IReturnFilter } from "@/interface/request/return";
-import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import SearchReturnModal from "@/components/admin/returns/SearchReturnModal";
+import StatusUpdateModal from "@/components/admin/returns/StatusUpdateModal";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -26,56 +13,68 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableHead,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import StatusUpdateModal from "@/components/admin/returns/StatusUpdateModal";
-import SearchReturnModal from "@/components/admin/returns/SearchReturnModal";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+  useDeleteReturn,
+  useReturns,
+  useReturnStats,
+  useUpdateReturnStatus,
+} from "@/hooks/return";
+import { IReturnFilter } from "@/interface/request/return";
 import {
-  mdiMagnify,
-  mdiDownload,
-  mdiPlus,
-  mdiFilterMultiple,
   mdiCalendar,
-  mdiDotsVertical,
-  mdiEye,
-  mdiPencilCircle,
-  mdiCheckCircle,
-  mdiDeleteCircle,
   mdiCancel,
   mdiCheck,
+  mdiCheckCircle,
+  mdiDeleteCircle,
+  mdiDotsVertical,
+  mdiDownload,
+  mdiEye,
+  mdiFilterMultiple,
+  mdiMagnify,
+  mdiPencilCircle,
+  mdiPlus,
 } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ReturnsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -327,16 +326,16 @@ export default function ReturnsPage() {
         </Breadcrumb>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setSearchModal(true)}>
-            <Icon path={mdiMagnify} size={0.7} className="mr-2" />
+            <Icon path={mdiMagnify} size={0.8} className="mr-2" />
             Tìm kiếm nâng cao
           </Button>
           <Button variant="outline" onClick={exportToCSV}>
-            <Icon path={mdiDownload} size={0.7} className="mr-2" />
+            <Icon path={mdiDownload} size={0.8} className="mr-2" />
             Xuất CSV
           </Button>
           <a href="/admin/returns/create" className="flex items-center gap-2">
             <Button className="flex items-center gap-2">
-              <Icon path={mdiPlus} size={0.7} />
+              <Icon path={mdiPlus} size={0.8} />
               Tạo yêu cầu trả hàng mới
             </Button>
           </a>
@@ -348,7 +347,7 @@ export default function ReturnsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col">
-                <p className="text-sm text-maintext">Tổng số đơn trả</p>
+                <p className="text-sm text-gray-700">Tổng số đơn trả</p>
                 <h3 className="text-2xl font-bold">
                   {statsData.data.totalReturns}
                 </h3>
@@ -358,7 +357,7 @@ export default function ReturnsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col">
-                <p className="text-sm text-maintext">Đang chờ xử lý</p>
+                <p className="text-sm text-gray-700">Đang chờ xử lý</p>
                 <h3 className="text-2xl font-bold">
                   {statsData.data.pendingReturns}
                 </h3>
@@ -368,7 +367,7 @@ export default function ReturnsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col">
-                <p className="text-sm text-maintext">Đã hoàn tiền</p>
+                <p className="text-sm text-gray-700">Đã hoàn tiền</p>
                 <h3 className="text-2xl font-bold">
                   {statsData.data.refundedReturns}
                 </h3>
@@ -378,7 +377,7 @@ export default function ReturnsPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex flex-col">
-                <p className="text-sm text-maintext">Tổng tiền hoàn trả</p>
+                <p className="text-sm text-gray-700">Tổng tiền hoàn trả</p>
                 <h3 className="text-2xl font-bold">
                   {formatCurrency(statsData.data.totalRefundAmount)}
                 </h3>
@@ -393,16 +392,16 @@ export default function ReturnsPage() {
           <Tabs defaultValue="all" onValueChange={setSelectedTab}>
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-4">
               <TabsList className="h-9">
-                <TabsTrigger value="all" className="px-4 text-maintext">
+                <TabsTrigger value="all" className="px-4 text-gray-700">
                   Tất cả
                 </TabsTrigger>
-                <TabsTrigger value="pending" className="px-4 text-maintext">
+                <TabsTrigger value="pending" className="px-4 text-gray-700">
                   Chờ xử lý
                 </TabsTrigger>
-                <TabsTrigger value="refunded" className="px-4 text-maintext">
+                <TabsTrigger value="refunded" className="px-4 text-gray-700">
                   Đã hoàn tiền
                 </TabsTrigger>
-                <TabsTrigger value="cancelled" className="px-4 text-maintext">
+                <TabsTrigger value="cancelled" className="px-4 text-gray-700">
                   Đã hủy
                 </TabsTrigger>
               </TabsList>
@@ -415,8 +414,8 @@ export default function ReturnsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 w-full"
                   />
-                  <div className="absolute left-3 top-2.5 text-maintext">
-                    <Icon path={mdiMagnify} size={0.7} />
+                  <div className="absolute left-3 top-2.5 text-gray-700">
+                    <Icon path={mdiMagnify} size={0.8} />
                   </div>
                 </div>
 
@@ -425,7 +424,7 @@ export default function ReturnsPage() {
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center"
                 >
-                  <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
                   Bộ lọc
                   {(filters.customer ||
                     filters.startDate ||
@@ -478,7 +477,7 @@ export default function ReturnsPage() {
                           >
                             <Icon
                               path={mdiCalendar}
-                              size={0.7}
+                              size={0.8}
                               className="mr-2"
                             />
                             {dateRange.from
@@ -513,7 +512,7 @@ export default function ReturnsPage() {
                           >
                             <Icon
                               path={mdiCalendar}
-                              size={0.7}
+                              size={0.8}
                               className="mr-2"
                             />
                             {dateRange.to
@@ -570,7 +569,7 @@ export default function ReturnsPage() {
               </div>
             ) : data?.data.returns.length === 0 ? (
               <div className="text-center py-10">
-                <p className="text-maintext">Không có yêu cầu trả hàng nào</p>
+                <p className="text-gray-700">Không có yêu cầu trả hàng nào</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -615,12 +614,12 @@ export default function ReturnsPage() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size="icon" variant="outline">
-                                <Icon path={mdiDotsVertical} size={0.7} />
+                                <Icon path={mdiDotsVertical} size={0.8} />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                className="cursor-pointer text-maintext"
+                                className="cursor-pointer text-gray-700"
                                 onClick={() => {
                                   setSelectedReturn((returnItem as any)?.id);
                                   setIsDetailDialogOpen(true);
@@ -628,10 +627,10 @@ export default function ReturnsPage() {
                               >
                                 <Icon
                                   path={mdiEye}
-                                  size={0.7}
+                                  size={0.8}
                                   className="mr-2"
                                 />
-                                <span className="text-maintext text-sm">
+                                <span className="text-gray-700 text-sm">
                                   Xem chi tiết
                                 </span>
                               </DropdownMenuItem>
@@ -643,13 +642,13 @@ export default function ReturnsPage() {
                                       (returnItem as any)?.id
                                     }`}
                                   >
-                                    <DropdownMenuItem className="cursor-pointer text-maintext">
+                                    <DropdownMenuItem className="cursor-pointer text-gray-700">
                                       <Icon
                                         path={mdiPencilCircle}
-                                        size={0.7}
+                                        size={0.8}
                                         className="mr-2 text-blue-400"
                                       />
-                                      <span className="text-maintext text-sm">
+                                      <span className="text-gray-700 text-sm">
                                         Chỉnh sửa
                                       </span>
                                     </DropdownMenuItem>
@@ -667,10 +666,10 @@ export default function ReturnsPage() {
                                   >
                                     <Icon
                                       path={mdiCheckCircle}
-                                      size={0.7}
+                                      size={0.8}
                                       className="mr-2 text-green-400 "
                                     />
-                                    <span className="text-sm text-maintext">
+                                    <span className="text-sm text-gray-700">
                                       Cập nhật trạng thái
                                     </span>
                                   </DropdownMenuItem>
@@ -686,10 +685,10 @@ export default function ReturnsPage() {
                                   >
                                     <Icon
                                       path={mdiDeleteCircle}
-                                      size={0.7}
+                                      size={0.8}
                                       className="mr-2 text-red-400 "
                                     />
-                                    <span className="text-sm text-maintext">
+                                    <span className="text-sm text-gray-700">
                                       Xóa yêu cầu
                                     </span>
                                   </DropdownMenuItem>
@@ -882,19 +881,19 @@ function ReturnDetailContent({
           <h3 className="text-lg font-semibold">Thông tin yêu cầu</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-maintext">Mã yêu cầu</p>
+              <p className="text-sm text-gray-700">Mã yêu cầu</p>
               <p className="font-medium">{returnData.code}</p>
             </div>
             <div>
-              <p className="text-sm text-maintext">Ngày tạo</p>
+              <p className="text-sm text-gray-700">Ngày tạo</p>
               <p className="font-medium">{formatDate(returnData.createdAt)}</p>
             </div>
             <div>
-              <p className="text-sm text-maintext">Đơn hàng gốc</p>
+              <p className="text-sm text-gray-700">Đơn hàng gốc</p>
               <p className="font-medium">{order.code}</p>
             </div>
             <div>
-              <p className="text-sm text-maintext">Trạng thái</p>
+              <p className="text-sm text-gray-700">Trạng thái</p>
               <div className="mt-1">
                 {returnData.status === "CHO_XU_LY" ? (
                   <Badge
@@ -921,7 +920,7 @@ function ReturnDetailContent({
               </div>
             </div>
             <div className="col-span-2">
-              <p className="text-sm text-maintext">Tổng tiền hoàn trả</p>
+              <p className="text-sm text-gray-700">Tổng tiền hoàn trả</p>
               <p className="font-medium text-lg text-primary">
                 {formatCurrency(returnData.totalRefund)}
               </p>
@@ -933,15 +932,15 @@ function ReturnDetailContent({
           <h3 className="text-lg font-semibold">Thông tin khách hàng</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <p className="text-sm text-maintext">Tên khách hàng</p>
+              <p className="text-sm text-gray-700">Tên khách hàng</p>
               <p className="font-medium">{customer.fullName}</p>
             </div>
             <div>
-              <p className="text-sm text-maintext">Email</p>
+              <p className="text-sm text-gray-700">Email</p>
               <p className="font-medium">{customer.email || "Không có"}</p>
             </div>
             <div>
-              <p className="text-sm text-maintext">Số điện thoại</p>
+              <p className="text-sm text-gray-700">Số điện thoại</p>
               <p className="font-medium">
                 {customer.phoneNumber || "Không có"}
               </p>
@@ -992,14 +991,14 @@ function ReturnDetailContent({
                           <Icon
                             path={mdiMagnify}
                             size={1}
-                            className="text-maintext"
+                            className="text-gray-700"
                           />
                         </div>
                       )}
                     </TableCell>
                     <TableCell className="font-medium">
                       {product.name}
-                      <div className="text-xs text-maintext">
+                      <div className="text-xs text-gray-700">
                         SKU: {product.code}
                       </div>
                     </TableCell>
@@ -1042,14 +1041,14 @@ function ReturnDetailContent({
             className="gap-2"
             onClick={() => onUpdateStatus(returnId, "DA_HUY")}
           >
-            <Icon path={mdiCancel} size={0.7} />
+            <Icon path={mdiCancel} size={0.8} />
             Từ chối trả hàng
           </Button>
           <Button
             className="gap-2"
             onClick={() => onUpdateStatus(returnId, "DA_HOAN_TIEN")}
           >
-            <Icon path={mdiCheck} size={0.7} />
+            <Icon path={mdiCheck} size={0.8} />
             Hoàn tiền
           </Button>
         </div>

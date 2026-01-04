@@ -190,7 +190,7 @@ export default function PromotionsPage() {
             className="flex items-center gap-2"
           >
             <Button className="flex items-center gap-2">
-              <Icon path={mdiPlus} size={0.7} />
+              <Icon path={mdiPlus} size={0.8} />
               Thêm chiến dịch khuyến mãi
             </Button>
           </a>
@@ -203,7 +203,7 @@ export default function PromotionsPage() {
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
-                size={0.7}
+                size={0.8}
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-maintext"
               />
               <Input
@@ -225,7 +225,7 @@ export default function PromotionsPage() {
                   className="flex items-center"
                   onClick={handleClearFilters}
                 >
-                  <Icon path={mdiFilterRemove} size={0.7} className="mr-2" />
+                  <Icon path={mdiFilterRemove} size={0.8} className="mr-2" />
                   Clear bộ lọc
                 </Button>
               )}
@@ -234,7 +234,7 @@ export default function PromotionsPage() {
                 className="flex items-center"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <Icon path={mdiFilterMultiple} size={0.7} className="mr-2" />
+                <Icon path={mdiFilterMultiple} size={0.8} className="mr-2" />
                 {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>
@@ -421,7 +421,7 @@ export default function PromotionsPage() {
                             href={`/admin/discounts/promotions/edit/${promotion.id}`}
                           >
                             <Button variant="outline" size="icon" title="Sửa">
-                              <Icon path={mdiPencilCircle} size={0.7} />
+                              <Icon path={mdiPencilCircle} size={0.8} />
                             </Button>
                           </a>
                           <Button
@@ -433,7 +433,7 @@ export default function PromotionsPage() {
                             }}
                             title="Xóa"
                           >
-                            <Icon path={mdiDeleteCircle} size={0.7} />
+                            <Icon path={mdiDeleteCircle} size={0.8} />
                           </Button>
                         </div>
                       </TableCell>
@@ -559,7 +559,7 @@ export default function PromotionsPage() {
                 <>
                   <Icon
                     path={mdiLoading}
-                    size={0.7}
+                    size={0.8}
                     className="mr-2 animate-spin"
                   />
                   Đang xóa...

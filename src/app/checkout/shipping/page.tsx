@@ -224,22 +224,21 @@ export default function ShippingPage() {
     }
   }, [selectedDistrict, form]);
 
-  // Update form with user profile data when available
+  // Update form with user data when available
   useEffect(() => {
-    if (userProfile?.data?.user) {
-      const profile = userProfile.data.user;
+    if (user) {
       form.reset({
-        fullName: profile.name || profile.fullName || "",
-        email: profile.email || "",
-        phoneNumber: profile.phoneNumber || "",
-        address: profile.addresses?.[0]?.specificAddress || "",
-        province: profile.addresses?.[0]?.provinceName || "",
-        district: profile.addresses?.[0]?.districtName || "",
-        ward: profile.addresses?.[0]?.wardName || "",
+        fullName: user.name || user.fullName || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.addresses?.[0]?.specificAddress || "",
+        province: user.addresses?.[0]?.provinceName || "",
+        district: user.addresses?.[0]?.districtName || "",
+        ward: user.addresses?.[0]?.wardName || "",
         paymentMethod: "COD",
       });
     }
-  }, [userProfile, form]);
+  }, [user, form]);
 
   useEffect(() => {
     const checkCart = async () => {
@@ -584,24 +583,23 @@ export default function ShippingPage() {
 
   // Helper function to check if field should be disabled
   const isFieldDisabled = (fieldName: keyof ShippingFormValues) => {
-    if (!userProfile?.data?.user) return false;
-    const profile = userProfile.data.user;
+    if (!user) return false;
 
     switch (fieldName) {
       case "fullName":
-        return !!(profile.name || profile.fullName);
+        return !!(user.name || user.fullName);
       case "email":
-        return !!profile.email;
+        return !!user.email;
       case "phoneNumber":
-        return !!profile.phoneNumber;
+        return !!user.phoneNumber;
       case "address":
-        return !!profile.addresses?.[0]?.specificAddress;
+        return !!user.addresses?.[0]?.specificAddress;
       case "province":
-        return !!profile.addresses?.[0]?.provinceName;
+        return !!user.addresses?.[0]?.provinceName;
       case "district":
-        return !!profile.addresses?.[0]?.districtName;
+        return !!user.addresses?.[0]?.districtName;
       case "ward":
-        return !!profile.addresses?.[0]?.wardName;
+        return !!user.addresses?.[0]?.wardName;
       default:
         return false;
     }

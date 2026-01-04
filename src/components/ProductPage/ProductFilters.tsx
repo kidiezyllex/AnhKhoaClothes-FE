@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getSizeLabel } from "@/utils/sizeMapping";
-import { toast } from "react-toastify";
+import { Slider } from "@/components/ui/slider";
 import {
   useBrands,
   useCategories,
   useColors,
-  useSizes,
   useFilterOptions,
+  useSizes,
 } from "@/hooks/product";
 import type { IProductFilter } from "@/interface/request/product";
+import { getSizeLabel } from "@/utils/sizeMapping";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 interface ProductFiltersProps {
   filters: IProductFilter;
@@ -288,7 +288,7 @@ export const ProductFilters = ({
               handlePriceChange(value as [number, number])
             }
           />
-          <div className="flex justify-between mt-2 text-sm text-maintext">
+          <div className="flex justify-between mt-2 text-sm text-gray-700">
             <span>{formatPrice(selectedPriceRange[0])}</span>
             <span>{formatPrice(selectedPriceRange[1])}</span>
           </div>

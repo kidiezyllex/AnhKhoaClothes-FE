@@ -1,10 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { Icon } from "@mdi/react";
-import { mdiTag, mdiContentCopy, mdiChevronLeft } from "@mdi/js";
-import { toast } from "react-toastify";
-import { useVouchers } from "@/hooks/voucher";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +7,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
-  TableHeader,
   TableBody,
-  TableRow,
   TableCell,
   TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useVouchers } from "@/hooks/voucher";
+import { cn } from "@/lib/utils";
+import { mdiChevronLeft, mdiContentCopy, mdiTag } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { motion } from "framer-motion";
+import React from "react";
+import { toast } from "react-toastify";
 
 interface VouchersDialogProps {
   open: boolean;
@@ -134,7 +134,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
               <h3 className="text-xl font-semibold text-red-600 mb-2">
                 Lỗi khi tải dữ liệu
               </h3>
-              <p className="text-maintext text-center max-w-md">
+              <p className="text-gray-700 text-center max-w-md">
                 Không thể tải danh sách mã giảm giá. Vui lòng kiểm tra kết nối
                 mạng và thử lại.
               </p>
@@ -150,12 +150,12 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
             vouchersData.data.vouchers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="h-20 w-20 rounded-full bg-gray-50 flex items-center justify-center mb-6">
-                <Icon path={mdiTag} size={2} className="text-maintext" />
+                <Icon path={mdiTag} size={2} className="text-gray-700" />
               </div>
-              <h3 className="text-xl font-semibold text-maintext mb-2">
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
                 Chưa có mã giảm giá
               </h3>
-              <p className="text-maintext text-center max-w-md">
+              <p className="text-gray-700 text-center max-w-md">
                 Hiện tại không có mã giảm giá nào đang hoạt động trong hệ thống.
               </p>
             </div>
@@ -164,13 +164,13 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
               {/* Header Stats */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-6">
-                  <div className="text-sm text-maintext">
+                  <div className="text-sm text-gray-700">
                     <span className="font-semibold text-primary text-lg">
                       {vouchersData.data.vouchers.length}
                     </span>{" "}
                     mã giảm giá
                   </div>
-                  <div className="text-sm text-maintext">
+                  <div className="text-sm text-gray-700">
                     <span className="font-semibold text-green-600 text-lg">
                       {
                         vouchersData.data.vouchers.filter(
@@ -180,7 +180,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                     </span>{" "}
                     khả dụng
                   </div>
-                  <div className="text-sm text-maintext">
+                  <div className="text-sm text-gray-700">
                     <span className="font-semibold text-red-600 text-lg">
                       {
                         vouchersData.data.vouchers.filter((v) =>
@@ -257,13 +257,13 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                                     className={cn(
                                       "font-mono font-bold text-sm tracking-wider",
                                       isDisabled
-                                        ? "text-maintext"
+                                        ? "text-gray-700"
                                         : "text-primary"
                                     )}
                                   >
                                     {voucher.code}
                                   </div>
-                                  <div className="text-xs text-maintext">
+                                  <div className="text-xs text-gray-700">
                                     ID: {String(voucher.id).slice(-6)}
                                   </div>
                                 </div>
@@ -275,12 +275,12 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                               <div
                                 className={cn(
                                   "font-medium text-sm leading-tight",
-                                  isDisabled ? "text-maintext" : "text-maintext"
+                                  isDisabled ? "text-gray-700" : "text-gray-700"
                                 )}
                               >
                                 {voucher.name}
                               </div>
-                              <div className="text-xs text-maintext mt-1">
+                              <div className="text-xs text-gray-700 mt-1">
                                 Đã dùng: {voucher.usedCount}/{voucher.quantity}
                               </div>
                             </TableCell>
@@ -311,7 +311,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                               <div
                                 className={cn(
                                   "font-bold text-sm",
-                                  isDisabled ? "text-maintext" : "text-primary"
+                                  isDisabled ? "text-gray-700" : "text-primary"
                                 )}
                               >
                                 {voucher.discountType === "PERCENTAGE"
@@ -320,7 +320,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                               </div>
                               {voucher.discountType === "PERCENTAGE" &&
                                 voucher.maxValue && (
-                                  <div className="text-xs text-maintext">
+                                  <div className="text-xs text-gray-700">
                                     Max: {formatCurrency(voucher.maxValue)}
                                   </div>
                                 )}
@@ -328,7 +328,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
 
                             {/* Min Order */}
                             <TableCell className="text-right">
-                              <div className="font-semibold text-sm text-maintext">
+                              <div className="font-semibold text-sm text-gray-700">
                                 {formatCurrency(voucher.minOrderValue)}
                               </div>
                             </TableCell>
@@ -361,7 +361,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                               <div
                                 className={cn(
                                   "text-xs font-medium",
-                                  isExpired ? "text-red-600" : "text-maintext"
+                                  isExpired ? "text-red-600" : "text-gray-700"
                                 )}
                               >
                                 {formatDate(voucher.endDate)}
@@ -387,7 +387,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                                   className={cn(
                                     "px-4 py-2 text-xs font-semibold transition-all duration-200",
                                     isDisabled
-                                      ? "bg-gray-200 text-maintext cursor-not-allowed hover:bg-gray-200"
+                                      ? "bg-gray-200 text-gray-700 cursor-not-allowed hover:bg-gray-200"
                                       : "bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white shadow-sm hover:shadow-sm"
                                   )}
                                   onClick={() =>
@@ -426,7 +426,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
 
               {/* Footer Info */}
               <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-border">
-                <div className="flex items-center justify-between text-sm text-maintext">
+                <div className="flex items-center justify-between text-sm text-gray-700">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-400" />
@@ -437,7 +437,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                       <span>Không khả dụng</span>
                     </div>
                   </div>
-                  <div className="text-xs text-maintext">
+                  <div className="text-xs text-gray-700">
                     Cập nhật lần cuối: {new Date().toLocaleTimeString("vi-VN")}
                   </div>
                 </div>
@@ -452,7 +452,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
             onClick={() => onOpenChange(false)}
             className="px-8 py-2 font-medium"
           >
-            <Icon path={mdiChevronLeft} size={0.7} className="mr-2" />
+            <Icon path={mdiChevronLeft} size={0.8} className="mr-2" />
             Đóng
           </Button>
         </DialogFooter>

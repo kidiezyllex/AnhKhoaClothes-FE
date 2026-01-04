@@ -2,28 +2,9 @@
 
 import { useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icon } from "@mdi/react";
-import {
-  mdiMagnify,
-  mdiPlus,
-  mdiPencil,
-  mdiDelete,
-  mdiCalendarClock,
-} from "@mdi/js";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +13,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  mdiCalendarClock,
+  mdiDelete,
+  mdiMagnify,
+  mdiPencil,
+  mdiPlus,
+} from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
 
 type DiscountType = "percentage" | "fixed";
 type DiscountStatus = "active" | "scheduled" | "expired" | "draft";
@@ -232,7 +232,7 @@ export default function DiscountsPage() {
         );
       case "expired":
         return (
-          <Badge className="bg-gray-100 text-maintext hover:bg-gray-100">
+          <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">
             Đã hết hạn
           </Badge>
         );
@@ -259,7 +259,7 @@ export default function DiscountsPage() {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
         <Button className="flex items-center">
-          <Icon path={mdiPlus} size={0.7} className="mr-2" />
+          <Icon path={mdiPlus} size={0.8} className="mr-2" />
           Tạo mã giảm giá
         </Button>
       </div>
@@ -294,8 +294,8 @@ export default function DiscountsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 w-full"
                 />
-                <div className="absolute left-3 top-2.5 text-maintext">
-                  <Icon path={mdiMagnify} size={0.7} />
+                <div className="absolute left-3 top-2.5 text-gray-700">
+                  <Icon path={mdiMagnify} size={0.8} />
                 </div>
               </div>
             </div>
@@ -386,7 +386,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
   if (discounts.length === 0) {
     return (
       <div className="text-center py-10">
-        <p className="text-maintext">Không tìm thấy mã giảm giá nào phù hợp.</p>
+        <p className="text-gray-700">Không tìm thấy mã giảm giá nào phù hợp.</p>
       </div>
     );
   }
@@ -396,28 +396,28 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b">
-            <th className="px-4 py-3 text-left font-medium text-maintext">
+            <th className="px-4 py-3 text-left font-medium text-gray-700">
               Mã giảm giá
             </th>
-            <th className="px-4 py-3 text-left font-medium text-maintext">
+            <th className="px-4 py-3 text-left font-medium text-gray-700">
               Tên
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Giá trị
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Áp dụng
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Thời gian
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Sử dụng
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Trạng thái
             </th>
-            <th className="px-4 py-3 text-center font-medium text-maintext">
+            <th className="px-4 py-3 text-center font-medium text-gray-700">
               Thao tác
             </th>
           </tr>
@@ -430,7 +430,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                 <div>
                   <div className="font-medium">{discount.name}</div>
                   {discount.description && (
-                    <div className="text-maintext text-xs truncate max-w-[200px]">
+                    <div className="text-gray-700 text-xs truncate max-w-[200px]">
                       {discount.description}
                     </div>
                   )}
@@ -443,7 +443,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                   <span>{formatCurrency(discount.discountValue)}</span>
                 )}
                 {discount.minOrderValue && (
-                  <div className="text-xs text-maintext">
+                  <div className="text-xs text-gray-700">
                     Đơn tối thiểu: {formatCurrency(discount.minOrderValue)}
                   </div>
                 )}
@@ -459,12 +459,12 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                 <div className="flex items-center justify-center">
                   <Icon
                     path={mdiCalendarClock}
-                    size={0.7}
-                    className="mr-1 text-maintext"
+                    size={0.8}
+                    className="mr-1 text-gray-700"
                   />
                   <div>
                     <div>{formatDate(discount.startDate)}</div>
-                    <div className="text-xs text-maintext">
+                    <div className="text-xs text-gray-700">
                       {formatDate(discount.endDate)}
                     </div>
                   </div>
@@ -474,7 +474,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                 <div>
                   <span>{discount.usageCount}</span>
                   {discount.usageLimit && (
-                    <span className="text-maintext">
+                    <span className="text-gray-700">
                       /{discount.usageLimit}
                     </span>
                   )}
@@ -510,7 +510,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem className="flex items-center cursor-pointer">
-                        <Icon path={mdiPencil} size={0.7} className="mr-2" />
+                        <Icon path={mdiPencil} size={0.8} className="mr-2" />
                         <span>Chỉnh sửa</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -518,7 +518,7 @@ const DiscountTable: React.FC<DiscountTableProps> = ({
                         className="flex items-center text-red-600 cursor-pointer"
                         onClick={() => onDelete(discount)}
                       >
-                        <Icon path={mdiDelete} size={0.7} className="mr-2" />
+                        <Icon path={mdiDelete} size={0.8} className="mr-2" />
                         <span>Xóa</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
