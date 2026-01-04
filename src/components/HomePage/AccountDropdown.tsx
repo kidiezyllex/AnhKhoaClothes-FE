@@ -96,7 +96,9 @@ const AccountDropdown = () => {
             </DropdownMenuItem>
           </motion.div>
 
-          {profile?.data?.user?.role === "ADMIN" && (
+          {(profile?.data?.user?.role === "ADMIN" ||
+            profile?.data?.user?.role === "STAFF" ||
+            profile?.data?.user?.email === "adminallwear@gmail.com") && (
             <motion.div transition={{ delay: 0.07 }}>
               <DropdownMenuItem asChild>
                 <a

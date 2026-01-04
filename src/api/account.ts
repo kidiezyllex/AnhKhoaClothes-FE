@@ -1,25 +1,25 @@
 // Nhập các interface liên quan đến request (tạo, cập nhật, lọc tài khoản, địa chỉ, profile, đổi mật khẩu)
 import {
-  IAccountFilter,
   IAccountCreate,
-  IAccountUpdate,
+  IAccountFilter,
   IAccountStatusUpdate,
+  IAccountUpdate,
   IAddressCreate,
   IAddressUpdate,
-  IProfileUpdate,
   IChangePassword,
+  IProfileUpdate,
 } from "@/interface/request/account";
 
 // Nhập các interface liên quan đến response (kết quả trả về từ server)
 import {
-  IAccountsResponse,
   IAccountResponse,
-  IProfileResponse,
-  IActionResponse
+  IAccountsResponse,
+  IActionResponse,
+  IProfileResponse
 } from "@/interface/response/account";
 
 // Nhập các hàm gọi API đã xây dựng sẵn
-import { sendGet, sendPost, sendPut, sendDelete } from "./axios";
+import { sendDelete, sendGet, sendPost, sendPut } from "./axios";
 
 // === Admin Account API ===
 
@@ -35,7 +35,6 @@ export const getAccountById = async (accountId: string): Promise<IAccountRespons
   return res as IAccountResponse;
 };
 
-// Tạo tài khoản mới (dành cho Admin)
 export const createAccount = async (payload: IAccountCreate): Promise<IAccountResponse> => {
   const res = await sendPost("/accounts/register", payload); // Gửi POST đến endpoint đăng ký
   return res as IAccountResponse;
