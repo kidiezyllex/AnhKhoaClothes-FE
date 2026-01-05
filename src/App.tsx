@@ -5,11 +5,9 @@ import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-// Layout components
 import AdminLayout from "@/layouts/AdminLayout";
 import RootLayout from "@/layouts/RootLayout";
 
-// Lazy load page components with route-based code splitting
 const HomePage = React.lazy(() => import("@/pages/HomePage"));
 const NotFoundPage = React.lazy(() => import("@/pages/NotFoundPage"));
 const AboutUsPage = React.lazy(() => import("@/pages/AboutUsPage"));

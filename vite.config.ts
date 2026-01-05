@@ -1,72 +1,50 @@
-// Import hàm defineConfig để định nghĩa cấu hình cho Vite
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
-// Import plugin React để hỗ trợ JSX, Fast Refresh,...
-import react from '@vitejs/plugin-react'
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-// Import path để xử lý alias đường dẫn
-import path from 'path'
-
-// Xuất cấu hình Vite
 export default defineConfig({
-  // ⚙️ Cấu hình server dev
   server: {
-    // Cổng chạy ứng dụng là 3000
     port: 3000,
-    strictPort: true, // Nếu cổng 3000 bận thì báo lỗi thay vì tự chuyển cổng khác
+    strictPort: true,
 
-    // Tắt polling nếu không dùng Docker/WSL cũ để giảm tải CPU
     watch: {
-      usePolling: false, 
+      usePolling: false,
     },
 
-    // Bật HMR (Hot Module Replacement)
     hmr: {
-      overlay: true, // Hiển thị lỗi trên màn hình
+      overlay: true,
     },
-
-    // Cho phép tất cả các host truy cập
-    allowedHosts: ['*'],
+    allowedHosts: ["*"],
   },
 
-  // 🔌 Thêm plugin vào Vite
-  plugins: [
-    // Kích hoạt plugin React (JSX, Fast Refresh,...)
-    react(),
-  ],
+  plugins: [react()],
 
-  //  Cấu hình resolve alias
   resolve: {
     alias: {
-      // Khi import '@/' sẽ hiểu là './src'
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 
-  // 🛠️ Cấu hình Build
   build: {
-    target: 'esnext',
-    minify: 'esbuild', // Dùng esbuild để build nhanh hơn
+    target: "esnext",
+    minify: "esbuild",
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        // Tách code (Code Splitting) thông minh hơn
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@mui/material', '@mui/icons-material', 'framer-motion'],
-          'utils-vendor': ['axios', 'date-fns', 'lodash'],
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-vendor": ["framer-motion"],
+          "utils-vendor": ["axios", "date-fns"],
         },
       },
     },
-    // Tăng giới hạn cảnh báo chunk size (mặc định 500kb)
-    chunkSizeWarningLimit: 1000, 
+    chunkSizeWarningLimit: 1000,
   },
 
-  // ⚡ Tối ưu hóa dependencies (Pre-bundling)
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'axios'],
+    include: ["react", "react-dom", "react-router-dom", "axios"],
   },
 
-  // 🌐 Base path cho toàn bộ app khi build (mặc định '/')
-  base: '/',
-})
+  base: "/",
+});
