@@ -136,11 +136,6 @@ export default function CreatePromotionPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    return new Date(dateString).toISOString().split("T")[0];
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -367,10 +362,7 @@ export default function CreatePromotionPage() {
                                 {product.name}
                               </Label>
                               <div className="text-xs text-gray-700">
-                                Mã: {product.code} | Thương hiệu:{" "}
-                                {typeof (product as any)?.brand === "string"
-                                  ? (product as any)?.brand
-                                  : (product as any)?.brand.name}
+                                Mã: {product.code}
                               </div>
                             </div>
                           </div>
@@ -386,7 +378,7 @@ export default function CreatePromotionPage() {
                         <div className="flex flex-wrap gap-2">
                           {selectedProducts.map((productId) => {
                             const product = productsData?.data?.products?.find(
-                              (p) => p.id === productId
+                              (p) => (p as any)?.id === productId
                             );
                             return product ? (
                               <Badge

@@ -1,13 +1,13 @@
-import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ReactQueryClientProvider } from "@/provider/ReactQueryClientProvider";
-import { UserProvider } from "@/context/useUserContext";
-import { ToastContainer } from "react-toastify";
 import { LazyComponentLoader } from "@/components/Common/LazyComponentLoader";
+import { UserProvider } from "@/context/useUserContext";
+import { ReactQueryClientProvider } from "@/provider/ReactQueryClientProvider";
+import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 
 // Layout components
-import RootLayout from "@/layouts/RootLayout";
 import AdminLayout from "@/layouts/AdminLayout";
+import RootLayout from "@/layouts/RootLayout";
 
 // Lazy load page components with route-based code splitting
 const HomePage = React.lazy(() => import("@/pages/HomePage"));
@@ -22,7 +22,6 @@ const RegisterPage = React.lazy(() => import("@/pages/auth/RegisterPage"));
 // Public pages
 const ProductsPage = React.lazy(() => import("@/pages/ProductsPage"));
 const ProductDetailPage = React.lazy(() => import("@/pages/ProductDetailPage"));
-const ProfilePage = React.lazy(() => import("@/pages/ProfilePage"));
 const OrdersPage = React.lazy(() => import("@/pages/OrdersPage"));
 const OrderDetailPage = React.lazy(() => import("@/pages/OrderDetailPage"));
 const ReturnsPage = React.lazy(() => import("@/pages/ReturnsPage"));
@@ -97,9 +96,6 @@ const AdminPosPage = React.lazy(() => import("@/pages/admin/AdminPosPage"));
 const AdminProductsPage = React.lazy(
   () => import("@/pages/admin/AdminProductsPage")
 );
-const AdminProductBrandsPage = React.lazy(
-  () => import("@/pages/admin/AdminProductBrandsPage")
-);
 const AdminProductCategoriesPage = React.lazy(
   () => import("@/pages/admin/AdminProductCategoriesPage")
 );
@@ -111,9 +107,6 @@ const AdminProductCreatePage = React.lazy(
 );
 const AdminProductEditPage = React.lazy(
   () => import("@/pages/admin/AdminProductEditPage")
-);
-const AdminProductMaterialsPage = React.lazy(
-  () => import("@/pages/admin/AdminProductMaterialsPage")
 );
 const AdminProductSizesPage = React.lazy(
   () => import("@/pages/admin/AdminProductSizesPage")
@@ -200,14 +193,6 @@ function App() {
                 element={
                   <LazyComponentLoader fallback={<PageLoader />}>
                     <ProductDetailPage />
-                  </LazyComponentLoader>
-                }
-              />
-              <Route
-                path="profile"
-                element={
-                  <LazyComponentLoader fallback={<PageLoader />}>
-                    <ProfilePage />
                   </LazyComponentLoader>
                 }
               />
@@ -436,14 +421,6 @@ function App() {
                 }
               />
               <Route
-                path="products/brands"
-                element={
-                  <LazyComponentLoader fallback={<PageLoader />}>
-                    <AdminProductBrandsPage />
-                  </LazyComponentLoader>
-                }
-              />
-              <Route
                 path="products/categories"
                 element={
                   <LazyComponentLoader fallback={<PageLoader />}>
@@ -472,14 +449,6 @@ function App() {
                 element={
                   <LazyComponentLoader fallback={<PageLoader />}>
                     <AdminProductEditPage />
-                  </LazyComponentLoader>
-                }
-              />
-              <Route
-                path="products/materials"
-                element={
-                  <LazyComponentLoader fallback={<PageLoader />}>
-                    <AdminProductMaterialsPage />
                   </LazyComponentLoader>
                 }
               />

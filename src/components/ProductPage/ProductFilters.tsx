@@ -3,7 +3,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import {
-  useBrands,
   useCategories,
   useColors,
   useFilterOptions,
@@ -25,7 +24,6 @@ export const ProductFilters = ({
   onChange,
   formatPrice,
 }: ProductFiltersProps) => {
-  const { data: brandsData, isLoading: isLoadingBrands } = useBrands();
   const { data: categoriesData, isLoading: isLoadingCategories } =
     useCategories();
   const { data: colorsData, isLoading: isLoadingColors } = useColors();
@@ -34,14 +32,6 @@ export const ProductFilters = ({
     useFilterOptions();
 
   // State cho các bộ lọc hiện có
-  const [selectedBrand, setSelectedBrand] = useState<string | undefined>(
-    filters.brands
-      ? Array.isArray(filters.brands)
-        ? filters.brands[0]
-        : filters.brands
-      : undefined
-  );
-
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
     filters.categories
       ? Array.isArray(filters.categories)
@@ -73,16 +63,6 @@ export const ProductFilters = ({
 
   // Sync state với filters prop
   useEffect(() => {
-    if (filters.brands) {
-      setSelectedBrand(
-        Array.isArray(filters.brands) ? filters.brands[0] : filters.brands
-      );
-    } else {
-      setSelectedBrand(undefined);
-    }
-  }, [filters.brands]);
-
-  useEffect(() => {
     if (filters.categories) {
       setSelectedCategory(
         Array.isArray(filters.categories)
@@ -95,16 +75,6 @@ export const ProductFilters = ({
   }, [filters.categories]);
 
   // Handlers cho các bộ lọc hiện có
-  const handleBrandChange = (brandId: string) => {
-    if (selectedBrand === brandId) {
-      setSelectedBrand(undefined);
-      onChange({ brands: undefined });
-    } else {
-      setSelectedBrand(brandId);
-      onChange({ brands: brandId });
-    }
-  };
-
   const handleCategoryChange = (categoryId: string) => {
     if (selectedCategory === categoryId) {
       setSelectedCategory(undefined);
@@ -160,10 +130,6 @@ export const ProductFilters = ({
   };
 
   // Memoized data
-  const brands = useMemo(() => {
-    return brandsData?.data?.brands || [];
-  }, [brandsData]);
-
   const categories = useMemo(() => {
     return categoriesData?.data?.categories || [];
   }, [categoriesData]);
@@ -230,7 +196,6 @@ export const ProductFilters = ({
 
   const handleResetFilters = () => {
     setSelectedPriceRange([priceRange.min, priceRange.max]);
-    setSelectedBrand(undefined);
     setSelectedCategory(undefined);
     setSelectedArticleType(undefined);
     setSelectedGender(undefined);
@@ -239,7 +204,6 @@ export const ProductFilters = ({
     setSelectedUsage(undefined);
 
     onChange({
-      brands: undefined,
       categories: undefined,
       minPrice: undefined,
       maxPrice: undefined,
@@ -256,7 +220,6 @@ export const ProductFilters = ({
   };
 
   if (
-    isLoadingBrands ||
     isLoadingCategories ||
     isLoadingColors ||
     isLoadingSizes ||

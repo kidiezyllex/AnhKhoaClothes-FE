@@ -382,7 +382,7 @@ export default function AccountsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.data.accounts.length === 0 ? (
+                  {data?.data.users.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={6}
@@ -392,7 +392,7 @@ export default function AccountsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    data?.data.accounts.map((account) => (
+                    data?.data.users.map((account) => (
                       <TableRow key={account.id} className="hover:bg-gray-50">
                         <TableCell className="py-3 px-4">
                           <div className="flex items-center space-x-4">
@@ -529,41 +529,34 @@ export default function AccountsPage() {
                 </TableBody>
               </Table>
 
-              {data?.data.pagination && data.data.pagination.totalPages > 1 && (
+              {data?.data.pages && data.data.pages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t">
                   <div className="text-sm text-gray-700">
-                    Hiển thị{" "}
-                    {(data.data.pagination.currentPage - 1) *
-                      (filters.limit || 10) +
-                      1}{" "}
+                    Hiển thị {(data.data.page - 1) * (filters.limit || 10) + 1}{" "}
                     đến{" "}
                     {Math.min(
-                      data.data.pagination.currentPage * (filters.limit || 10),
-                      data.data.pagination.count
+                      data.data.page * (filters.limit || 10),
+                      data.data.count
                     )}{" "}
-                    trong tổng số {data.data.pagination.count} tài khoản
+                    trong tổng số {data.data.count} tài khoản
                   </div>
                   <div className="flex space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        handleChangePage(data.data.pagination.currentPage - 1)
-                      }
-                      disabled={data.data.pagination.currentPage === 1}
+                      onClick={() => handleChangePage(data.data.page - 1)}
+                      disabled={data.data.page === 1}
                     >
                       Trước
                     </Button>
                     {Array.from(
-                      { length: data.data.pagination.totalPages },
+                      { length: data.data.pages },
                       (_, i) => i + 1
                     ).map((page) => (
                       <Button
                         key={page}
                         variant={
-                          page === data.data.pagination.currentPage
-                            ? "default"
-                            : "outline"
+                          page === data.data.page ? "default" : "outline"
                         }
                         size="sm"
                         onClick={() => handleChangePage(page)}
@@ -574,13 +567,8 @@ export default function AccountsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        handleChangePage(data.data.pagination.currentPage + 1)
-                      }
-                      disabled={
-                        data.data.pagination.currentPage ===
-                        data.data.pagination.totalPages
-                      }
+                      onClick={() => handleChangePage(data.data.page + 1)}
+                      disabled={data.data.page === data.data.pages}
                     >
                       Sau
                     </Button>

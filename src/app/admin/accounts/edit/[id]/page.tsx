@@ -54,29 +54,36 @@ export default function EditAccountPage() {
 
   useEffect(() => {
     if (accountData?.data) {
-      const account = accountData.data;
+      // Handle the case where the user object is nested in data.user or data directly
+      const account =
+        "user" in accountData.data
+          ? (accountData.data as any).user
+          : accountData.data;
+
+      if (!account) return;
+
       const formGender =
-        account.gender === "Nam"
+        account.gender === "Nam" || account.gender === "male"
           ? true
-          : account.gender === "Nữ"
+          : account.gender === "Nữ" || account.gender === "female"
           ? false
           : undefined;
 
       setFormData({
-        fullName: account.fullName,
-        email: account.email,
-        phoneNumber: account.phoneNumber,
+        fullName: account.fullName || account.name || "",
+        email: account.email || "",
+        phoneNumber: account.phoneNumber || "",
         gender: formGender,
         birthday: account.birthday,
         citizenId: account.citizenId,
         avatar: account.avatar,
-        status: account.status,
+        status: (account.is_active ? "ACTIVE" : account.status) || "ACTIVE",
       });
 
       setDisplayGender(
-        account.gender === "Nam"
+        account.gender === "Nam" || account.gender === "male"
           ? "Nam"
-          : account.gender === "Nữ"
+          : account.gender === "Nữ" || account.gender === "female"
           ? "Nữ"
           : "Khác"
       );
@@ -236,9 +243,11 @@ export default function EditAccountPage() {
         <div className="space-y-1">
           <h2 className="text-3xl font-bold">{formData.fullName}</h2>
           <p className="text-gray-700 text-lg">
-            {accountData.data.role === "ADMIN"
+            {((accountData.data as any).user || accountData.data).role ===
+            "ADMIN"
               ? "Quản trị viên"
-              : accountData.data.role === "STAFF"
+              : ((accountData.data as any).user || accountData.data).role ===
+                "STAFF"
               ? "Nhân viên"
               : "Khách hàng"}
           </p>

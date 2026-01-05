@@ -95,8 +95,8 @@ const SidebarLayout = memo(function SidebarLayout({
                 />
               </a>
             ) : (
-              <h1 className="text-2xl text-primary !font-bold select-none cursor-pointer text-center">
-                A<span className="text-extra">S</span>
+              <h1 className="text-2xl text-white !font-bold select-none cursor-pointer text-center">
+                AnhKhoaClothes
               </h1>
             )}
           </div>

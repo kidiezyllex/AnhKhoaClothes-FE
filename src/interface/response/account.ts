@@ -1,4 +1,4 @@
-import { IAddress } from '../request/account';
+import { IAddress } from "../request/account";
 
 export interface IPreferencePriceRange {
   min: number;
@@ -22,6 +22,7 @@ export interface IAccount {
   id: string;
   email: string;
   name: string;
+  fullName: string;
   username: string;
   first_name: string;
   last_name: string;
@@ -34,7 +35,7 @@ export interface IAccount {
   phoneNumber: string | null;
   citizenId: string | null;
   birthday: string | null;
-  role: string | 'CUSTOMER' | 'STAFF' | 'ADMIN';
+  role: string | "CUSTOMER" | "STAFF" | "ADMIN";
   preferences?: IUserPreferences;
   favorites?: any[];
   user_embedding?: number[];
@@ -43,13 +44,10 @@ export interface IAccount {
   outfit_history?: any[];
   created_at: string;
   updated_at: string;
-  // Compatibility fields (optional, to avoid immediate breakage if used)
-  fullName?: string;
-  status?: 'ACTIVE' | 'INACTIVE';
+  // Compatibility fields
+  status?: "ACTIVE" | "INACTIVE";
   avatar?: string;
   addresses?: IAddress[];
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export interface IProfileData {
@@ -70,15 +68,12 @@ export interface IAccountResponse {
   };
 }
 
-export interface IPagination {
-  count: number;
-  totalPages: number;
-  currentPage: number;
-}
-
 export interface IAccountsData {
-  accounts: IAccount[];
-  pagination: IPagination;
+  users: IAccount[];
+  page: number;
+  pages: number;
+  perPage: number;
+  count: number;
 }
 
 export interface IAccountsResponse {
@@ -91,4 +86,4 @@ export interface IActionResponse {
   status: string;
   message: string;
   data?: any;
-} 
+}

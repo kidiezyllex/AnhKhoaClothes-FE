@@ -153,7 +153,7 @@ export default function OrdersPage() {
     } else {
       if (!dateRange?.from && !dateRange?.to) {
         const { startDate, endDate, ...restExisting } = filters;
-        setFilters((prev) => ({ ...restExisting, ...newFilters }));
+        setFilters(() => ({ ...restExisting, ...newFilters }));
         return;
       }
     }
@@ -268,14 +268,16 @@ export default function OrdersPage() {
     const fileName = `${fileNamePrefix}_${dateStr}.xlsx`;
 
     const formattedOrders = ordersToExport.map((order) => ({
-      "Mã đơn hàng": order.code,
-      "Khách hàng": order.customer?.fullName || order.shippingName || "N/A",
-      "Số điện thoại":
-        order.customer?.phoneNumber || order.shippingPhoneNumber || "N/A",
-      "Ngày tạo": formatDate(order.createdAt),
-      "Tổng tiền": formatCurrency(order.total),
-      "Trạng thái đơn hàng": order.orderStatus, // Consider mapping to readable status like in Badge
-      "Trạng thái thanh toán": order.paymentStatus, // Consider mapping to readable status
+      "Mã đơn hàng": order.id.slice(-8).toUpperCase(),
+      "Khách hàng":
+        order.shipping_address?.recipient_phone_number || "Khách lẻ",
+      "Số điện thoại": order.shipping_address?.recipient_phone_number || "N/A",
+      "Ngày tạo": formatDate(order.created_at),
+      "Tổng tiền": formatCurrency(order.total_price),
+      "Trạng thái đơn hàng": order.status,
+      "Trạng thái thanh toán": order.is_paid
+        ? "Đã thanh toán"
+        : "Chưa thanh toán",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(formattedOrders);
@@ -325,19 +327,6 @@ export default function OrdersPage() {
       }
     };
 
-    const getPaymentStatusLabelLocal = (status: string): string => {
-      switch (status) {
-        case "PENDING":
-          return "Chưa thanh toán";
-        case "PARTIAL_PAID":
-          return "Thanh toán một phần";
-        case "PAID":
-          return "Đã thanh toán";
-        default:
-          return status;
-      }
-    };
-
     doc.setFontSize(18);
     doc.text("Danh sách Đơn hàng", 14, 22);
     doc.setFontSize(11);
@@ -352,12 +341,12 @@ export default function OrdersPage() {
       "Trạng thái TT",
     ];
     const tableRows = ordersToExport.map((order) => [
-      order.code || "N/A",
-      order.customer?.fullName || order.shippingName || "N/A",
-      formatDate(order.createdAt),
-      formatCurrency(order.total),
-      getOrderStatusLabelLocal(order.orderStatus),
-      getPaymentStatusLabelLocal(order.paymentStatus),
+      order.id?.slice(-8).toUpperCase() || "N/A",
+      order.shipping_address?.recipient_phone_number || "N/A",
+      formatDate(order.created_at),
+      formatCurrency(order.total_price),
+      getOrderStatusLabelLocal(order.status),
+      order.is_paid ? "Đã thanh toán" : "Chưa thanh toán",
     ]);
 
     autoTable(doc, {
@@ -370,7 +359,7 @@ export default function OrdersPage() {
         textColor: [255, 255, 255],
         fontStyle: "bold",
       },
-      didDrawCell: (data) => {},
+      didDrawCell: () => {},
       styles: {
         font: doc.getFont().fontName,
         fontSize: 9,
@@ -799,33 +788,37 @@ export default function OrdersPage() {
             <TableBody>
               {data.data.orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.code}</TableCell>
+                  <TableCell className="font-medium">
+                    {order.id.slice(-8).toUpperCase()}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {order.customer?.fullName || order.shippingName}
+                        Khách hàng (
+                        {order.shipping_address?.recipient_phone_number ||
+                          "N/A"}
+                        )
                       </div>
                       <div className="text-sm text-gray-700 italic">
-                        {order.customer?.phoneNumber === "0000000000"
-                          ? "Chưa có SĐT"
-                          : order.customer?.phoneNumber}
+                        {order.shipping_address?.recipient_phone_number ||
+                          "Chưa có SĐT"}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {formatDate(order.createdAt)}
+                    {formatDate(order.created_at)}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    <OrderTypeBadge orderCode={order.code} />
+                    <OrderTypeBadge isOutfit={order.is_outfit_purchase} />
                   </TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatCurrency(order.total)}
+                    {formatCurrency(order.total_price)}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <OrderStatusBadge status={order.orderStatus} />
+                    <OrderStatusBadge status={order.status} />
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <PaymentStatusBadge status={order.paymentStatus} />
+                    <PaymentStatusBadge isPaid={order.is_paid} />
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
@@ -840,8 +833,8 @@ export default function OrdersPage() {
                         variant="outline"
                         size="icon"
                         disabled={
-                          order.orderStatus === "DA_HUY" ||
-                          order.orderStatus === "HOAN_THANH"
+                          order.status === "DA_HUY" ||
+                          order.status === "HOAN_THANH"
                         }
                         onClick={() => {
                           setOrderToCancel(order.id);
@@ -858,30 +851,25 @@ export default function OrdersPage() {
           </Table>
         </div>
 
-        {data.data.pagination.totalPages > 1 && (
+        {data.data.pages > 1 && (
           <div className="flex justify-center mt-6">
             <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  handleChangePage(
-                    Math.max(1, data.data.pagination.currentPage - 1)
-                  )
+                  handleChangePage(Math.max(1, data.data.page - 1))
                 }
-                disabled={data.data.pagination.currentPage === 1}
+                disabled={data.data.page === 1}
               >
                 Trước
               </Button>
-              {Array.from(
-                { length: data.data.pagination.totalPages },
-                (_, i) => i + 1
-              )
+              {Array.from({ length: data.data.pages }, (_, i) => i + 1)
                 .filter(
                   (page) =>
                     page === 1 ||
-                    page === data.data.pagination.currentPage ||
-                    Math.abs(page - data.data.pagination.currentPage) <= 1
+                    page === data.data.page ||
+                    Math.abs(page - data.data.page) <= 1
                 )
                 .reduce((acc: (number | string)[], page, idx, arr) => {
                   if (idx > 0 && page - arr[idx - 1] > 1) {
@@ -903,11 +891,7 @@ export default function OrdersPage() {
                   ) : (
                     <Button
                       key={`page-${page}`}
-                      variant={
-                        data.data.pagination.currentPage === page
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={data.data.page === page ? "default" : "outline"}
                       size="sm"
                       onClick={() => handleChangePage(page as number)}
                     >
@@ -920,16 +904,10 @@ export default function OrdersPage() {
                 size="sm"
                 onClick={() =>
                   handleChangePage(
-                    Math.min(
-                      data.data.pagination.totalPages,
-                      data.data.pagination.currentPage + 1
-                    )
+                    Math.min(data.data.pages, data.data.page + 1)
                   )
                 }
-                disabled={
-                  data.data.pagination.currentPage ===
-                  data.data.pagination.totalPages
-                }
+                disabled={data.data.page === data.data.pages}
               >
                 Sau
               </Button>
@@ -942,105 +920,32 @@ export default function OrdersPage() {
 }
 
 const OrderStatusBadge = ({ status }: { status: string }) => {
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "CHO_XAC_NHAN":
-        return {
-          label: "Chờ xác nhận",
-          className: "!bg-amber-50 !text-amber-500 !border-amber-500",
-        };
-      case "CHO_GIAO_HANG":
-        return {
-          label: "Chờ giao hàng",
-          className: "!bg-blue-50 !text-blue-500 !border-blue-500",
-        };
-      case "DANG_VAN_CHUYEN":
-        return {
-          label: "Đang vận chuyển",
-          className: "!bg-orange-50 !text-orange-500 !border-orange-500",
-        };
-      case "DA_GIAO_HANG":
-        return {
-          label: "Đã giao hàng",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
-      case "HOAN_THANH":
-        return {
-          label: "Hoàn thành",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
-      case "DA_HUY":
-        return {
-          label: "Đã hủy",
-          className: "!bg-red-50 !text-red-500 !border-red-500",
-        };
-      default:
-        return {
-          label: "Không xác định",
-          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
-        };
-    }
+  const labels: Record<string, string> = {
+    CHO_XAC_NHAN: "Chờ xác nhận",
+    CHO_GIAO_HANG: "Chờ giao hàng",
+    DANG_VAN_CHUYEN: "Đang vận chuyển",
+    DA_GIAO_HANG: "Đã giao hàng",
+    HOAN_THANH: "Hoàn thành",
+    DA_HUY: "Đã hủy",
   };
 
-  const config = getStatusConfig(status);
-
-  return <Badge className={config.className}>{config.label}</Badge>;
+  return <Badge variant={status as any}>{labels[status] || status}</Badge>;
 };
 
-const PaymentStatusBadge = ({ status }: { status: string }) => {
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return {
-          label: "Chưa thanh toán",
-          className: "!bg-yellow-50 !text-yellow-500 !border-yellow-500",
-        };
-      case "PARTIAL_PAID":
-        return {
-          label: "Thanh toán một phần",
-          className: "!bg-blue-50 !text-blue-500 !border-blue-500",
-        };
-      case "PAID":
-        return {
-          label: "Đã thanh toán",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
-      default:
-        return {
-          label: "Không xác định",
-          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
-        };
-    }
-  };
-
-  const config = getStatusConfig(status);
-
-  return <Badge className={config.className}>{config.label}</Badge>;
+const PaymentStatusBadge = ({ isPaid }: { isPaid: boolean }) => {
+  return (
+    <Badge variant={isPaid ? "PAID" : "UNPAID"}>
+      {isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
+    </Badge>
+  );
 };
 
-const OrderTypeBadge = ({ orderCode }: { orderCode: string }) => {
-  const getOrderType = (code: string) => {
-    if (code && code.includes("POS")) {
-      return {
-        label: "Tại quầy",
-        className: "!bg-purple-50 !text-purple-500 !border-purple-500",
-      };
-    } else if (code && code.includes("DH")) {
-      return {
-        label: "Online",
-        className: "!bg-cyan-50 !text-cyan-500 !border-cyan-500",
-      };
-    } else {
-      return {
-        label: "Không xác định",
-        className: "!bg-gray-50 !text-gray-700 !border-gray-500",
-      };
-    }
-  };
-
-  const config = getOrderType(orderCode);
-
-  return <Badge className={config.className}>{config.label}</Badge>;
+const OrderTypeBadge = ({ isOutfit }: { isOutfit: boolean }) => {
+  return (
+    <Badge variant={isOutfit ? "ADMIN" : "new"}>
+      {isOutfit ? "Mua theo bộ (Outfit)" : "Mua lẻ (Online)"}
+    </Badge>
+  );
 };
 
 type OrderDetailDialogProps = {
@@ -1066,27 +971,14 @@ const OrderDetailDialog = ({
 }: OrderDetailDialogProps) => {
   if (!orderId || !orderDetail) return null;
 
-  const getPaymentMethodName = (method: string) => {
-    switch (method) {
-      case "CASH":
-        return "Tiền mặt";
-      case "BANK_TRANSFER":
-        return "Chuyển khoản ngân hàng";
-      case "COD":
-        return "Thanh toán khi nhận hàng";
-      case "MIXED":
-        return "Thanh toán nhiều phương thức";
-      default:
-        return "Không xác định";
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
-            <span>Chi tiết đơn hàng: {orderDetail.orderNumber}</span>
+            <span>
+              Chi tiết đơn hàng: {orderDetail.id.slice(-8).toUpperCase()}
+            </span>
             <div className="flex space-x-2">
               <a href={`/admin/orders/edit/${orderId}`}>
                 <Button variant="outline" size="sm">
@@ -1111,35 +1003,35 @@ const OrderDetailDialog = ({
                 </h3>
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-700">Mã đơn hàng:</span>
+                    <span className="text-sm text-gray-700">ID đơn hàng:</span>
                     <span className="text-sm font-medium">
-                      {orderDetail.orderNumber}
+                      {orderDetail.id}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">Ngày tạo:</span>
                     <span className="text-sm font-medium">
-                      {formatDate(orderDetail.createdAt)}
+                      {formatDate(orderDetail.created_at)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">
                       Trạng thái đơn hàng:
                     </span>
-                    <OrderStatusBadge status={orderDetail.orderStatus} />
+                    <OrderStatusBadge status={orderDetail.status} />
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">
                       Trạng thái thanh toán:
                     </span>
-                    <PaymentStatusBadge status={orderDetail.paymentStatus} />
+                    <PaymentStatusBadge isPaid={orderDetail.is_paid} />
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">
                       Phương thức thanh toán:
                     </span>
                     <span className="text-sm font-medium">
-                      {getPaymentMethodName(orderDetail.paymentMethod)}
+                      {orderDetail.payment_method}
                     </span>
                   </div>
                 </div>
@@ -1152,26 +1044,16 @@ const OrderDetailDialog = ({
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">
-                      Tên khách hàng:
-                    </span>
-                    <span className="text-sm font-medium">
-                      {orderDetail.customer?.fullName}
-                    </span>
-                  </div>
-                  {orderDetail.customer?.email && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-700">Email:</span>
-                      <span className="text-sm font-medium">
-                        {orderDetail.customer.email}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-700">
                       Số điện thoại:
                     </span>
                     <span className="text-sm font-medium">
-                      {orderDetail.customer?.phoneNumber}
+                      {orderDetail.shipping_address?.recipient_phone_number}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-700">User ID:</span>
+                    <span className="text-sm font-medium">
+                      {orderDetail.user_id}
                     </span>
                   </div>
                 </div>
@@ -1182,19 +1064,17 @@ const OrderDetailDialog = ({
                   Địa chỉ giao hàng
                 </h3>
                 <div className="mt-2 rounded-[6px] border p-4">
-                  {orderDetail.shippingAddress ? (
+                  {orderDetail.shipping_address ? (
                     <div className="space-y-2">
-                      <p className="text-sm font-medium">
-                        {orderDetail.shippingAddress.name}
+                      <p className="text-sm">
+                        SĐT:{" "}
+                        {orderDetail.shipping_address.recipient_phone_number}
                       </p>
                       <p className="text-sm">
-                        {orderDetail.shippingAddress.phoneNumber}
-                      </p>
-                      <p className="text-sm">
-                        {orderDetail.shippingAddress.specificAddress},{" "}
-                        {orderDetail.shippingAddress.wardName},{" "}
-                        {orderDetail.shippingAddress.districtName},{" "}
-                        {orderDetail.shippingAddress.provinceName}
+                        {orderDetail.shipping_address.address},{" "}
+                        {orderDetail.shipping_address.city},{" "}
+                        {orderDetail.shipping_address.postal_code},{" "}
+                        {orderDetail.shipping_address.country}
                       </p>
                     </div>
                   ) : (
@@ -1229,35 +1109,35 @@ const OrderDetailDialog = ({
                           <TableRow key={index}>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                {item.product && item.product.imageUrl && (
+                                {item.images && item.images.length > 0 && (
                                   <div className="w-10 h-10 rounded border overflow-hidden bg-gray-100">
                                     <img
-                                      src={item.product.imageUrl}
-                                      alt={item.product.name}
+                                      src={item.images[0]}
+                                      alt={item.name}
                                       className="w-full h-full object-contain"
                                     />
                                   </div>
                                 )}
                                 <div>
                                   <div className="font-medium text-sm">
-                                    {item.product?.name}
+                                    {item.name}
                                   </div>
                                   <div className="text-xs text-gray-700">
-                                    {item.variant?.colorName &&
-                                      item.variant?.sizeName &&
-                                      `${item.variant.colorName} / ${item.variant.sizeName}`}
+                                    {item.color_selected &&
+                                      item.size_selected &&
+                                      `${item.color_selected} / ${item.size_selected}`}
                                   </div>
                                 </div>
                               </div>
                             </TableCell>
                             <TableCell className="text-right">
-                              {formatCurrency(item.price)}
+                              {formatCurrency(item.price_sale)}
                             </TableCell>
                             <TableCell className="text-right">
-                              {item.quantity}
+                              {item.qty}
                             </TableCell>
                             <TableCell className="text-right">
-                              {formatCurrency(item.price * item.quantity)}
+                              {formatCurrency(item.price_sale * item.qty)}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1272,28 +1152,24 @@ const OrderDetailDialog = ({
                 <div className="mt-2 rounded-[6px] border p-4 space-y-4">
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-700">
-                      Tổng tiền hàng:
+                      Tiền vận chuyển:
                     </span>
                     <span className="text-sm font-medium">
-                      {formatCurrency(orderDetail.subTotal)}
+                      {formatCurrency(orderDetail.shipping_price)}
                     </span>
                   </div>
-                  {orderDetail.voucher && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-700">
-                        Mã giảm giá ({orderDetail.voucher.code}):
-                      </span>
-                      <span className="text-sm font-medium text-red-500">
-                        -{formatCurrency(orderDetail.discount)}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-700">Thuế:</span>
+                    <span className="text-sm font-medium">
+                      {formatCurrency(orderDetail.tax_price)}
+                    </span>
+                  </div>
                   <div className="flex justify-between border-t pt-2">
                     <span className="text-sm font-medium">
                       Tổng thanh toán:
                     </span>
                     <span className="text-base font-bold">
-                      {formatCurrency(orderDetail.total)}
+                      {formatCurrency(orderDetail.total_price)}
                     </span>
                   </div>
                 </div>
@@ -1305,11 +1181,9 @@ const OrderDetailDialog = ({
                   <Button
                     className="w-full"
                     disabled={["DA_HUY", "HOAN_THANH"].includes(
-                      orderDetail.orderStatus
+                      orderDetail.status
                     )}
-                    onClick={() =>
-                      onUpdateStatus(orderId, orderDetail.orderStatus)
-                    }
+                    onClick={() => onUpdateStatus(orderId, orderDetail.status)}
                   >
                     Cập nhật trạng thái
                   </Button>
@@ -1317,7 +1191,7 @@ const OrderDetailDialog = ({
                     variant="outline"
                     className="w-full"
                     disabled={["DA_HUY", "HOAN_THANH"].includes(
-                      orderDetail.orderStatus
+                      orderDetail.status
                     )}
                     onClick={() => onCancelOrder(orderId)}
                   >

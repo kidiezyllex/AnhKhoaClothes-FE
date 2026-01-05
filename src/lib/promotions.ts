@@ -13,7 +13,6 @@ export const calculateProductDiscount = (
   originalPrice: number,
   activePromotions: IPromotion[]
 ): ProductWithDiscount => {
-  
   if (!activePromotions || activePromotions.length === 0) {
     return {
       originalPrice,
@@ -25,21 +24,21 @@ export const calculateProductDiscount = (
 
   const now = new Date();
 
-  const applicablePromotions = activePromotions.filter(promotion => {
+  const applicablePromotions = activePromotions.filter((promotion) => {
     // Check status
-    if (promotion.status !== 'ACTIVE') {
+    if (promotion.status !== "ACTIVE") {
       return false;
     }
 
     const startDate = new Date(promotion.startDate);
     const endDate = new Date(promotion.endDate);
-    
+
     if (now < startDate || now > endDate) {
       return false;
     }
 
     // New logic: handle applyTo
-    if (promotion.applyTo === 'ALL_PRODUCTS') {
+    if (promotion.applyTo === "ALL_PRODUCTS") {
       return true;
     }
 
@@ -49,10 +48,12 @@ export const calculateProductDiscount = (
       productIds = promotion.productIds;
     } else if (promotion.products) {
       // Fallback for old structure if still exists
-      productIds = (promotion.products as any[]).map(p => typeof p === 'string' ? p : p.id || p._id);
+      productIds = (promotion.products as any[]).map((p) =>
+        typeof p === "string" ? p : (p as any)?.id || p._id
+      );
     }
 
-    return productIds.some(pId => String(pId) === String(productId));
+    return productIds.some((pId) => String(pId) === String(productId));
   });
 
   if (applicablePromotions.length === 0) {
@@ -65,28 +66,35 @@ export const calculateProductDiscount = (
   }
 
   // Find the BEST promotion (maximal discount amount)
-  const bestPromotionInfo = applicablePromotions.map(promo => {
-    let discountAmt = 0;
-    const val = parseFloat(String(promo.discountValue));
-    
-    if (promo.discountType === 'PERCENTAGE') {
-      discountAmt = (originalPrice * val) / 100;
-    } else { // FIXED_AMOUNT
-      discountAmt = val;
-    }
-    
-    return {
-      promotion: promo,
-      discountAmount: discountAmt
-    };
-  }).reduce((best, current) => {
-    return current.discountAmount > best.discountAmount ? current : best;
-  });
+  const bestPromotionInfo = applicablePromotions
+    .map((promo) => {
+      let discountAmt = 0;
+      const val = parseFloat(String(promo.discountValue));
 
-  const finalDiscountAmount = Math.min(originalPrice, bestPromotionInfo.discountAmount);
+      if (promo.discountType === "PERCENTAGE") {
+        discountAmt = (originalPrice * val) / 100;
+      } else {
+        // FIXED_AMOUNT
+        discountAmt = val;
+      }
+
+      return {
+        promotion: promo,
+        discountAmount: discountAmt,
+      };
+    })
+    .reduce((best, current) => {
+      return current.discountAmount > best.discountAmount ? current : best;
+    });
+
+  const finalDiscountAmount = Math.min(
+    originalPrice,
+    bestPromotionInfo.discountAmount
+  );
   const discountedPrice = originalPrice - finalDiscountAmount;
-  const calculatedPercent = originalPrice > 0 ? (finalDiscountAmount / originalPrice) * 100 : 0;
-  
+  const calculatedPercent =
+    originalPrice > 0 ? (finalDiscountAmount / originalPrice) * 100 : 0;
+
   return {
     originalPrice,
     discountedPrice: Math.max(0, Math.round(discountedPrice)),
@@ -101,16 +109,16 @@ export const applyPromotionsToProducts = (
   activePromotions: IPromotion[]
 ): any[] => {
   if (!activePromotions || activePromotions.length === 0) {
-    return products.map(p => ({
+    return products.map((p) => ({
       ...p,
       hasDiscount: false,
       discountedPrice: p.variants?.[0]?.price || 0,
       originalPrice: p.variants?.[0]?.price || 0,
-      discountPercent: 0
+      discountPercent: 0,
     }));
   }
 
-  return products.map(product => {
+  return products.map((product) => {
     const basePrice = (product as any)?.variants?.[0]?.price || 0;
 
     if (basePrice === 0) {
@@ -145,18 +153,18 @@ export const applyPromotionsToProducts = (
 };
 
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
     maximumFractionDigits: 0,
   }).format(price);
 };
 
 export const isPromotionActive = (promotion: any): boolean => {
-  if (promotion.status !== 'ACTIVE') return false;
+  if (promotion.status !== "ACTIVE") return false;
 
   const now = new Date();
-  
+
   const startDate = new Date(promotion.startDate);
   const endDate = new Date(promotion.endDate);
 
@@ -166,9 +174,9 @@ export const isPromotionActive = (promotion: any): boolean => {
 
 export const filterActivePromotions = (promotions: any[]): any[] => {
   if (!promotions || promotions.length === 0) return [];
-  
+
   const now = new Date();
-  const activePromotions = promotions.filter(promotion => {
+  const activePromotions = promotions.filter((promotion) => {
     const isActive = isPromotionActive(promotion);
     return isActive;
   });

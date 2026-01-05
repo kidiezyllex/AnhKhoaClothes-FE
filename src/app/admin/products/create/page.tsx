@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useBrands, useCategories, useMaterials } from "@/hooks/attributes";
+import { useCategories } from "@/hooks/attributes";
 import { useCreateProduct } from "@/hooks/product";
 import { useUploadImage } from "@/hooks/upload";
 import { IProductCreate, IProductVariant } from "@/interface/request/product";
@@ -51,9 +51,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const initialProduct: IProductCreate = {
   name: "",
-  brand: "",
   category: "",
-  material: "",
   description: "",
   weight: 0,
   variants: [
@@ -85,10 +83,7 @@ export default function CreateProductPage() {
       setProduct({ ...product, [name]: value });
     }
   };
-  const { data: brandsData } = useBrands();
   const { data: categoriesData } = useCategories();
-
-  const { data: materialsData } = useMaterials();
   const handleAddVariant = () => {
     setProduct({
       ...product,
@@ -152,7 +147,7 @@ export default function CreateProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product.name || !product.brand || !product.category) {
+    if (!product.name || !product.category) {
       toast.error("Vui lòng điền đầy đủ thông tin sản phẩm");
       setActiveTab("info");
       return;
@@ -184,8 +179,7 @@ export default function CreateProductPage() {
   };
 
   const isFormValid = () => {
-    const isBasicInfoValid =
-      !!product.name && !!product.brand && !!product.category;
+    const isBasicInfoValid = !!product.name && !!product.category;
     const areVariantsValid = (product as any)?.variants.every(
       (v) => !!v.colorId && !!v.sizeId && v.price > 0
     );
@@ -198,14 +192,8 @@ export default function CreateProductPage() {
     if (!product.name.trim()) {
       missingFields.push("Tên sản phẩm");
     }
-    if (!product.brand) {
-      missingFields.push("Thương hiệu");
-    }
     if (!product.category) {
       missingFields.push("Danh mục");
-    }
-    if (!product.material) {
-      missingFields.push("Chất liệu");
     }
 
     return missingFields;
@@ -305,40 +293,6 @@ export default function CreateProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="brand">
-                      Thương hiệu <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={product.brand}
-                      onValueChange={(value) =>
-                        setProduct({ ...product, brand: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn thương hiệu">
-                          {product.brand
-                            ? (brandsData?.data || []).find(
-                                (brand) =>
-                                  brand.id.toString() ===
-                                  (product as any)?.brand?.toString()
-                              )?.name || "Chọn thương hiệu"
-                            : "Chọn thương hiệu"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(brandsData?.data || []).map((brand) => (
-                          <SelectItem
-                            key={brand.id}
-                            value={brand.id.toString()}
-                          >
-                            {brand.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="category">
                       Danh mục <span className="text-red-500">*</span>
                     </Label>
@@ -366,40 +320,6 @@ export default function CreateProductPage() {
                             value={category.id.toString()}
                           >
                             {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="material">
-                      Chất liệu <span className="text-red-500">*</span>
-                    </Label>
-                    <Select
-                      value={product.material}
-                      onValueChange={(value) =>
-                        setProduct({ ...product, material: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn chất liệu">
-                          {product.material
-                            ? (materialsData?.data || []).find(
-                                (material) =>
-                                  material.id.toString() ===
-                                  (product as any)?.material?.toString()
-                              )?.name || "Chọn chất liệu"
-                            : "Chọn chất liệu"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(materialsData?.data || []).map((material) => (
-                          <SelectItem
-                            key={material.id}
-                            value={material.id.toString()}
-                          >
-                            {material.name}
                           </SelectItem>
                         ))}
                       </SelectContent>

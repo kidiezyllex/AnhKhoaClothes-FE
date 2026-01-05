@@ -1,6 +1,5 @@
 "use client";
 
-import { getAllVouchers } from "@/api/voucher";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -36,19 +35,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAccounts } from "@/hooks/account";
-import { useCreatePOSOrder } from "@/hooks/order";
 import { useProducts, useSearchProducts } from "@/hooks/product";
 import { usePromotions } from "@/hooks/promotion";
 import { useIncrementVoucherUsage } from "@/hooks/voucher";
-import { IPOSOrderCreateRequest } from "@/interface/request/order";
 import { IProductFilter } from "@/interface/request/product";
-import { IAccount } from "@/interface/response/account";
 import {
   applyPromotionsToProducts,
   filterActivePromotions,
 } from "@/lib/promotions";
 import { checkImageUrl, cn } from "@/lib/utils";
-import { usePosStore } from "@/stores/posStore";
 import { POSCartItem, usePOSCartStore } from "@/stores/usePOSCartStore";
 import { usePendingCartsStore } from "@/stores/usePendingCartsStore";
 import { getSizeLabel } from "@/utils/sizeMapping";
@@ -76,28 +71,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const QRCodeComponent = ({
-  value,
-  size = 200,
-}: {
-  value: string;
-  size?: number;
-}) => {
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(
-    value
-  )}`;
-
-  return (
-    <img
-      src={qrCodeUrl}
-      alt="QR Code"
-      width={size}
-      height={size}
-      className="border border-gray-200 rounded"
-    />
-  );
-};
-
 const CardSkeleton = () => (
   <div className="bg-white rounded-[6px] border border-border shadow-sm overflow-hidden">
     <Skeleton className="h-48 w-full" />
@@ -118,61 +91,60 @@ const CardSkeleton = () => (
 
 interface ApiVariant {
   id: string;
-  colorId?: { id: string; name: string; code: string; images?: string[] }; // Color information if applicable
-  sizeId?: { id: string; name: string; value?: string }; // Size information if applicable
-  price: number; // Variant price
-  stock: number; // Available stock
-  images?: string[]; // Variant-specific images
-  sku?: string; // Stock Keeping Unit
-  actualSizeId?: string; // Reference to actual size ID
+  colorId?: { id: string; name: string; code: string; images?: string[] };
+  sizeId?: { id: string; name: string; value?: string };
+  price: number;
+  stock: number;
+  images?: string[];
+  sku?: string;
+  actualSizeId?: string;
 }
 
 interface ApiProduct {
-  id: string; // Unique product identifier
-  name: string; // Product name
-  brand: { id: string; name: string } | string; // Brand information or brand ID
-  category: { id: string; name: string } | string; // Category information or category ID
-  description?: string; // Optional product description
-  variants: ApiVariant[]; // Array of product variants
-  status?: string; // Product status (e.g., active, inactive)
-  createdAt: string; // Product creation timestamp
+  id: string;
+  name: string;
+  category: { id: string; name: string } | string;
+  description?: string;
+  variants: ApiVariant[];
+  status?: string;
+  createdAt: string;
 }
 
 interface InvoiceShopInfo {
-  name: string; // Shop name
-  address: string; // Shop address
-  phone: string; // Contact phone number
-  email: string; // Contact email
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
 }
 
 interface InvoiceCustomerInfo {
-  name: string; // Customer name
-  phone: string; // Customer phone number
+  name: string;
+  phone: string;
 }
 
 interface InvoiceItem {
-  name: string; // Product name
-  quantity: number; // Quantity purchased
-  price: number; // Unit price
-  total: number; // Total price (quantity * price)
-  color: string; // Selected color
-  size: string; // Selected size
+  name: string;
+  quantity: number;
+  price: number;
+  total: number;
+  color: string;
+  size: string;
 }
 
 interface InvoiceData {
-  shopInfo: InvoiceShopInfo; // Shop details
-  customerInfo: InvoiceCustomerInfo; // Customer details
-  orderId: string; // Unique order identifier
-  employee: string; // Employee who processed the sale
-  createdAt: string; // Order timestamp
-  items: InvoiceItem[]; // Array of purchased items
-  subTotal: number; // Sum before discounts
-  discount: number; // Applied discount amount
-  voucherCode?: string; // Applied voucher code if any
-  total: number; // Final amount after discounts
-  cashReceived: number; // Cash received from customer
-  changeGiven: number; // Change to be given to customer
-  paymentMethod: string; // Payment method used
+  shopInfo: InvoiceShopInfo;
+  customerInfo: InvoiceCustomerInfo;
+  orderId: string;
+  employee: string;
+  createdAt: string;
+  items: InvoiceItem[];
+  subTotal: number;
+  discount: number;
+  voucherCode?: string;
+  total: number;
+  cashReceived: number;
+  changeGiven: number;
+  paymentMethod: string;
 }
 
 const getVariantImageUrl = (variant: any) => {
@@ -290,7 +262,6 @@ const convertProductToApiProduct = (product: any): ApiProduct => {
     return {
       id: "",
       name: "Unknown Product",
-      brand: "Unknown",
       category: "Unknown",
       variants: [],
       createdAt: new Date().toISOString(),
@@ -303,7 +274,6 @@ const convertProductToApiProduct = (product: any): ApiProduct => {
       (product as any)?._id?.toString() ||
       "",
     name: (product as any)?.name || "Unknown Product",
-    brand: (product as any)?.brand || "Unknown",
     category: (product as any)?.category || "Unknown",
     description: (product as any)?.description,
     variants: (product as any)?.variants?.map(convertVariantToApiVariant) || [],
@@ -326,37 +296,26 @@ export default function POSPage() {
     carts: pendingCarts, // All pending shopping carts
     activeCartId, // Currently active cart ID
     createNewCart, // Function to create a new cart
-    deleteCart, // Function to delete a cart
     setActiveCart, // Function to switch active cart
     addItemToCart: addItemToPendingCart, // Add item to pending cart
-    removeItemFromCart: removeItemFromPendingCart, // Remove item from pending cart
     updateItemQuantityInCart: updateItemQuantityInPendingCart, // Update item quantity
     clearCartItems: clearPendingCartItems, // Clear all items from cart
-    setCartDiscount: setPendingCartDiscount, // Apply discount to cart
     getActiveCart, // Get currently active cart
   } = usePendingCartsStore();
 
   // Get active cart data
   const activeCart = getActiveCart();
   const cartItems = activeCart?.items || [];
-  const appliedDiscount = activeCart?.appliedDiscount || 0;
   const appliedVoucher = activeCart?.appliedVoucher || null;
-  const couponCode = activeCart?.couponCode || "";
 
   const {
     items: mainCartItems,
-    appliedDiscount: mainAppliedDiscount,
-    appliedVoucher: mainAppliedVoucher,
-    couponCode: mainCouponCode,
     addToCart: addToCartStore,
-    removeFromCart: removeFromCartStore,
     updateQuantity: updateQuantityStore,
     clearCart: clearCartStore,
     setDiscount,
     setVoucher,
     setCouponCode,
-    calculateSubtotal,
-    calculateTotal,
   } = usePOSCartStore();
 
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
@@ -389,12 +348,6 @@ export default function POSPage() {
   const [selectedCartForView, setSelectedCartForView] = useState<string | null>(
     null
   );
-
-  const stats = usePosStore((state) => state.stats);
-  const updateStatsOnCheckout = usePosStore(
-    (state) => state.updateStatsOnCheckout
-  );
-  const createOrderMutation = useCreatePOSOrder();
 
   const [recentTransactions, setRecentTransactions] = useState([
     {
@@ -431,8 +384,7 @@ export default function POSPage() {
     []
   );
 
-  const { data: usersData, isLoading: isLoadingUsers } =
-    useAccounts(accountsParams);
+  const { data: usersData } = useAccounts(accountsParams);
 
   // Debounced search with better performance
   useEffect(() => {
@@ -596,7 +548,6 @@ export default function POSPage() {
 
   const handleProductSelect = (product: any) => {
     // Keep the product with promotion info intact
-    const productWithPromotion = { ...product };
 
     // Convert only for variant handling, but preserve promotion info
     const convertedProduct = convertProductToApiProduct(product);
@@ -742,14 +693,12 @@ export default function POSPage() {
     };
 
     if (activeCartId) {
-      // Add to existing cart if there's an active cart
       const existingItem = cartItems.find((item) => item.id === cartItemId);
       const activeCartName =
         pendingCarts.find((cart) => cart.id === activeCartId)?.name ||
         "Giỏ hàng";
 
       if (existingItem) {
-        // If item already exists, increase quantity
         if (existingItem.quantity < convertedVariant.stock) {
           updateItemQuantityInPendingCart(activeCartId, cartItemId, 1);
           toast.success(
@@ -794,295 +743,12 @@ export default function POSPage() {
     addItemToCorrectCart(selectedProduct, selectedApiVariant, true);
   };
 
-  const updateCartItemQuantity = (id: string, amount: number) => {
-    const item = cartItems.find((item) => item.id === id);
-    if (!item) return;
-
-    const variant = selectedProduct?.variants.find(
-      (v) => `${selectedProduct.id}-${v.id}` === id
-    );
-
-    if (!variant) return;
-
-    const newQuantity = item.quantity + amount;
-
-    if (newQuantity <= 0) {
-      removeCartItem(id);
-      return;
-    }
-
-    if (newQuantity > variant.stock) {
-      toast.error("Số lượng vượt quá hàng tồn kho.");
-      return;
-    }
-
-    if (activeCartId) {
-      updateItemQuantityInPendingCart(activeCartId, id, amount);
-    } else {
-      updateQuantityStore(id, amount); // Sửa thành updateQuantityStore
-    }
-  };
-
-  const removeCartItem = (id: string) => {
-    if (activeCartId) {
-      removeItemFromPendingCart(activeCartId, id);
-      const cartName =
-        pendingCarts.find((cart) => cart.id === activeCartId)?.name ||
-        "Giỏ hàng";
-      toast.success(`Đã xóa sản phẩm khỏi ${cartName}`);
-    } else {
-      removeFromCartStore(id); // Sửa thành removeFromCartStore
-      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
-    }
-  };
-
-  const removeItemFromSpecificCart = (cartId: string, itemId: string) => {
-    removeItemFromPendingCart(cartId, itemId);
-    const cartName =
-      pendingCarts.find((cart) => cart.id === cartId)?.name || "Giỏ hàng";
-    toast.success(`Đã xóa sản phẩm khỏi ${cartName}`);
-  };
-
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) {
-      toast.error("Vui lòng nhập mã giảm giá");
-      return;
-    }
-
-    try {
-      const response = await getAllVouchers({ status: "ACTIVE" }); // Thêm tham số
-      const vouchers = response.data.vouchers;
-
-      const validVoucher = vouchers.find(
-        (v) =>
-          v.code === couponCode &&
-          v.status === "ACTIVE" &&
-          new Date(v.startDate) <= new Date() &&
-          new Date(v.endDate) >= new Date() &&
-          v.quantity > v.usedCount // Sửa thành quantity và usedCount
-      );
-
-      if (!validVoucher) {
-        toast.error("Mã giảm giá không hợp lệ hoặc đã hết hạn");
-        return;
-      }
-
-      // Apply voucher to active cart or main cart
-      if (activeCartId) {
-        const cart = pendingCarts.find((c) => c.id === activeCartId);
-        if (cart) {
-          const cartName = cart.name || "Giỏ hàng";
-          setPendingCartDiscount(activeCartId, validVoucher.discountValue); // Sửa để truyền giá trị discount
-          toast.success(`Đã áp dụng mã giảm giá cho ${cartName}`);
-        }
-      } else {
-        setVoucher(validVoucher); // Giữ nguyên vì setVoucher có thể xử lý object voucher
-        toast.success("Đã áp dụng mã giảm giá");
-      }
-    } catch (error) {
-      console.error("Error applying coupon:", error);
-      toast.error("Có lỗi xảy ra khi áp dụng mã giảm giá");
-    }
-  };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
       maximumFractionDigits: 0,
     }).format(amount);
-  };
-
-  const formatDateTimeForInvoice = (dateString: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(dateString));
-  };
-
-  const handleCheckout = async () => {
-    // Kiểm tra giỏ hàng có trống không
-    if (cartItems.length === 0) {
-      toast.error("Giỏ hàng đang trống");
-      return;
-    }
-
-    // Kiểm tra số tiền thanh toán
-    const totalAmount = calculateCartTotal();
-    const cashReceivedNum = parseFloat(cashReceived.toString());
-
-    // Kiểm tra tiền mặt nếu thanh toán bằng tiền mặt
-    if (
-      paymentMethod === "cash" &&
-      (isNaN(cashReceivedNum) || cashReceivedNum < totalAmount)
-    ) {
-      toast.error("Số tiền khách đưa không đủ hoặc không hợp lệ.");
-      return;
-    }
-
-    // Bắt đầu quá trình thanh toán
-    setCheckoutIsLoading(true);
-
-    // Tạo mã đơn hàng từ thời gian hiện tại
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const generatedOrderId = `POS${hours}${minutes}${seconds}`;
-
-    // Chuẩn bị dữ liệu đơn hàng
-    const orderPayload: IPOSOrderCreateRequest = {
-      orderId: generatedOrderId,
-      customer: customerName || "Khách tại quầy",
-      items: cartItems.map((item) => ({
-        product: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        variant: {
-          colorId: item.actualColorId || "",
-          sizeId: item.actualSizeId || "",
-        },
-      })),
-      subTotal: calculateCartSubtotal(),
-      total: totalAmount,
-      shippingAddress: {
-        name: customerName || "Khách vãng lai",
-        phoneNumber: customerPhone || "N/A",
-        provinceId: "N/A",
-        districtId: "N/A",
-        wardId: "N/A",
-        specificAddress: "Tại quầy",
-      },
-      paymentMethod: paymentMethod === "cash" ? "CASH" : "BANK_TRANSFER",
-      orderStatus: "HOAN_THANH",
-      discount: appliedDiscount,
-      voucher: appliedVoucher?.id || "",
-    };
-
-    try {
-      // Gọi API tạo đơn hàng
-      const orderResponse = await createOrderMutation.mutateAsync(orderPayload);
-
-      if (orderResponse.success && orderResponse.data) {
-        // Xử lý khi tạo đơn hàng thành công
-        const orderCode =
-          orderResponse.data.orderNumber ||
-          `POS-${Math.floor(1000 + Math.random() * 9000)}`;
-
-        // Cập nhật thống kê
-        updateStatsOnCheckout(totalAmount);
-
-        // Thêm vào danh sách giao dịch gần đây
-        const newTransaction = {
-          id: orderCode,
-          customer: customerName || "Khách vãng lai",
-          amount: totalAmount,
-          time: new Date().toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          status: "completed",
-        };
-        setRecentTransactions([
-          newTransaction,
-          ...recentTransactions.slice(0, 2),
-        ]);
-
-        // Hiển thị thông báo thành công
-        toast.success(`Đã tạo đơn hàng ${orderCode} và thanh toán thành công!`);
-
-        // Cập nhật số lượng sử dụng voucher nếu có
-        if (appliedVoucher) {
-          incrementVoucherUsageMutation(appliedVoucher.id, {
-            onSuccess: () => {
-              toast.info(
-                `Đã cập nhật lượt sử dụng cho mã giảm giá "${appliedVoucher.code}".`
-              );
-            },
-            onError: (error: Error) => {
-              toast.error(`Lỗi khi cập nhật mã giảm giá: ${error.message}`);
-            },
-          });
-        }
-
-        // Tính tiền thừa cho thanh toán tiền mặt
-        const currentChangeDue =
-          paymentMethod === "cash" &&
-          !isNaN(cashReceivedNum) &&
-          cashReceivedNum >= totalAmount
-            ? cashReceivedNum - totalAmount
-            : 0;
-
-        // Chuẩn bị dữ liệu cho hóa đơn
-        const invoiceData: InvoiceData = {
-          shopInfo: {
-            name: "Clothes Shop",
-            address: "Địa chỉ shop: 20 Hồ Tùng Mậu, Cầu Giấy, Hà Nội",
-            phone: "0123 456 789",
-            email: "info@clothes.com",
-          },
-          customerInfo: {
-            name: customerName || "Khách vãng lai",
-            phone: customerPhone || "N/A",
-          },
-          orderId: orderCode,
-          employee: "Nhân viên Bán Hàng",
-          createdAt: new Date().toISOString(),
-          items: cartItems.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.price * item.quantity,
-            color: item.colorName,
-            size: item.sizeName,
-          })),
-          subTotal: calculateCartSubtotal(),
-          discount: appliedDiscount,
-          voucherCode: appliedVoucher?.code,
-          total: totalAmount,
-          cashReceived:
-            paymentMethod === "cash" ? cashReceivedNum : totalAmount,
-          changeGiven: currentChangeDue,
-          paymentMethod: paymentMethod === "cash" ? "Tiền mặt" : "Chuyển khoản",
-        };
-
-        // Hiển thị hóa đơn
-        setCurrentInvoiceData(invoiceData);
-        setShowInvoiceDialog(true);
-
-        // Reset các state sau khi thanh toán thành công
-        clearCartStore();
-        if (activeCartId) {
-          clearPendingCartItems(activeCartId);
-        }
-        setCustomerName("");
-        setCustomerPhone("");
-        setSelectedUserId("guest");
-        setPaymentMethod("cash");
-        setCashReceived("");
-        setTransferPaymentCompleted(false);
-        setShowCheckoutDialog(false);
-      } else {
-        // Xử lý khi tạo đơn hàng thất bại
-        toast.error(
-          (orderResponse as any).message ||
-            "Không thể tạo đơn hàng. Vui lòng thử lại."
-        );
-      }
-    } catch (error: any) {
-      // Xử lý lỗi
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra trong quá trình thanh toán."
-      );
-    } finally {
-      // Kết thúc loading
-      setCheckoutIsLoading(false);
-    }
   };
 
   const handleProceedToCheckout = () => {
@@ -1098,28 +764,6 @@ export default function POSPage() {
     setCustomerPhone("");
     setTransferPaymentCompleted(false);
     setShowCheckoutDialog(true);
-  };
-
-  const handleUserSelect = (userId: string) => {
-    setSelectedUserId(userId);
-    if (
-      userId &&
-      userId !== "guest" &&
-      userId !== "loading" &&
-      userId !== "no-customers" &&
-      usersData?.data?.accounts
-    ) {
-      const selectedUser = usersData.data.accounts.find(
-        (user: IAccount) => user.id === userId
-      );
-      if (selectedUser) {
-        setCustomerName(selectedUser.fullName);
-        setCustomerPhone(selectedUser.phoneNumber || "");
-      }
-    } else {
-      setCustomerName("");
-      setCustomerPhone("");
-    }
   };
 
   useEffect(() => {
@@ -1188,40 +832,6 @@ export default function POSPage() {
       ApiVariant["sizeId"]
     >[];
   }, [selectedProduct?.id, selectedApiVariant?.colorId?.id]);
-
-  // Memoize cart calculations
-  const cartCalculations = useMemo(() => {
-    const subtotal = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    const total = Math.max(0, subtotal - appliedDiscount);
-    return { subtotal, total };
-  }, [cartItems, appliedDiscount]);
-
-  // Helper functions for cart calculations - now use memoized values
-  const calculateCartSubtotal = () => cartCalculations.subtotal;
-  const calculateCartTotal = () => cartCalculations.total;
-
-  const totalAmount = cartCalculations.total;
-  const cashReceivedNum = parseFloat(cashReceived.toString());
-
-  // Optimize change calculation
-  const changeDue = useMemo(() => {
-    if (paymentMethod !== "cash" || !cashReceived) return 0;
-    const cashReceivedNum = parseFloat(cashReceived.toString());
-    return !isNaN(cashReceivedNum) && cashReceivedNum >= totalAmount
-      ? cashReceivedNum - totalAmount
-      : 0;
-  }, [paymentMethod, cashReceived, totalAmount]);
-
-  // Memoize getBrandName function
-  const getBrandName = useCallback(
-    (brand: ApiProduct["brand"]) =>
-      typeof brand === "object" ? brand.name : brand,
-    []
-  );
-
   // Helper function to safely get color info from variants
   const getColorInfo = useCallback((colorId: any) => {
     if (!colorId) return null;
@@ -1237,7 +847,7 @@ export default function POSPage() {
       if (!variants?.length) return [];
       const colorMap = new Map();
 
-      variants.forEach((v, index) => {
+      variants.forEach((v) => {
         const colorInfo = getColorInfo(v.colorId);
         if (colorInfo) {
           colorMap.set(colorInfo.id, colorInfo);
@@ -1249,7 +859,6 @@ export default function POSPage() {
     [getColorInfo]
   );
 
-  // Handle creating new pending cart
   const handleCreateNewCart = () => {
     const newCartId = createNewCart();
     if (!newCartId) {
@@ -1259,34 +868,11 @@ export default function POSPage() {
     toast.success(`Đã tạo giỏ hàng mới: Giỏ hàng ${pendingCarts.length + 1}`);
   };
 
-  // Handle deleting a pending cart
   const handleDeleteCart = (cartId: string) => {
     setCartToDelete(cartId);
     setShowDeleteCartDialog(true);
   };
 
-  // Confirm delete cart
-  const confirmDeleteCart = () => {
-    if (cartToDelete) {
-      const cartToDeleteData = pendingCarts.find(
-        (cart) => cart.id === cartToDelete
-      );
-      if (cartToDeleteData) {
-        deleteCart(cartToDelete);
-        toast.success(`Đã xóa ${cartToDeleteData.name}`);
-      }
-      setCartToDelete(null);
-      setShowDeleteCartDialog(false);
-    }
-  };
-
-  // Cancel delete cart
-  const cancelDeleteCart = () => {
-    setCartToDelete(null);
-    setShowDeleteCartDialog(false);
-  };
-
-  // Handle switching active cart
   const handleSwitchCart = (cartId: string) => {
     setActiveCart(cartId);
     const cart = pendingCarts.find((c) => c.id === cartId);
@@ -1312,20 +898,6 @@ export default function POSPage() {
       setCouponCode(activeCart.couponCode);
     }
   };
-
-  // Handle viewing cart items
-  const handleViewCartItems = (cartId: string) => {
-    setSelectedCartForView(cartId);
-    setShowCartItemsDialog(true);
-  };
-
-  // Close cart items dialog
-  const closeCartItemsDialog = () => {
-    setShowCartItemsDialog(false);
-    setSelectedCartForView(null);
-  };
-
-  // JSX return - giao diện của component
   return (
     <div className="h-full">
       {/* Header với breadcrumb navigation */}
@@ -1366,7 +938,7 @@ export default function POSPage() {
         {/* Danh sách các giỏ hàng đang chờ */}
         {pendingCarts.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {pendingCarts.slice(0, 5).map((cart, index) => (
+            {pendingCarts.slice(0, 5).map((cart) => (
               <motion.button
                 key={cart.id}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -1592,12 +1164,6 @@ export default function POSPage() {
                     {/* Product Header */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2">
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary/10 text-primary border-primary/20"
-                        >
-                          {getBrandName(selectedProduct.brand)}
-                        </Badge>
                         <Badge variant="outline" className="text-gray-700">
                           Admin POS
                         </Badge>
@@ -1918,9 +1484,6 @@ export default function POSPage() {
                                 >
                                   {product.name}
                                 </h3>
-                                <p className="text-gray-700 text-sm mb-2 truncate">
-                                  {getBrandName((product as any)?.brand)}
-                                </p>
                                 <div className="flex justify-between items-center">
                                   <div className="flex flex-col">
                                     <p
@@ -1995,9 +1558,7 @@ export default function POSPage() {
                               <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Sản phẩm
                               </th>
-                              <th className="text-left py-3 px-4 font-medium text-gray-700">
-                                Thương hiệu
-                              </th>
+
                               <th className="text-left py-3 px-4 font-medium text-gray-700">
                                 Giá
                               </th>
@@ -2024,10 +1585,6 @@ export default function POSPage() {
                                   (v) => (v as any)?.colorId?.id
                                 )
                               ).size;
-                              const firstAvailableVariant =
-                                (product as any)?.variants.find(
-                                  (v) => v.stock > 0
-                                ) || (product as any)?.variants[0];
                               return (
                                 <tr
                                   key={product.id}
@@ -2051,12 +1608,6 @@ export default function POSPage() {
                                         {product.name}
                                       </span>
                                     </div>
-                                  </td>
-                                  <td
-                                    className="py-3 px-4 text-gray-700 truncate max-w-[100px]"
-                                    onClick={() => handleProductSelect(product)}
-                                  >
-                                    {getBrandName((product as any)?.brand)}
                                   </td>
                                   <td
                                     className="py-3 px-4"

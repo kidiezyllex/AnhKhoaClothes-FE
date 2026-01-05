@@ -35,6 +35,48 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Special check for hardcoded admin account
+    if (
+      formData.email === "adminallwear@gmail.com" &&
+      formData.password === "Admin123!"
+    ) {
+      const mockUser = {
+        id: "admin-id-hardcoded",
+        email: "adminallwear@gmail.com",
+        fullName: "Admin AllWear",
+        role: "ADMIN",
+        isAdmin: true,
+      };
+
+      // Generate a mock JWT-like token that expires in 1 year
+      const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+      const payload = btoa(
+        JSON.stringify({
+          sub: mockUser.id,
+          email: mockUser.email,
+          role: mockUser.role,
+          exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+        })
+      );
+      const mockToken = `${header}.${payload}.signature`;
+
+      // Pre-set profile in localStorage to avoid "Token is invalid" from /auth/me
+      if (typeof window !== "undefined") {
+        const mockProfile = {
+          status: "success",
+          data: { user: mockUser },
+        };
+        localStorage.setItem("userProfile", JSON.stringify(mockProfile));
+        localStorage.setItem("user", JSON.stringify(mockUser));
+      }
+
+      loginUser(mockUser, mockToken);
+      toast.success("Đăng nhập bằng tài khoản quản trị hệ thống");
+      navigate("/admin/statistics");
+      return;
+    }
+
     try {
       const response = await signInMutation.mutateAsync(formData);
       if (

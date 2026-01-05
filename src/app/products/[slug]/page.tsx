@@ -283,12 +283,6 @@ const ImageZoom = ({
 };
 
 // Helper functions for ProductCard
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(price);
-};
 
 import { useParams } from "react-router-dom";
 
@@ -485,10 +479,6 @@ export default function ProductDetail() {
         ) || "/placeholder.svg",
       quantity: quantity,
       slug: (product as any)?.id.toString(),
-      brand:
-        typeof (product as any)?.brand === "string"
-          ? (product as any)?.brand
-          : (product as any)?.brand?.name || "No Brand",
       size: String(selectedVariant.size || ""),
       colors: [String(selectedVariant.color || "")],
       stock: selectedVariant.stock,
@@ -542,7 +532,7 @@ export default function ProductDetail() {
     if (!allProductsData?.data?.products || !productData?.data) return [];
 
     let filteredProducts = allProductsData.data.products
-      .filter((p: IProduct) => p.id !== productData.data.product.id)
+      .filter((p: IProduct) => (p as any)?.id !== productData.data.product.id)
       .slice(0, 5);
 
     // Apply promotions to similar products - but only active promotions
@@ -603,11 +593,6 @@ export default function ProductDetail() {
 
   const product = productData?.data?.product;
   if (!product) return null;
-
-  // Product metadata - use actual API fields
-  const brandName = (product as any)?.masterCategory || "No Brand";
-  const categoryName = (product as any)?.subCategory || "No Category";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50/50 to-white">
       <div className="container mx-auto py-8">
@@ -1252,100 +1237,94 @@ export default function ProductDetail() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {similarProducts.map(
-                (similarProduct: IProduct, index: number) => (
-                  <ProductCard
-                    key={similarProduct.id}
-                    product={similarProduct}
-                    promotionsData={promotionsData}
-                    formatPrice={formatPrice}
-                    onAddToCart={() => {
-                      const firstVariant = similarProduct.variants?.[0];
-                      if (!firstVariant) return;
+              {similarProducts.map((similarProduct: IProduct) => (
+                <ProductCard
+                  key={similarProduct.id}
+                  product={similarProduct}
+                  promotionsData={promotionsData}
+                  formatPrice={formatPrice}
+                  onAddToCart={() => {
+                    const firstVariant = similarProduct.variants?.[0];
+                    if (!firstVariant) return;
 
-                      if (firstVariant.stock === 0) {
-                        toast.error("Sản phẩm đã hết hàng");
-                        return;
-                      }
+                    if (firstVariant.stock === 0) {
+                      toast.error("Sản phẩm đã hết hàng");
+                      return;
+                    }
 
-                      const { addToCart } = useCartStore.getState();
+                    const { addToCart } = useCartStore.getState();
 
-                      let discountPercent = similarProduct.sale || 0;
-                      let finalPrice = calculateDiscountedPrice(
-                        firstVariant.price,
-                        discountPercent
+                    let discountPercent = similarProduct.sale || 0;
+                    let finalPrice = calculateDiscountedPrice(
+                      firstVariant.price,
+                      discountPercent
+                    );
+                    let originalPrice =
+                      discountPercent > 0 ? firstVariant.price : undefined;
+
+                    if (
+                      discountPercent === 0 &&
+                      promotionsData?.data?.promotions
+                    ) {
+                      const activePromotions = filterActivePromotions(
+                        promotionsData.data.promotions
                       );
-                      let originalPrice =
-                        discountPercent > 0 ? firstVariant.price : undefined;
-
-                      if (
-                        discountPercent === 0 &&
-                        promotionsData?.data?.promotions
-                      ) {
-                        const activePromotions = filterActivePromotions(
-                          promotionsData.data.promotions
-                        );
-                        const discount = calculateProductDiscount(
-                          String(similarProduct.id),
-                          firstVariant.price,
-                          activePromotions
-                        );
-                        if (discount.discountPercent > 0) {
-                          finalPrice = discount.discountedPrice;
-                          originalPrice = discount.originalPrice;
-                          discountPercent = discount.discountPercent;
-                        }
+                      const discount = calculateProductDiscount(
+                        String(similarProduct.id),
+                        firstVariant.price,
+                        activePromotions
+                      );
+                      if (discount.discountPercent > 0) {
+                        finalPrice = discount.discountedPrice;
+                        originalPrice = discount.originalPrice;
+                        discountPercent = discount.discountPercent;
                       }
+                    }
 
-                      const cartItem = {
-                        id: String(firstVariant._id || firstVariant.id),
-                        productId: String(similarProduct.id),
-                        name:
-                          similarProduct.productDisplayName ||
-                          similarProduct.name,
-                        price: finalPrice,
-                        originalPrice: originalPrice,
-                        discountPercent: discountPercent,
-                        hasDiscount: discountPercent > 0,
-                        image:
-                          checkImageUrl(
-                            similarProduct.images?.[0] ||
-                              firstVariant.images?.[0] ||
-                              ""
-                          ) || "/placeholder.svg",
-                        quantity: 1,
-                        slug: similarProduct.id.toString(),
-                        brand:
-                          typeof similarProduct.brand === "string"
-                            ? similarProduct.brand
-                            : similarProduct.brand?.name || "No Brand",
-                        size: String(firstVariant.size || ""),
-                        colors: [String(firstVariant.color || "")],
-                        stock: firstVariant.stock,
-                        colorId: String(firstVariant.color || ""),
-                        sizeId: String(firstVariant.size || ""),
-                        colorName: String(firstVariant.color || ""),
-                        sizeName: String(firstVariant.size || ""),
-                      };
-
-                      addToCart(cartItem, 1);
-                      toast.success("Đã thêm sản phẩm vào giỏ hàng");
-                    }}
-                    onQuickView={() => {
-                      window.location.href = `/products/${(
+                    const cartItem = {
+                      id: String(firstVariant._id || firstVariant.id),
+                      productId: String(similarProduct.id),
+                      name:
                         similarProduct.productDisplayName ||
-                        similarProduct.name ||
-                        "product"
-                      )
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}-${similarProduct.id}`;
-                    }}
-                    onAddToWishlist={() => {
-                      toast.success("Đã thêm vào danh sách yêu thích");
-                    }}
-                  />
-                )
-              )}
+                        similarProduct.name,
+                      price: finalPrice,
+                      originalPrice: originalPrice,
+                      discountPercent: discountPercent,
+                      hasDiscount: discountPercent > 0,
+                      image:
+                        checkImageUrl(
+                          similarProduct.images?.[0] ||
+                            firstVariant.images?.[0] ||
+                            ""
+                        ) || "/placeholder.svg",
+                      quantity: 1,
+                      slug: similarProduct.id.toString(),
+                      size: String(firstVariant.size || ""),
+                      colors: [String(firstVariant.color || "")],
+                      stock: firstVariant.stock,
+                      colorId: String(firstVariant.color || ""),
+                      sizeId: String(firstVariant.size || ""),
+                      colorName: String(firstVariant.color || ""),
+                      sizeName: String(firstVariant.size || ""),
+                    };
+
+                    addToCart(cartItem, 1);
+                    toast.success("Đã thêm sản phẩm vào giỏ hàng");
+                  }}
+                  onQuickView={() => {
+                    window.location.href = `/products/${(
+                      similarProduct.productDisplayName ||
+                      similarProduct.name ||
+                      "product"
+                    )
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}-${similarProduct.id}`;
+                  }}
+                  onAddToWishlist={() => {
+                    toast.success("Đã thêm vào danh sách yêu thích");
+                  }}
+                />
+              ))}
             </div>
 
             <div className="text-center mt-12">

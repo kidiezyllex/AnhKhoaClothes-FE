@@ -147,19 +147,6 @@ export default function ProductsPage() {
     }
 
     // Apply filters after promotions
-    if (filters.brands && filters.brands.length > 0) {
-      const brandsArray = Array.isArray(filters.brands)
-        ? filters.brands
-        : [filters.brands];
-      filteredProducts = filteredProducts.filter((product) => {
-        const brandId =
-          typeof (product as any)?.brand === "object"
-            ? ((product as any)?.brand as any).id
-            : (product as any)?.brand;
-        return brandsArray.includes(brandId);
-      });
-    }
-
     if (filters.categories && filters.categories.length > 0) {
       const categoriesArray = Array.isArray(filters.categories)
         ? filters.categories
@@ -405,10 +392,6 @@ export default function ProductsPage() {
         ) || "",
       quantity: 1,
       slug: (product as any)?.code || String((product as any)?.id),
-      brand:
-        typeof (product as any)?.brand === "string"
-          ? (product as any)?.brand
-          : (product as any)?.brand?.name,
       size: firstVariant.size?.code || firstVariant.size?.name,
       colors: [firstVariant.color?.name || "Default"],
       stock: firstVariant.stock,
@@ -447,11 +430,6 @@ export default function ProductsPage() {
     setAppliedVoucher(null);
     toast.info("Đã xóa mã giảm giá");
   };
-
-  const filteredProducts = useMemo(() => {
-    if (!data || !data.data || !data.data.products) return [];
-    return data.data.products;
-  }, [data]);
 
   return (
     <div className="container mx-auto py-8 relative bg-[#EAEBF2]">
@@ -555,20 +533,20 @@ export default function ProductsPage() {
                 Thử lại
               </Button>
             </div>
-          ) : filteredProducts.length > 0 ? (
+          ) : (data?.data?.products || []).length > 0 ? (
             <>
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-gray-700 font-semibold">
                   Tìm thấy{" "}
                   <span className="text-primary text-lg">
-                    {data?.data?.count || filteredProducts.length}
+                    {data?.data?.count || (data?.data?.products || []).length}
                   </span>{" "}
                   sản phẩm
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredProducts.map((product) => (
+                {(data?.data?.products || []).map((product) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -718,7 +696,7 @@ export default function ProductsPage() {
               {/* Mobile Voucher Form */}
               <div className="lg:hidden mt-8 bg-white rounded-[6px] shadow-sm border p-4">
                 <VoucherForm
-                  orderValue={filteredProducts.reduce(
+                  orderValue={(data?.data?.products || []).reduce(
                     (sum, product) =>
                       sum + ((product as any)?.variants[0]?.price || 0),
                     0

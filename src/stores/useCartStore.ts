@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface CartItem {
   id: string; // variant ID
@@ -12,7 +12,6 @@ export interface CartItem {
   image: string;
   quantity: number;
   slug: string;
-  brand: string;
   colors?: string[];
   size?: string;
   stock?: number;
@@ -27,7 +26,7 @@ export interface AppliedVoucher {
   code: string;
   discount: number;
   voucherId: string;
-  discountType: 'PERCENTAGE' | 'FIXED_AMOUNT';
+  discountType: "PERCENTAGE" | "FIXED_AMOUNT";
   discountValue: number;
   maxDiscount?: number;
 }
@@ -53,23 +52,29 @@ interface CartState {
 
 const calculateCartTotals = (items: CartItem[]) => {
   const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
   return { totalItems, totalPrice };
 };
 
 const calculateTotals = (items: CartItem[], voucherDiscount: number = 0) => {
   // Tạm tính: Tổng giá trị các sản phẩm (đã áp dụng khuyến mãi)
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-  
+  const subtotal = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
   // Thuế VAT 5%
   const tax = subtotal * 0.05;
-  
+
   // Phí vận chuyển: Miễn phí nếu đơn hàng trên 500,000 VND, ngược lại 30,000 VND
   const shipping = subtotal >= 500000 ? 0 : 30000;
-  
+
   // Tổng cộng (trừ voucher discount)
   const total = subtotal + tax + shipping - voucherDiscount;
-  
+
   return { subtotal, tax, shipping, total };
 };
 
@@ -85,18 +90,24 @@ export const useCartStore = create(
       total: 0,
       appliedVoucher: null,
       voucherDiscount: 0,
-      
+
       calculateVoucherDiscount: () => {
         const { appliedVoucher, items } = get();
         if (!appliedVoucher) return 0;
-        
+
         // Calculate current subtotal from items
-        const currentSubtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
-        
-        if (appliedVoucher.discountType === 'PERCENTAGE') {
+        const currentSubtotal = items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        );
+
+        if (appliedVoucher.discountType === "PERCENTAGE") {
           let discount = (currentSubtotal * appliedVoucher.discountValue) / 100;
           // Apply max discount if exists
-          if (appliedVoucher.maxDiscount && discount > appliedVoucher.maxDiscount) {
+          if (
+            appliedVoucher.maxDiscount &&
+            discount > appliedVoucher.maxDiscount
+          ) {
             discount = appliedVoucher.maxDiscount;
           }
           return discount;
@@ -104,97 +115,98 @@ export const useCartStore = create(
           return Math.min(appliedVoucher.discountValue, currentSubtotal);
         }
       },
-      
+
       setAppliedVoucher: (voucher) => {
         set({ appliedVoucher: voucher });
         // Recalculate after setting voucher
         const state = get();
         const voucherDiscount = voucher ? state.calculateVoucherDiscount() : 0;
-        const { subtotal, tax, shipping, total } = calculateTotals(state.items, voucherDiscount);
+        const { subtotal, tax, shipping, total } = calculateTotals(
+          state.items,
+          voucherDiscount
+        );
         set({ voucherDiscount, subtotal, tax, shipping, total });
       },
-      
+
       removeVoucher: () => {
         set({ appliedVoucher: null, voucherDiscount: 0 });
-        const { subtotal, tax, shipping, total } = calculateTotals(get().items, 0);
+        const { subtotal, tax, shipping, total } = calculateTotals(
+          get().items,
+          0
+        );
         set({ subtotal, tax, shipping, total });
       },
-      
+
       addToCart: (product, quantity) => {
         const currentItems = [...get().items];
         const productId = String((product as any)?.id);
-        
-        if (!productId || productId === 'undefined' || productId === 'null') {
-          console.error("Attempting to add product without valid ID to cart", product);
+
+        if (!productId || productId === "undefined" || productId === "null") {
+          console.error(
+            "Attempting to add product without valid ID to cart",
+            product
+          );
           return;
         }
 
-        const existingItemIndex = currentItems.findIndex(item => String(item.id) === productId);
-        
+        const existingItemIndex = currentItems.findIndex(
+          (item) => String(item.id) === productId
+        );
+
         if (existingItemIndex !== -1) {
           const existingItem = currentItems[existingItemIndex];
           const newQuantity = existingItem.quantity + quantity;
-          
+
           // Check stock limit
           if (existingItem.stock && newQuantity > existingItem.stock) {
             return;
           }
-          
+
           currentItems[existingItemIndex] = {
             ...existingItem,
-            quantity: newQuantity
+            quantity: newQuantity,
           };
         } else {
           // Check stock for new item
           if ((product as any)?.stock && quantity > (product as any)?.stock) {
             return;
           }
-          
+
           currentItems.push({
             id: productId,
-            productId: String((product as any)?.productId || (product as any)?.id),
+            productId: String(
+              (product as any)?.productId || (product as any)?.id
+            ),
             name: (product as any)?.name,
             price: (product as any)?.price,
             originalPrice: (product as any)?.originalPrice,
             discountPercent: (product as any)?.discountPercent || 0,
-            hasDiscount: Boolean((product as any)?.hasDiscount || ((product as any)?.originalPrice && (product as any)?.originalPrice > (product as any)?.price)),
+            hasDiscount: Boolean(
+              (product as any)?.hasDiscount ||
+                ((product as any)?.originalPrice &&
+                  (product as any)?.originalPrice > (product as any)?.price)
+            ),
             image: (product as any)?.image,
             quantity: quantity,
             slug: (product as any)?.slug,
-            brand: (product as any)?.brand,
             colors: (product as any)?.colors,
             size: (product as any)?.size,
             stock: (product as any)?.stock,
-            colorId: (product as any)?.colorId || '',
-            sizeId: (product as any)?.sizeId || '',
-            colorName: (product as any)?.colorName || '',
-            sizeName: (product as any)?.sizeName || '',
+            colorId: (product as any)?.colorId || "",
+            sizeId: (product as any)?.sizeId || "",
+            colorName: (product as any)?.colorName || "",
+            sizeName: (product as any)?.sizeName || "",
           });
         }
-        
+
         const { totalItems, totalPrice } = calculateCartTotals(currentItems);
         const voucherDiscount = get().calculateVoucherDiscount();
-        const { subtotal, tax, shipping, total } = calculateTotals(currentItems, voucherDiscount);
-        
-        set({ 
-          items: currentItems, 
-          totalItems, 
-          totalPrice,
-          subtotal,
-          tax,
-          shipping,
-          total,
+        const { subtotal, tax, shipping, total } = calculateTotals(
+          currentItems,
           voucherDiscount
-        });
-      },
-      
-      removeFromCart: (productId) => {
-        const currentItems = get().items.filter(item => item.id !== productId);
-        const { totalItems, totalPrice } = calculateCartTotals(currentItems);
-        const voucherDiscount = get().calculateVoucherDiscount();
-        const { subtotal, tax, shipping, total } = calculateTotals(currentItems, voucherDiscount);
-        
-        set({ 
+        );
+
+        set({
           items: currentItems,
           totalItems,
           totalPrice,
@@ -202,14 +214,39 @@ export const useCartStore = create(
           tax,
           shipping,
           total,
-          voucherDiscount
+          voucherDiscount,
         });
       },
-      
+
+      removeFromCart: (productId) => {
+        const currentItems = get().items.filter(
+          (item) => item.id !== productId
+        );
+        const { totalItems, totalPrice } = calculateCartTotals(currentItems);
+        const voucherDiscount = get().calculateVoucherDiscount();
+        const { subtotal, tax, shipping, total } = calculateTotals(
+          currentItems,
+          voucherDiscount
+        );
+
+        set({
+          items: currentItems,
+          totalItems,
+          totalPrice,
+          subtotal,
+          tax,
+          shipping,
+          total,
+          voucherDiscount,
+        });
+      },
+
       updateQuantity: (productId, quantity) => {
         const currentItems = [...get().items];
-        const itemIndex = currentItems.findIndex(item => item.id === productId);
-        
+        const itemIndex = currentItems.findIndex(
+          (item) => item.id === productId
+        );
+
         if (itemIndex !== -1) {
           const item = currentItems[itemIndex];
           // Check stock limit
@@ -221,12 +258,15 @@ export const useCartStore = create(
           } else {
             currentItems[itemIndex].quantity = quantity;
           }
-          
+
           const { totalItems, totalPrice } = calculateCartTotals(currentItems);
           const voucherDiscount = get().calculateVoucherDiscount();
-          const { subtotal, tax, shipping, total } = calculateTotals(currentItems, voucherDiscount);
-          
-          set({ 
+          const { subtotal, tax, shipping, total } = calculateTotals(
+            currentItems,
+            voucherDiscount
+          );
+
+          set({
             items: currentItems,
             totalItems,
             totalPrice,
@@ -234,13 +274,13 @@ export const useCartStore = create(
             tax,
             shipping,
             total,
-            voucherDiscount
+            voucherDiscount,
           });
         }
       },
-      
+
       clearCart: () => {
-        set({ 
+        set({
           items: [],
           totalItems: 0,
           totalPrice: 0,
@@ -249,12 +289,12 @@ export const useCartStore = create(
           shipping: 0,
           total: 0,
           appliedVoucher: null,
-          voucherDiscount: 0
+          voucherDiscount: 0,
         });
-      }
+      },
     }),
     {
-      name: 'cart-storage',
+      name: "cart-storage",
     }
   )
-); 
+);

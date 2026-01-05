@@ -66,7 +66,6 @@ import "react-toastify/dist/ReactToastify.css";
 interface ProductInfo {
   name: string;
   code: string;
-  brand: string;
   colorName: string;
   colorCode: string;
   sizeName: string;
@@ -83,7 +82,6 @@ interface OrderItem {
     product: {
       name: string;
       code: string;
-      brand: { name: string };
     };
     color: { name: string; code: string };
     size: { value: string };
@@ -92,42 +90,12 @@ interface OrderItem {
   product?: {
     name: string;
     code: string;
-    brand: { name: string } | string;
     variants?: any[];
   };
   variant?: {
     colorId: string;
     sizeId: string;
   };
-}
-
-interface OrderData {
-  id: number;
-  code: string;
-  orderStatus: string;
-  paymentStatus: string;
-  paymentMethod: string;
-  subTotal: string | number;
-  discount: string | number;
-  total: string | number;
-  createdAt: string;
-  shippingName?: string;
-  shippingPhoneNumber?: string;
-  shippingSpecificAddress?: string;
-  customer:
-    | {
-        fullName: string;
-        email: string;
-        phoneNumber: string;
-      }
-    | string;
-  staff?: {
-    fullName: string;
-  };
-  voucher?: {
-    code: string;
-  };
-  items: OrderItem[];
 }
 
 interface OrderStep {
@@ -271,11 +239,9 @@ const OrderStepper = ({ currentStatus }: { currentStatus: string }) => {
           })}
           {/* Progress lines container */}
           <div className="absolute top-7 left-0 right-0 flex items-center -z-0 px-4 sm:px-8 md:px-12">
-            {orderSteps.map((step, index) => {
+            {orderSteps.map((_step, index) => {
               if (index === orderSteps.length - 1) return null;
               const lineProgressClass =
-                index < currentStepIdx
-                  ? orderSteps[index].colors.progressFillClass
                   : "bg-gray-300 dark:bg-gray-600";
               return (
                 <div
@@ -362,14 +328,11 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
   return <Badge className={config.className}>{config.label}</Badge>;
 };
 
-// Helper function to get product info from the new data structure
 const getProductInfo = (item: OrderItem): ProductInfo => {
-  // Handle the new data structure from the API response
   if (item.productVariant?.product) {
     return {
       name: item.productVariant.product.name || "Tên sản phẩm chưa cập nhật",
       code: item.productVariant.product.code || "N/A",
-      brand: item.productVariant.product.brand?.name || "N/A",
       colorName: item.productVariant.color?.name || "N/A",
       colorCode: item.productVariant.color?.code || "#000000",
       sizeName: item.productVariant.size
@@ -379,14 +342,9 @@ const getProductInfo = (item: OrderItem): ProductInfo => {
     };
   }
 
-  // Fallback for older data structure
   return {
     name: item.product?.name || "Tên sản phẩm chưa cập nhật",
     code: item.product?.code || "N/A",
-    brand:
-      typeof item.product?.brand === "object"
-        ? item.product.brand.name
-        : item.product?.brand || "N/A",
     colorName: "N/A",
     colorCode: "#000000",
     sizeName: "N/A",
@@ -593,16 +551,6 @@ export default function OrderDetailPage() {
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: vi });
-  };
-
-  const formatDateTimeForInvoice = (dateString: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(dateString));
   };
 
   const getPaymentMethodName = (method: string) => {
@@ -1056,9 +1004,6 @@ export default function OrderDetailPage() {
                                 {productInfo.name}
                               </div>
                               <div className="text-sm text-gray-700 mt-0.5">
-                                Thương hiệu: {productInfo.brand}
-                              </div>
-                              <div className="text-sm text-gray-700 mt-0.5">
                                 Mã: {productInfo.code}
                               </div>
                               <div className="text-sm text-gray-700 mt-0.5">
@@ -1315,9 +1260,6 @@ export default function OrderDetailPage() {
                             <div className="min-w-0 flex-1">
                               <div className="font-medium text-sm">
                                 {productInfo.name}
-                              </div>
-                              <div className="text-xs text-gray-700 mt-0.5">
-                                {productInfo.brand}
                               </div>
                               <div className="text-xs text-gray-700 mt-0.5">
                                 Mã: {productInfo.code}

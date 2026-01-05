@@ -81,18 +81,10 @@ export default function EditProductPage() {
 
       setProductUpdate({
         name: (product as any)?.name,
-        brand:
-          typeof (product as any)?.brand === "string"
-            ? (product as any)?.brand
-            : (product as any)?.brand.name,
         category:
           typeof (product as any)?.category === "string"
             ? (product as any)?.category
             : (product as any)?.category.name,
-        material:
-          typeof (product as any)?.material === "string"
-            ? (product as any)?.material
-            : (product as any)?.material.name,
         description: (product as any)?.description,
         weight: (product as any)?.weight,
         status: (product as any)?.status,
@@ -386,33 +378,6 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="brand">Thương hiệu</Label>
-                    <Select
-                      value={productUpdate.brand || ""}
-                      onValueChange={(value) =>
-                        setProductUpdate({ ...productUpdate, brand: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn thương hiệu" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          "Prada",
-                          "Uniqlo",
-                          "Balenciaga",
-                          "Chanel",
-                          "Louis Vuitton",
-                        ].map((brand) => (
-                          <SelectItem key={brand} value={brand}>
-                            {brand}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="category">Danh mục</Label>
                     <Select
                       value={productUpdate.category || ""}
@@ -434,29 +399,6 @@ export default function EditProductPage() {
                             {category}
                           </SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="material">Chất liệu</Label>
-                    <Select
-                      value={productUpdate.material || ""}
-                      onValueChange={(value) =>
-                        setProductUpdate({ ...productUpdate, material: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn chất liệu" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["Canvas", "Da", "Vải", "Nhựa", "Cao su"].map(
-                          (material) => (
-                            <SelectItem key={material} value={material}>
-                              {material}
-                            </SelectItem>
-                          )
-                        )}
                       </SelectContent>
                     </Select>
                   </div>

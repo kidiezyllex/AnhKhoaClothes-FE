@@ -56,7 +56,6 @@ import {
 import {
   mdiAccountGroup,
   mdiCashMultiple,
-  mdiEye,
   mdiLoading,
   mdiPackageVariantClosed,
   mdiSync,
@@ -146,21 +145,14 @@ export default function StatisticsPage() {
     isLoading: statisticsLoading,
     isError: statisticsError,
   } = useStatistics(statisticsFilters);
-  const {
-    data: overviewStatistics,
-    isLoading: overviewLoading,
-    isError: overviewError,
-  } = useStatistics(overviewFilters);
+  const { isLoading: overviewLoading, isError: overviewError } =
+    useStatistics(overviewFilters);
   const {
     data: revenueData,
     isLoading: revenueLoading,
     isError: revenueError,
   } = useRevenueReport(revenueFilters);
-  const {
-    data: topProductsData,
-    isLoading: topProductsLoading,
-    isError: topProductsError,
-  } = useTopProducts(topProductsFilters);
+  const { data: topProductsData } = useTopProducts(topProductsFilters);
   const generateDailyStatistics = useGenerateDailyStatistics();
   const { data: accountsData } = useAccounts({ role: "CUSTOMER" });
   const { data: statisticsDetailData, isLoading: isDetailLoading } =
@@ -178,15 +170,6 @@ export default function StatisticsPage() {
     value: any
   ) => {
     setTopProductsFilters({ ...topProductsFilters, [key]: value });
-  };
-
-  const handleChangePage = (newPage: number) => {
-    setStatisticsFilters({ ...statisticsFilters, page: newPage });
-  };
-
-  const handleViewDetail = (statisticsId: string) => {
-    setSelectedStatisticsId(statisticsId);
-    setIsDetailModalOpen(true);
   };
 
   const handleGenerateStatistics = async () => {
@@ -224,14 +207,6 @@ export default function StatisticsPage() {
     }).format(new Date(dateString));
   };
 
-  const formatPercentChange = (value: number) => {
-    return value > 0 ? (
-      <span className="text-primary">+{value.toFixed(2)}%</span>
-    ) : (
-      <span className="text-red-600">{value.toFixed(2)}%</span>
-    );
-  };
-
   interface StatCardProps {
     title: string;
     value: string | number;
@@ -241,7 +216,7 @@ export default function StatisticsPage() {
     change: number;
   }
 
-  // Overview dashboard stats
+  // Overview dashboard stats with modern design
   const StatCard = ({
     title,
     value,
@@ -250,33 +225,44 @@ export default function StatisticsPage() {
     bgColor,
     change,
   }: StatCardProps) => {
+    const isPositive = change >= 0;
     return (
-      <Card className="h-full">
+      <Card className="h-full bg-white border border-gray-200 hover:shadow-md transition-all duration-300">
         <CardContent className="p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-base text-gray-700">{title}</p>
-              <h3 className="text-2xl font-bold mt-2 text-gray-700">{value}</h3>
-              <div className="flex items-center mt-2">
-                <Icon
-                  path={change >= 0 ? mdiTrendingUp : mdiTrendingUp}
-                  size={0.8}
-                  className={change >= 0 ? "text-primary" : "text-red-600"}
-                />
-                <span
-                  className={`text-sm ml-1 ${
-                    change >= 0 ? "text-primary" : "text-red-600"
-                  }`}
-                >
-                  {Math.abs(change).toFixed(1)}% {change >= 0 ? "tăng" : "giảm"}
-                </span>
-              </div>
+          <div className="flex items-start gap-4">
+            {/* Icon */}
+            <div className={`${bgColor} p-3 rounded-xl flex-shrink-0`}>
+              <Icon path={icon} size={1.3} className={iconColor} />
             </div>
-            <div
-              className={`${bgColor} w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0`}
-            >
-              <Icon path={icon} size={1} className={iconColor} />
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-700 mb-1 font-semibold">
+                {title}
+              </p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-2">{value}</h3>
             </div>
+          </div>
+          {/* Change indicator */}
+          <div
+            className={`inline-flex items-center gap-1 text-sm font-medium ${
+              isPositive ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            <Icon
+              path={mdiTrendingUp}
+              size={0.8}
+              style={{
+                transform: isPositive ? "none" : "rotate(180deg)",
+              }}
+            />
+            <span>
+              {isPositive ? "+" : ""}
+              {change.toFixed(1)}%
+            </span>
+            <span className="text-gray-700 font-normal ml-1">
+              vs tháng trước
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -284,77 +270,61 @@ export default function StatisticsPage() {
   };
 
   // Sử dụng statisticsData thay vì overviewStatistics để hiển thị đúng dữ liệu
-  const currentMonthData = statisticsData?.data?.statistics?.[0] || {
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalProfit: 0,
+  const currentMonthData = statisticsData?.data?.data?.[0] || {
+    orderCount: 0,
+    revenue: 0,
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
   };
 
-  // Tính tổng doanh thu từ revenue data hoặc từ statistics data
-  const totalRevenue =
-    revenueData?.data?.reduce(
-      (sum: number, item: any) => sum + item.totalRevenue,
-      0
-    ) ||
-    currentMonthData.totalRevenue ||
-    0;
+  // Tính tổng doanh thu từ revenue data
+  const totalRevenue = revenueData?.data?.totalRevenue || 0;
+  const totalOrders = revenueData?.data?.orderCount || 0;
 
-  // Tính số khách hàng mới trong tháng hiện tại
+  // Tính số khách hàng mới từ danh sách users
+  const accountsList = accountsData?.data?.users || [];
   const newCustomersCount =
-    accountsData?.data?.accounts?.filter((account) => {
-      const accountDate = new Date(account.createdAt);
+    accountsList.filter((account) => {
+      const accountDate = new Date(account.created_at);
       const currentDate = new Date();
-      const currentMonth = currentDate.getMonth();
-      const currentYear = currentDate.getFullYear();
       return (
-        accountDate.getMonth() === currentMonth &&
-        accountDate.getFullYear() === currentYear
+        accountDate.getMonth() === currentDate.getMonth() &&
+        accountDate.getFullYear() === currentDate.getFullYear()
       );
     }).length || 0;
 
-  // Tạo mock data cho revenue chart nếu không có dữ liệu thực
-  const mockRevenueData = revenueData?.data?.length
-    ? revenueData.data
+  // Sử dụng dữ liệu từ statisticsData.data.data cho biểu đồ vì nó là mảng lịch sử
+  const chartData = statisticsData?.data?.data || [];
+  const mockRevenueData = chartData.length
+    ? chartData.map((item) => ({
+        date: `${item.month}/${item.year}`,
+        totalRevenue: item.revenue,
+        totalOrders: item.orderCount,
+      }))
     : [
         {
-          date: "2026-01",
-          totalRevenue: currentMonthData.totalRevenue,
-          totalOrders: currentMonthData.totalOrders,
+          date: `${new Date().getMonth() + 1}/${new Date().getFullYear()}`,
+          totalRevenue: currentMonthData.revenue,
+          totalOrders: currentMonthData.orderCount,
         },
-        { date: "2026-02", totalRevenue: 0, totalOrders: 0 },
-        { date: "2026-03", totalRevenue: 0, totalOrders: 0 },
       ];
 
-  // Tạo mock data cho top products nếu không có dữ liệu thực
-  const mockTopProductsData = topProductsData?.data?.length
-    ? topProductsData.data
+  // Lấy top products từ data.products
+  const actualTopProducts = topProductsData?.data?.products || [];
+  const mockTopProductsData = actualTopProducts.length
+    ? actualTopProducts.map((item) => ({
+        product: {
+          id: item.id.toString(),
+          name: item.name,
+        },
+        totalQuantity: item.sold,
+        totalRevenue: 0, // API không trả về revenue cho top products
+      }))
     : [
         {
-          product: {
-            id: "1",
-            name: "Sản phẩm mẫu 1",
-            brand: { id: "1", name: "Uniqlo" },
-          },
-          totalQuantity: 10,
-          totalRevenue: 1000000,
-        },
-        {
-          product: {
-            id: "2",
-            name: "Sản phẩm mẫu 2",
-            brand: { id: "2", name: "Prada" },
-          },
-          totalQuantity: 8,
-          totalRevenue: 800000,
-        },
-        {
-          product: {
-            id: "3",
-            name: "Sản phẩm mẫu 3",
-            brand: { id: "3", name: "Balenciaga" },
-          },
-          totalQuantity: 5,
-          totalRevenue: 500000,
+          product: { id: "1", name: "Chưa có dữ liệu" },
+          totalQuantity: 0,
+          totalRevenue: 0,
         },
       ];
 
@@ -380,7 +350,7 @@ export default function StatisticsPage() {
           onOpenChange={setIsGenerateDialogOpen}
         >
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button>
               <Icon path={mdiSync} size={0.8} className="mr-2" />
               Tạo thống kê
             </Button>
@@ -439,11 +409,10 @@ export default function StatisticsPage() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid grid-cols-4 w-full max-w-6xl">
+        <TabsList className="grid grid-cols-3 w-full max-w-4xl">
           <TabsTrigger value="overview">Tổng quan</TabsTrigger>
           <TabsTrigger value="revenue">Doanh thu</TabsTrigger>
           <TabsTrigger value="products">Sản phẩm</TabsTrigger>
-          <TabsTrigger value="statistics">Lịch sử</TabsTrigger>
         </TabsList>
 
         {/* Tổng quan */}
@@ -476,15 +445,15 @@ export default function StatisticsPage() {
               />
               <StatCard
                 title="Số đơn hàng"
-                value={currentMonthData?.totalOrders?.toString() || "0"}
+                value={totalOrders.toString()}
                 icon={mdiPackageVariantClosed}
                 iconColor="text-blue-600"
                 bgColor="bg-blue-100"
                 change={5.3}
               />
               <StatCard
-                title="Lợi nhuận"
-                value={formatCurrency(currentMonthData?.totalProfit || 0)}
+                title="Lợi nhuận dự kiến"
+                value={formatCurrency(totalRevenue * 0.15)} // Giả định 15% vì API không trả lợi nhuận
                 icon={mdiTrendingUp}
                 iconColor="text-purple-600"
                 bgColor="bg-purple-100"
@@ -568,19 +537,27 @@ export default function StatisticsPage() {
                         }: {
                           name: string;
                           percent: number;
-                        }) =>
-                          percent > 0.05
-                            ? `${name}: ${(percent * 100).toFixed(1)}%`
-                            : ""
-                        }
+                        }) => {
+                          if (percent <= 0.05) return "";
+                          const maxLength = 15;
+                          const truncatedName =
+                            name.length > maxLength
+                              ? `${name.substring(0, maxLength)}...`
+                              : name;
+                          return `${truncatedName}: ${(percent * 100).toFixed(
+                            1
+                          )}%`;
+                        }}
                         labelLine={false}
                       >
-                        {mockTopProductsData.slice(0, 5).map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
+                        {mockTopProductsData
+                          .slice(0, 5)
+                          .map((_entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
                       </Pie>
                       <Tooltip
                         formatter={(
@@ -596,11 +573,13 @@ export default function StatisticsPage() {
                       <Legend
                         verticalAlign="bottom"
                         height={36}
-                        formatter={(value: string, entry: any) =>
-                          entry.payload?.fullName?.length > 25
-                            ? `${entry.payload.fullName.substring(0, 25)}...`
-                            : entry.payload?.fullName || value
-                        }
+                        formatter={(value: string, entry: any) => {
+                          const fullName = entry.payload?.fullName || value;
+                          const maxLength = 20;
+                          return fullName.length > maxLength
+                            ? `${fullName.substring(0, maxLength)}...`
+                            : fullName;
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -676,10 +655,7 @@ export default function StatisticsPage() {
                       Số đơn hàng
                     </h3>
                     <p className="text-2xl font-bold mt-2 text-blue-500">
-                      {mockRevenueData.reduce(
-                        (sum: number, item) => sum + (item.totalOrders || 0),
-                        0
-                      )}
+                      {totalOrders}
                     </p>
                   </div>
                 </div>
@@ -735,7 +711,6 @@ export default function StatisticsPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab Sản phẩm bán chạy */}
         <TabsContent value="products" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
@@ -814,16 +789,22 @@ export default function StatisticsPage() {
                       }: {
                         name: string;
                         percent: number;
-                      }) =>
-                        percent > 0.05
-                          ? `${name}: ${(percent * 100).toFixed(1)}%`
-                          : ""
-                      }
+                      }) => {
+                        if (percent <= 0.05) return "";
+                        const maxLength = 15;
+                        const truncatedName =
+                          name.length > maxLength
+                            ? `${name.substring(0, maxLength)}...`
+                            : name;
+                        return `${truncatedName}: ${(percent * 100).toFixed(
+                          1
+                        )}%`;
+                      }}
                       labelLine={false}
                     >
                       {mockTopProductsData
                         .slice(0, topProductsFilters.limit || 10)
-                        .map((entry, index) => (
+                        .map((_entry, index) => (
                           <Cell
                             key={`cell-${index}`}
                             fill={COLORS[index % COLORS.length]}
@@ -840,11 +821,13 @@ export default function StatisticsPage() {
                     <Legend
                       verticalAlign="bottom"
                       height={36}
-                      formatter={(value: string, entry: any) =>
-                        entry.payload?.fullName?.length > 25
-                          ? `${entry.payload.fullName.substring(0, 25)}...`
-                          : entry.payload?.fullName || value
-                      }
+                      formatter={(value: string, entry: any) => {
+                        const fullName = entry.payload?.fullName || value;
+                        const maxLength = 20;
+                        return fullName.length > maxLength
+                          ? `${fullName.substring(0, maxLength)}...`
+                          : fullName;
+                      }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -883,7 +866,6 @@ export default function StatisticsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Tên sản phẩm</TableHead>
-                      <TableHead>Thương hiệu</TableHead>
                       <TableHead className="text-right">Số lượng bán</TableHead>
                       <TableHead className="text-right">Doanh thu</TableHead>
                     </TableRow>
@@ -893,9 +875,6 @@ export default function StatisticsPage() {
                       <TableRow key={index}>
                         <TableCell className="font-medium text-gray-700">
                           {item.product?.name || `Sản phẩm ${index + 1}`}
-                        </TableCell>
-                        <TableCell className="text-gray-700">
-                          {item.product?.brand?.name || "Uniqlo"}
                         </TableCell>
                         <TableCell className="text-right text-gray-700">
                           {item.totalQuantity}
@@ -908,213 +887,6 @@ export default function StatisticsPage() {
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab Lịch sử thống kê */}
-        <TabsContent value="statistics" className="space-y-4 text-gray-700">
-          <Card className="mb-4">
-            <CardHeader>
-              <CardTitle>Lịch sử thống kê</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                  <Label htmlFor="statsType">Loại thống kê</Label>
-                  <Select
-                    value={statisticsFilters.type || ""}
-                    onValueChange={(value) =>
-                      setStatisticsFilters({
-                        ...statisticsFilters,
-                        type: value as any,
-                      })
-                    }
-                  >
-                    <SelectTrigger id="statsType">
-                      <SelectValue placeholder="Chọn loại thống kê" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Tất cả</SelectItem>
-                      <SelectItem value="DAILY">Theo ngày</SelectItem>
-                      <SelectItem value="WEEKLY">Theo tuần</SelectItem>
-                      <SelectItem value="MONTHLY">Theo tháng</SelectItem>
-                      <SelectItem value="YEARLY">Theo năm</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="statsStartDate">Từ ngày</Label>
-                  <Input
-                    id="statsStartDate"
-                    type="date"
-                    value={statisticsFilters.startDate || ""}
-                    onChange={(e) =>
-                      setStatisticsFilters({
-                        ...statisticsFilters,
-                        startDate: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="statsEndDate">Đến ngày</Label>
-                  <Input
-                    id="statsEndDate"
-                    type="date"
-                    value={statisticsFilters.endDate || ""}
-                    onChange={(e) =>
-                      setStatisticsFilters({
-                        ...statisticsFilters,
-                        endDate: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="statsLimit">Số lượng mỗi trang</Label>
-                  <Select
-                    value={statisticsFilters.limit?.toString() || "10"}
-                    onValueChange={(value) =>
-                      setStatisticsFilters({
-                        ...statisticsFilters,
-                        limit: parseInt(value),
-                        page: 1,
-                      })
-                    }
-                  >
-                    <SelectTrigger id="statsLimit">
-                      <SelectValue placeholder="Số lượng mỗi trang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10 mục</SelectItem>
-                      <SelectItem value="20">20 mục</SelectItem>
-                      <SelectItem value="50">50 mục</SelectItem>
-                      <SelectItem value="100">100 mục</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {statisticsLoading ? (
-                <Skeleton className="h-80 w-full" />
-              ) : statisticsError ? (
-                <p className="text-red-600">Lỗi khi tải dữ liệu thống kê</p>
-              ) : !statisticsData?.data?.statistics?.length ? (
-                <div className="flex items-center justify-center h-80 text-gray-700">
-                  <p>Không có dữ liệu thống kê</p>
-                </div>
-              ) : (
-                <>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Ngày thống kê</TableHead>
-                          <TableHead>Loại</TableHead>
-                          <TableHead className="text-right">
-                            Số đơn hàng
-                          </TableHead>
-                          <TableHead className="text-right">
-                            Doanh thu
-                          </TableHead>
-                          <TableHead className="text-right">
-                            Lợi nhuận
-                          </TableHead>
-                          <TableHead className="text-center">
-                            Hành động
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {statisticsData?.data?.statistics?.map((item) => (
-                          <TableRow key={item.id || item.date}>
-                            <TableCell className="font-medium text-gray-700">
-                              {formatDate(item.date)}
-                            </TableCell>
-                            <TableCell className="text-gray-700">
-                              <Badge variant="outline">
-                                {item.type === "DAILY"
-                                  ? "Ngày"
-                                  : item.type === "WEEKLY"
-                                  ? "Tuần"
-                                  : item.type === "MONTHLY"
-                                  ? "Tháng"
-                                  : "Năm"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right text-gray-700">
-                              {item.totalOrders}
-                            </TableCell>
-                            <TableCell className="text-right text-gray-700">
-                              {formatCurrency(item.totalRevenue)}
-                            </TableCell>
-                            <TableCell className="text-right text-gray-700">
-                              {formatCurrency(item.totalProfit)}
-                            </TableCell>
-                            <TableCell className="text-center">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleViewDetail(item.id || item.date)
-                                }
-                              >
-                                <Icon
-                                  path={mdiEye}
-                                  size={0.6}
-                                  className="mr-1"
-                                />
-                                Chi tiết
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-
-                  {/* Pagination */}
-                  {statisticsData &&
-                    statisticsData.data.pagination.totalPages > 1 && (
-                      <div className="flex justify-center items-center gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleChangePage(
-                              statisticsData.data.pagination.currentPage - 1
-                            )
-                          }
-                          disabled={
-                            statisticsData.data.pagination.currentPage <= 1
-                          }
-                        >
-                          Trước
-                        </Button>
-                        <span className="text-sm text-gray-700">
-                          Trang {statisticsData.data.pagination.currentPage} /{" "}
-                          {statisticsData.data.pagination.totalPages}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleChangePage(
-                              statisticsData.data.pagination.currentPage + 1
-                            )
-                          }
-                          disabled={
-                            statisticsData.data.pagination.currentPage >=
-                            statisticsData.data.pagination.totalPages
-                          }
-                        >
-                          Sau
-                        </Button>
-                      </div>
-                    )}
-                </>
-              )}
             </CardContent>
           </Card>
         </TabsContent>

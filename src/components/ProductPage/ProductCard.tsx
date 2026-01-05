@@ -222,13 +222,9 @@ export const ProductCard = ({
 
         <div className="p-3 flex flex-col flex-grow bg-green-50 relative">
           <span className="font-semibold text-base text-primary">
-            {product.brand
-              ? typeof (product as any)?.brand === "string"
-                ? (product as any)?.brand
-                : (product as any)?.brand?.name
-              : (product as any)?.gender ||
-                (product as any)?.masterCategory ||
-                "Product"}
+            {(product as any)?.gender ||
+              (product as any)?.masterCategory ||
+              "Product"}
           </span>
           <a
             href={`/products/${(

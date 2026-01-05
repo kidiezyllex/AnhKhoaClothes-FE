@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   Breadcrumb,
@@ -21,13 +21,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -37,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useBrands, useCategories } from "@/hooks/attributes";
+import { useCategories } from "@/hooks/attributes";
 import { useDeleteProduct, useProducts } from "@/hooks/product";
 import { usePromotions } from "@/hooks/promotion";
 import { IProductFilter } from "@/interface/request/product";
@@ -52,10 +45,10 @@ import {
   mdiMagnify,
   mdiPencilCircle,
   mdiPlus,
+  mdiStar,
 } from "@mdi/js";
 import { Icon } from "@mdi/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Lightbox from "yet-another-react-lightbox";
@@ -79,8 +72,7 @@ export default function ProductsPage() {
   const [lightboxSlides, setLightboxSlides] = useState<any[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const { data: brandsData } = useBrands();
-  const { data: categoriesData } = useCategories();
+  const { data: categoriesData, isError: isCategoriesError } = useCategories();
 
   const data = useMemo(() => {
     if (!rawData || !rawData.data || !rawData.data.products) return rawData;
@@ -102,32 +94,6 @@ export default function ProductsPage() {
       },
     };
   }, [rawData, promotionsData]);
-
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      if (searchQuery.trim()) {
-        setFilters((prev) => ({ ...prev, name: searchQuery, page: 1 }));
-      } else {
-        const { name, ...rest } = filters;
-        setFilters({ ...rest, page: 1 });
-      }
-    }, 500);
-
-    return () => clearTimeout(debounce);
-  }, [searchQuery]);
-
-  const handleFilterChange = (
-    key: keyof IProductFilter,
-    value: string | number | undefined
-  ) => {
-    if (value === "") {
-      const newFilters = { ...filters };
-      delete newFilters[key];
-      setFilters({ ...newFilters, page: 1 });
-    } else {
-      setFilters({ ...filters, [key]: value, page: 1 });
-    }
-  };
 
   const handleDeleteProduct = async (id: string) => {
     try {
@@ -159,39 +125,59 @@ export default function ProductsPage() {
     setFilters({ ...filters, page: newPage });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(dateString));
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+
+      return new Intl.DateTimeFormat("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).format(date);
+    } catch (error) {
+      return "N/A";
+    }
   };
 
   const handleOpenLightbox = (
     product: any,
-    variantIndex: number = 0,
+    _variantIndex: number = 0,
     imageIndex: number = 0
   ) => {
-    const slides = ((product as any)?.variants as any[]).flatMap(
-      (variant: any) =>
+    // Check if images are at product level (new API structure)
+    const productImages = (product as any)?.images || [];
+
+    let slides = [];
+
+    if (productImages.length > 0) {
+      // Use product-level images
+      slides = productImages.map((img: string) => ({
+        src: checkImageUrl(img),
+        alt:
+          (product as any)?.name ||
+          (product as any)?.productDisplayName ||
+          "Product Image",
+        download: checkImageUrl(img),
+      }));
+    } else {
+      // Fallback to variant images (old structure)
+      slides = ((product as any)?.variants as any[]).flatMap((variant: any) =>
         (variant.images || []).map((img: any) => ({
-          src: checkImageUrl(img.imageUrl),
-          alt: (product as any)?.name,
-          download: checkImageUrl(img.imageUrl),
+          src: checkImageUrl(typeof img === "string" ? img : img.imageUrl),
+          alt:
+            (product as any)?.name ||
+            (product as any)?.productDisplayName ||
+            "Product Image",
+          download: checkImageUrl(typeof img === "string" ? img : img.imageUrl),
         }))
-    );
-    let startIndex = 0;
-    let count = 0;
-    for (let i = 0; i < (product as any)?.variants.length; i++) {
-      const imgs = (product as any)?.variants[i].images || [];
-      if (i === variantIndex) {
-        startIndex = count + imageIndex;
-        break;
-      }
-      count += imgs.length;
+      );
     }
+
     setLightboxSlides(slides);
-    setLightboxIndex(startIndex);
+    setLightboxIndex(imageIndex);
     setLightboxOpen(true);
   };
 
@@ -249,126 +235,6 @@ export default function ProductsPage() {
               {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
             </Button>
           </div>
-
-          <AnimatePresence>
-            {showFilters && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4 pt-4 border-t"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
-                      Thương hiệu
-                    </label>
-                    <Select
-                      value={filters.brand || "all"}
-                      onValueChange={(value) =>
-                        handleFilterChange(
-                          "brand",
-                          value === "all" ? undefined : value
-                        )
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tất cả thương hiệu">
-                          {filters.brand
-                            ? (brandsData?.data || []).find(
-                                (brand) =>
-                                  brand.id.toString() ===
-                                  filters.brand?.toString()
-                              )?.name || "Tất cả thương hiệu"
-                            : "Tất cả thương hiệu"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tất cả thương hiệu</SelectItem>
-                        {(brandsData?.data || []).map((brand) => (
-                          <SelectItem
-                            key={brand.id}
-                            value={brand.id.toString()}
-                          >
-                            {brand.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
-                      Danh mục
-                    </label>
-                    <Select
-                      value={filters.category || "all"}
-                      onValueChange={(value) =>
-                        handleFilterChange(
-                          "category",
-                          value === "all" ? undefined : value
-                        )
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tất cả danh mục">
-                          {filters.category
-                            ? (categoriesData?.data || []).find(
-                                (category) =>
-                                  category.id.toString() ===
-                                  filters.category?.toString()
-                              )?.name || "Tất cả danh mục"
-                            : "Tất cả danh mục"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tất cả danh mục</SelectItem>
-                        {(categoriesData?.data || []).map((category) => (
-                          <SelectItem
-                            key={category.id}
-                            value={category.id.toString()}
-                          >
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-700 mb-2 font-semibold">
-                      Trạng thái
-                    </label>
-                    <Select
-                      value={filters.status || "all"}
-                      onValueChange={(value) =>
-                        handleFilterChange(
-                          "status",
-                          value === "all" ? undefined : value
-                        )
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Tất cả trạng thái">
-                          {filters.status === "ACTIVE"
-                            ? "Hoạt động"
-                            : filters.status === "INACTIVE"
-                            ? "Không hoạt động"
-                            : "Tất cả trạng thái"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                        <SelectItem value="ACTIVE">Hoạt động</SelectItem>
-                        <SelectItem value="INACTIVE">
-                          Không hoạt động
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </CardContent>
       </Card>
 
@@ -416,30 +282,16 @@ export default function ProductsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Hình ảnh
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Sản phẩm
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Thương hiệu
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Danh mục
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Giá
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>Hình ảnh</TableHead>
+                  <TableHead>Tên sản phẩm</TableHead>
+                  <TableHead>Giới tính</TableHead>
+                  <TableHead>Loại</TableHead>
+                  <TableHead>Màu sắc</TableHead>
+                  <TableHead>Mùa</TableHead>
+                  <TableHead>Giá</TableHead>
+                  <TableHead>Đánh giá</TableHead>
+                  <TableHead>Ngày cập nhật</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -454,33 +306,38 @@ export default function ProductsPage() {
                         >
                           <img
                             src={checkImageUrl(
-                              (product as any)?.variants[0]?.images?.[0]
-                                ?.imageUrl
+                              (product as any)?.images?.[0] ||
+                                (product as any)?.variants[0]?.images?.[0]
+                                  ?.imageUrl ||
+                                (product as any)?.variants[0]?.images?.[0]
                             )}
-                            alt={product.name}
+                            alt={
+                              product.name ||
+                              product.productDisplayName ||
+                              "Product"
+                            }
                             className="object-cover group-hover:scale-105 transition-transform duration-200"
                           />
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-700">
-                          {product.name}
-                        </div>
-                        <div className="text-xs text-gray-700">
-                          {product.variants.length} biến thể
+                      <TableCell className="px-4 py-4">
+                        <div className="text-base font-medium text-gray-700 max-w-[200px] whitespace-normal">
+                          {product.productDisplayName || product.name || "N/A"}
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {typeof (product as any)?.brand === "string"
-                          ? (product as any)?.brand
-                          : (product as any)?.brand.name}
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        {product.gender || "N/A"}
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {typeof (product as any)?.category === "string"
-                          ? (product as any)?.category
-                          : (product as any)?.category.name}
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        {product.articleType || "N/A"}
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm">
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        {product.baseColour || "N/A"}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        {product.season || "N/A"}
+                      </TableCell>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base">
                         {(() => {
                           const basePrice =
                             (product as any)?.variants[0]?.price || 0;
@@ -527,21 +384,22 @@ export default function ProductsPage() {
                           );
                         })()}
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            (product as any)?.status === "ACTIVE"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {(product as any)?.status === "ACTIVE"
-                            ? "Hoạt động"
-                            : "Không hoạt động"}
-                        </span>
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        <div className="flex items-center gap-1">
+                          <Icon
+                            path={mdiStar}
+                            size={0.8}
+                            className="text-yellow-500"
+                          />
+                          <span>({product.rating?.toFixed(1) || "N/A"})</span>
+                        </div>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {formatDate((product as any)?.updatedAt)}
+
+                      <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
+                        {formatDate(
+                          (product as any)?.updated_at ||
+                            (product as any)?.updatedAt
+                        )}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
@@ -609,7 +467,7 @@ export default function ProductsPage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={8}
+                      colSpan={10}
                       className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy sản phẩm nào
@@ -620,80 +478,162 @@ export default function ProductsPage() {
             </Table>
           </div>
 
-          {data?.data.pagination && data.data.pagination.totalPages > 1 && (
-            <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
-              <div className="hidden sm:block">
-                <p className="text-sm text-gray-700">
-                  Hiển thị{" "}
-                  <span className="font-medium">
-                    {(data.data.pagination.currentPage - 1) *
-                      data.data.pagination.limit +
-                      1}
-                  </span>{" "}
-                  đến{" "}
-                  <span className="font-medium">
-                    {Math.min(
-                      data.data.pagination.currentPage *
-                        data.data.pagination.limit,
-                      data.data.pagination.totalItems
-                    )}
-                  </span>{" "}
-                  của{" "}
-                  <span className="font-medium">
-                    {data.data.pagination.totalItems}
-                  </span>{" "}
-                  sản phẩm
-                </p>
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    handleChangePage(data.data.pagination.currentPage - 1)
-                  }
-                  disabled={data.data.pagination.currentPage === 1}
-                >
-                  Trước
-                </Button>
-                {[...Array(data.data.pagination.totalPages)]
-                  .map((_, i) => (
-                    <Button
-                      key={i}
-                      variant={
-                        data.data.pagination.currentPage === i + 1
-                          ? "default"
-                          : "outline"
+          {data?.data &&
+            (data.data.pages > 1 || data.data.pagination?.totalPages > 1) && (
+              <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
+                <div className="hidden sm:block">
+                  <p className="text-sm text-gray-700">
+                    Hiển thị{" "}
+                    <span className="font-medium">
+                      {((data.data.page ||
+                        data.data.pagination?.currentPage ||
+                        1) -
+                        1) *
+                        (data.data.perPage ||
+                          data.data.pagination?.limit ||
+                          10) +
+                        1}
+                    </span>{" "}
+                    đến{" "}
+                    <span className="font-medium">
+                      {Math.min(
+                        (data.data.page ||
+                          data.data.pagination?.currentPage ||
+                          1) *
+                          (data.data.perPage ||
+                            data.data.pagination?.limit ||
+                            10),
+                        data.data.count || data.data.pagination?.totalItems || 0
+                      )}
+                    </span>{" "}
+                    của{" "}
+                    <span className="font-medium">
+                      {data.data.count || data.data.pagination?.totalItems || 0}
+                    </span>{" "}
+                    sản phẩm
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      handleChangePage(
+                        (data.data.page ||
+                          data.data.pagination?.currentPage ||
+                          1) - 1
+                      )
+                    }
+                    disabled={
+                      (data.data.page ||
+                        data.data.pagination?.currentPage ||
+                        1) === 1
+                    }
+                  >
+                    Trước
+                  </Button>
+                  {(() => {
+                    const totalPages =
+                      data.data.pages || data.data.pagination?.totalPages || 1;
+                    const currentPage =
+                      data.data.page || data.data.pagination?.currentPage || 1;
+                    const pageButtons = [];
+
+                    // Always show first page
+                    if (totalPages > 0) {
+                      pageButtons.push(
+                        <Button
+                          key={1}
+                          variant={currentPage === 1 ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleChangePage(1)}
+                        >
+                          1
+                        </Button>
+                      );
+                    }
+
+                    // Show ellipsis if needed
+                    if (currentPage > 3) {
+                      pageButtons.push(
+                        <span
+                          key="ellipsis-start"
+                          className="px-2 text-gray-500"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    // Show pages around current page
+                    for (
+                      let i = Math.max(2, currentPage - 1);
+                      i <= Math.min(totalPages - 1, currentPage + 1);
+                      i++
+                    ) {
+                      if (i !== 1 && i !== totalPages) {
+                        pageButtons.push(
+                          <Button
+                            key={i}
+                            variant={currentPage === i ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleChangePage(i)}
+                          >
+                            {i}
+                          </Button>
+                        );
                       }
-                      size="sm"
-                      onClick={() => handleChangePage(i + 1)}
-                    >
-                      {i + 1}
-                    </Button>
-                  ))
-                  .slice(
-                    Math.max(0, data.data.pagination.currentPage - 3),
-                    Math.min(
-                      data.data.pagination.totalPages,
-                      data.data.pagination.currentPage + 2
-                    )
-                  )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    handleChangePage(data.data.pagination.currentPage + 1)
-                  }
-                  disabled={
-                    data.data.pagination.currentPage ===
-                    data.data.pagination.totalPages
-                  }
-                >
-                  Sau
-                </Button>
+                    }
+
+                    // Show ellipsis if needed
+                    if (currentPage < totalPages - 2) {
+                      pageButtons.push(
+                        <span key="ellipsis-end" className="px-2 text-gray-500">
+                          ...
+                        </span>
+                      );
+                    }
+
+                    // Always show last page if there's more than 1 page
+                    if (totalPages > 1) {
+                      pageButtons.push(
+                        <Button
+                          key={totalPages}
+                          variant={
+                            currentPage === totalPages ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handleChangePage(totalPages)}
+                        >
+                          {totalPages}
+                        </Button>
+                      );
+                    }
+
+                    return pageButtons;
+                  })()}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      handleChangePage(
+                        (data.data.page ||
+                          data.data.pagination?.currentPage ||
+                          1) + 1
+                      )
+                    }
+                    disabled={
+                      (data.data.page ||
+                        data.data.pagination?.currentPage ||
+                        1) >=
+                      (data.data.pages || data.data.pagination?.totalPages || 1)
+                    }
+                  >
+                    Sau
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       )}
 

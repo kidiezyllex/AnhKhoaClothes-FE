@@ -1,21 +1,21 @@
 "use client";
 import type React from "react";
-import { useNavigate } from "react-router-dom";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useState,
-  useRef,
   useMemo,
-  useCallback,
+  useRef,
+  useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { clearToken, setTokenToLocalStorage } from "@/helper/tokenStorage";
 import { useUserProfile } from "@/hooks/account";
+import { useAuth } from "@/hooks/useAuth";
 import { IAccountResponse } from "@/interface/response/account";
 import cookies from "js-cookie";
-import { useAuth } from "@/hooks/useAuth";
 
 type UserContextType = {
   user: null | Record<string, any>;
@@ -49,18 +49,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setUser(JSON.parse(storedUser));
       }
     }
-  }, []);
-
-  const setCookie = useCallback((name: string, value: string, days = 30) => {
-    if (typeof window === "undefined") return;
-    const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-  }, []);
-
-  const deleteCookie = useCallback((name: string) => {
-    if (typeof window === "undefined") return;
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
   }, []);
 
   const loginUser = useCallback((userInfo: any, token: string) => {
@@ -97,6 +85,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   );
 
   const fetchUserProfile = useCallback(async () => {
+    // Skip API refetch for hardcoded admin account
+    if (user?.email === "adminallwear@gmail.com") {
+      return;
+    }
     try {
       setIsLoadingProfile(true);
       await refetchProfile();
@@ -105,7 +97,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoadingProfile(false);
     }
-  }, [refetchProfile]);
+  }, [refetchProfile, user?.email]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

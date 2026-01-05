@@ -2,17 +2,14 @@ export interface IProductFilter {
   page?: number;
   limit?: number;
   name?: string;
-  brand?: string;
-  brands?: string[] | string;
   category?: string;
   categories?: string[] | string;
-  material?: string;
   color?: string;
   size?: string;
   minPrice?: number;
   maxPrice?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   status?: string;
   articleType?: string;
   gender?: string;
@@ -31,9 +28,7 @@ export interface IProductVariant {
 
 export interface IProductCreate {
   name: string;
-  brand: string;
   category: string;
-  material: string;
   description: string;
   weight: number;
   variants: IProductVariant[];
@@ -41,17 +36,15 @@ export interface IProductCreate {
 
 export interface IProductUpdate {
   name?: string;
-  brand?: string;
   category?: string;
-  material?: string;
   description?: string;
   weight?: number;
   variants?: IProductVariant[];
-  status?: 'ACTIVE' | 'INACTIVE';
+  status?: "ACTIVE" | "INACTIVE";
 }
 
 export interface IProductStatusUpdate {
-  status: 'ACTIVE' | 'INACTIVE';
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export interface IVariantStockUpdate {
@@ -70,11 +63,8 @@ export interface IProductImageUpdate {
 
 export interface IProductSearchParams {
   keyword: string;
-  brand?: string;
-  brands?: string[] | string;
   category?: string;
   categories?: string[] | string;
-  material?: string;
   color?: string;
   size?: string;
   minPrice?: number;
@@ -82,11 +72,11 @@ export interface IProductSearchParams {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   status?: string;
   articleType?: string;
   gender?: string;
   baseColour?: string;
   season?: string;
   usage?: string;
-} 
+}

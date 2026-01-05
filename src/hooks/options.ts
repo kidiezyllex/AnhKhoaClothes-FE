@@ -1,18 +1,7 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { sendGet } from "@/api/axios";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 // Định nghĩa các interface cho response
-interface IBrandsResponse {
-  success: boolean;
-  message: string;
-  data: {
-    brands: Array<{
-      id: string;
-      name: string;
-    }>;
-  };
-}
-
 interface ICategoriesResponse {
   success: boolean;
   message: string;
@@ -47,23 +36,7 @@ interface ISizesResponse {
   };
 }
 
-interface IMaterialsResponse {
-  success: boolean;
-  message: string;
-  data: {
-    materials: Array<{
-      id: string;
-      name: string;
-    }>;
-  };
-}
-
 // API functions
-const getBrands = async (): Promise<IBrandsResponse> => {
-  const res = await sendGet("/brands");
-  return res as IBrandsResponse;
-};
-
 const getCategories = async (): Promise<ICategoriesResponse> => {
   const res = await sendGet("/categories");
   return res as ICategoriesResponse;
@@ -79,19 +52,7 @@ const getSizes = async (): Promise<ISizesResponse> => {
   return res as ISizesResponse;
 };
 
-const getMaterials = async (): Promise<IMaterialsResponse> => {
-  const res = await sendGet("/materials");
-  return res as IMaterialsResponse;
-};
-
 // Hooks
-export const useBrands = (): UseQueryResult<IBrandsResponse, Error> => {
-  return useQuery<IBrandsResponse, Error>({
-    queryKey: ["brands"],
-    queryFn: () => getBrands(),
-  });
-};
-
 export const useCategories = (): UseQueryResult<ICategoriesResponse, Error> => {
   return useQuery<ICategoriesResponse, Error>({
     queryKey: ["categories"],
@@ -112,10 +73,3 @@ export const useSizes = (): UseQueryResult<ISizesResponse, Error> => {
     queryFn: () => getSizes(),
   });
 };
-
-export const useMaterials = (): UseQueryResult<IMaterialsResponse, Error> => {
-  return useQuery<IMaterialsResponse, Error>({
-    queryKey: ["materials"],
-    queryFn: () => getMaterials(),
-  });
-}; 

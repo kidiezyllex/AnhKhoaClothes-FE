@@ -1,41 +1,41 @@
 import {
-  useQuery,
-  useMutation,
-  UseQueryResult,
-  UseMutationResult,
-} from "@tanstack/react-query";
-import {
-  getAllProducts,
-  getProductById,
   createProduct,
+  deleteProduct,
+  getAllProducts,
+  getFilterOptions,
+  getProductById,
+  searchProducts,
   updateProduct,
+  updateProductImages,
   updateProductStatus,
   updateProductStock,
-  updateProductImages,
-  deleteProduct,
-  searchProducts,
-  getAllFilters,
-  getFilterOptions
 } from "@/api/product";
 import {
-  IProductFilter,
   IProductCreate,
-  IProductUpdate,
+  IProductFilter,
+  IProductImageUpdate,
+  IProductSearchParams,
   IProductStatusUpdate,
   IProductStockUpdate,
-  IProductImageUpdate,
-  IProductSearchParams
+  IProductUpdate,
 } from "@/interface/request/product";
 import {
-  IProductsResponse,
-  IProductResponse,
   IActionResponse,
-  IProductFiltersResponse,
-  IFilterOptionsResponse
+  IFilterOptionsResponse,
+  IProductResponse,
+  IProductsResponse,
 } from "@/interface/response/product";
-import { useBrands, useCategories, useColors, useMaterials, useSizes } from './options';
+import {
+  useMutation,
+  UseMutationResult,
+  useQuery,
+  UseQueryResult,
+} from "@tanstack/react-query";
+import { useCategories, useColors, useSizes } from "./options";
 
-export const useProducts = (params: IProductFilter = {}): UseQueryResult<IProductsResponse, Error> => {
+export const useProducts = (
+  params: IProductFilter = {}
+): UseQueryResult<IProductsResponse, Error> => {
   return useQuery<IProductsResponse, Error>({
     queryKey: ["products", params],
     queryFn: () => getAllProducts(params),
@@ -46,11 +46,13 @@ export const useProducts = (params: IProductFilter = {}): UseQueryResult<IProduc
   });
 };
 
-export const useProductDetail = (productId: string): UseQueryResult<IProductResponse, Error> => {
+export const useProductDetail = (
+  productId: string
+): UseQueryResult<IProductResponse, Error> => {
   return useQuery<IProductResponse, Error>({
     queryKey: ["product", productId],
     queryFn: () => getProductById(productId),
-    enabled: !!productId, 
+    enabled: !!productId,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
     refetchInterval: 4000,
@@ -58,7 +60,11 @@ export const useProductDetail = (productId: string): UseQueryResult<IProductResp
   });
 };
 
-export const useCreateProduct = (): UseMutationResult<IProductResponse, Error, IProductCreate> => {
+export const useCreateProduct = (): UseMutationResult<
+  IProductResponse,
+  Error,
+  IProductCreate
+> => {
   return useMutation<IProductResponse, Error, IProductCreate>({
     mutationFn: (payload) => createProduct(payload),
   });
@@ -69,18 +75,27 @@ export const useUpdateProduct = (): UseMutationResult<
   Error,
   { productId: string; payload: IProductUpdate }
 > => {
-  return useMutation<IProductResponse, Error, { productId: string; payload: IProductUpdate }>({
+  return useMutation<
+    IProductResponse,
+    Error,
+    { productId: string; payload: IProductUpdate }
+  >({
     mutationFn: ({ productId, payload }) => updateProduct(productId, payload),
   });
 };
-  
+
 export const useUpdateProductStatus = (): UseMutationResult<
   IProductResponse,
   Error,
   { productId: string; payload: IProductStatusUpdate }
 > => {
-  return useMutation<IProductResponse, Error, { productId: string; payload: IProductStatusUpdate }>({
-    mutationFn: ({ productId, payload }) => updateProductStatus(productId, payload),
+  return useMutation<
+    IProductResponse,
+    Error,
+    { productId: string; payload: IProductStatusUpdate }
+  >({
+    mutationFn: ({ productId, payload }) =>
+      updateProductStatus(productId, payload),
   });
 };
 
@@ -89,8 +104,13 @@ export const useUpdateProductStock = (): UseMutationResult<
   Error,
   { productId: string; payload: IProductStockUpdate }
 > => {
-  return useMutation<IProductResponse, Error, { productId: string; payload: IProductStockUpdate }>({
-    mutationFn: ({ productId, payload }) => updateProductStock(productId, payload),
+  return useMutation<
+    IProductResponse,
+    Error,
+    { productId: string; payload: IProductStockUpdate }
+  >({
+    mutationFn: ({ productId, payload }) =>
+      updateProductStock(productId, payload),
   });
 };
 
@@ -99,37 +119,51 @@ export const useUpdateProductImages = (): UseMutationResult<
   Error,
   { productId: string; payload: IProductImageUpdate }
 > => {
-  return useMutation<IProductResponse, Error, { productId: string; payload: IProductImageUpdate }>({
-    mutationFn: ({ productId, payload }) => updateProductImages(productId, payload),
+  return useMutation<
+    IProductResponse,
+    Error,
+    { productId: string; payload: IProductImageUpdate }
+  >({
+    mutationFn: ({ productId, payload }) =>
+      updateProductImages(productId, payload),
   });
 };
 
-export const useDeleteProduct = (): UseMutationResult<IActionResponse, Error, string> => {
+export const useDeleteProduct = (): UseMutationResult<
+  IActionResponse,
+  Error,
+  string
+> => {
   return useMutation<IActionResponse, Error, string>({
     mutationFn: (productId) => deleteProduct(productId),
   });
 };
 
-export const useSearchProducts = (params: IProductSearchParams): UseQueryResult<IProductsResponse, Error> => {
+export const useSearchProducts = (
+  params: IProductSearchParams
+): UseQueryResult<IProductsResponse, Error> => {
   return useQuery<IProductsResponse, Error>({
     queryKey: ["searchProducts", params],
     queryFn: () => searchProducts(params),
-    enabled: !!params.keyword || 
-             !!params.brands || 
-             !!params.categories || 
-             !!params.color || 
-             !!params.size || 
-             !!params.minPrice || 
-             !!params.maxPrice,
+    enabled:
+      !!params.keyword ||
+      !!params.categories ||
+      !!params.color ||
+      !!params.size ||
+      !!params.minPrice ||
+      !!params.maxPrice,
     staleTime: 30000, // 30 seconds
     gcTime: 300000, // 5 minutes
     refetchInterval: 4000,
     refetchIntervalInBackground: true,
   });
-}; 
+};
 
 // Hook để lấy filter options (articleTypes, genders, baseColours, seasons, usages)
-export const useFilterOptions = (): UseQueryResult<IFilterOptionsResponse, Error> => {
+export const useFilterOptions = (): UseQueryResult<
+  IFilterOptionsResponse,
+  Error
+> => {
   return useQuery<IFilterOptionsResponse, Error>({
     queryKey: ["filterOptions"],
     queryFn: () => getFilterOptions(),
@@ -139,4 +173,4 @@ export const useFilterOptions = (): UseQueryResult<IFilterOptionsResponse, Error
 };
 
 // Re-export hooks from options.ts
-export { useBrands, useCategories, useColors, useMaterials, useSizes }; 
+export { useCategories, useColors, useSizes };

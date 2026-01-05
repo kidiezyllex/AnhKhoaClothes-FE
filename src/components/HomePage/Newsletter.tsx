@@ -1,15 +1,8 @@
-import React, { useState } from "react";
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { mdiCheckCircle, mdiEmailFast, mdiGift, mdiSale } from "@mdi/js";
 import { Icon } from "@mdi/react";
-import {
-  mdiEmailOutline,
-  mdiEmailFast,
-  mdiCheckCircle,
-  mdiGift,
-  mdiSale,
-} from "@mdi/js";
+import { motion, useInView } from "framer-motion";
+import React, { useRef, useState } from "react";
 import { Input } from "../ui/input";
 
 export const Newsletter = () => {
@@ -97,7 +90,7 @@ export const Newsletter = () => {
             </motion.h2>
 
             <motion.p
-              className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg text-gray-700 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}

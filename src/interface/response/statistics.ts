@@ -1,7 +1,48 @@
+export interface IMonthlyStatisticsItem {
+  month: number;
+  year: number;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface IStatisticsResponse {
+  status: string;
+  message: string;
+  data: {
+    data: IMonthlyStatisticsItem[];
+  };
+}
+
+export interface IRevenueReport {
+  totalRevenue: number;
+  orderCount: number;
+}
+
+export interface IRevenueReportResponse {
+  status: string;
+  message: string;
+  data: IRevenueReport;
+}
+
+export interface ITopProduct {
+  id: number;
+  name: string;
+  sold: number;
+}
+
+export interface ITopProductsResponse {
+  status: string;
+  message: string;
+  data: {
+    products: ITopProduct[];
+  };
+}
+
+// Keeping these for potential backward compatibility or other endpoints
 export interface IStatisticsItem {
   id: string;
   date: string;
-  type: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+  type: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
   totalOrders: number;
   totalRevenue: number;
   totalProfit: number;
@@ -48,67 +89,12 @@ export interface IRevenueSeries {
   averageOrderValue: number;
 }
 
-export interface IPreviousPeriod {
-  total: number;
-  change: number;
-  percentChange: number;
-}
-
-export interface IRevenueReport {
-  total: number;
-  series: IRevenueSeries[];
-  previousPeriod: IPreviousPeriod;
-}
-
-export interface ITopProduct {
-  product: {
-    id: string;
-    name: string;
-    brand: {
-      id: string;
-      name: string;
-    };
-    category: {
-      id: string;
-      name: string;
-    };
-  };
-  totalQuantity: number;
-  totalRevenue: number;
-}
-
-export interface IStatisticsResponse {
-  success: boolean;
-  message: string;
-  data: {
-    statistics: IStatisticsItem[];
-    pagination: {
-      totalItems: number;
-      totalPages: number;
-      currentPage: number;
-      limit: number;
-    };
-  };
-}
-
 export interface IStatisticsDetailResponse {
   success: boolean;
   data: IStatisticsDetail;
 }
 
-export interface IRevenueReportResponse {
-  success: boolean;
-  message: string;
-  data: IRevenueSeries[];
-}
-
-export interface ITopProductsResponse {
-  success: boolean;
-  message: string;
-  data: ITopProduct[];
-}
-
 export interface IGenerateDailyResponse {
   success: boolean;
   data: IStatisticsDetail;
-} 
+}

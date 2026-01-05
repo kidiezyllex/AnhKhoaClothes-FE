@@ -116,7 +116,7 @@ export const HeroBanner = () => {
                       alt="Customer 3"
                       className="w-10 h-10 rounded-full border-2 border-white object-cover"
                     />
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm border-2 border-white">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm border-2 border-white">
                       +
                     </div>
                   </div>
@@ -131,7 +131,7 @@ export const HeroBanner = () => {
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-gray-700 mt-1">
                       "Chất lượng tuyệt vời, giao hàng nhanh!"
                     </p>
                   </div>

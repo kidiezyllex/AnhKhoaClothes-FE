@@ -940,7 +940,6 @@ export default function ShippingPage() {
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-700">{item.name}</h4>
                       <p className="text-sm text-muted-foreground">
-                        {item.brand}
                         {item.size &&
                           ` • Size ${getSizeLabel(Number(item.size))}`}
                       </p>

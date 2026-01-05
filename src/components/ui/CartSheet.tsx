@@ -499,7 +499,6 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
                           </button>
                         </div>
                         <div className="text-sm text-muted-foreground flex items-center justify-between mb-2">
-                          <span>Thương hiệu: {item.brand}</span>
                           {item.stock !== undefined && (
                             <span
                               className={`ml-2 text-sm px-2 py-0.5 rounded-full ${

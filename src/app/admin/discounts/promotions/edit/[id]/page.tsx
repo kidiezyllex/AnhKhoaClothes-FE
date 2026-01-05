@@ -480,10 +480,7 @@ export default function EditPromotionPage() {
                                 {product.name}
                               </Label>
                               <div className="text-xs text-gray-700">
-                                Mã: {product.code} | Thương hiệu:{" "}
-                                {typeof (product as any)?.brand === "string"
-                                  ? (product as any)?.brand
-                                  : (product as any)?.brand.name}
+                                Mã: {product.code}
                               </div>
                             </div>
                           </div>
@@ -499,7 +496,7 @@ export default function EditPromotionPage() {
                         <div className="flex flex-wrap gap-2">
                           {selectedProducts.map((productId) => {
                             const product = productsData?.data?.products?.find(
-                              (p) => p.id === productId
+                              (p) => (p as any)?.id === productId
                             );
                             return product ? (
                               <Badge
