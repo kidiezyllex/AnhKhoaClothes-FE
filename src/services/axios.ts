@@ -1,23 +1,26 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 // Add a request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     // Get token from localStorage
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
     // If token exists, add it to headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -37,23 +40,26 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Get refresh token
-        const refreshToken = localStorage.getItem('refreshToken');
-        
+        const refreshToken = localStorage.getItem("refreshToken");
+
         if (!refreshToken) {
           // If no refresh token, redirect to login
-          window.location.href = '/login';
+          window.location.href = "/login";
           return Promise.reject(error);
         }
 
         // Call refresh token endpoint
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`, {
-          refreshToken
-        });
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+          {
+            refreshToken,
+          }
+        );
 
         if (response.data.success) {
           // Save new tokens
-          localStorage.setItem('accessToken', response.data.accessToken);
-          localStorage.setItem('refreshToken', response.data.refreshToken);
+          localStorage.setItem("accessToken", response.data.accessToken);
+          localStorage.setItem("refreshToken", response.data.refreshToken);
 
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
@@ -61,10 +67,10 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         // If refresh token fails, redirect to login
-        window.location.href = '/login';
+        window.location.href = "/login";
       }
     }
 
     return Promise.reject(error);
   }
-); 
+);

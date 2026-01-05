@@ -1,6 +1,6 @@
 // ===== Import các thư viện cần thiết ===== //
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'; // axios và các kiểu liên quan
-import cookies from 'js-cookie'; // Thư viện thao tác cookie trên trình duyệt
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios"; // axios và các kiểu liên quan
+import cookies from "js-cookie"; // Thư viện thao tác cookie trên trình duyệt
 
 // ===== Interface mở rộng để thêm tuỳ chọn notify vào request config ===== //
 interface CustomAxiosRequestConfig extends AxiosRequestConfig {
@@ -9,17 +9,17 @@ interface CustomAxiosRequestConfig extends AxiosRequestConfig {
 
 // ===== Hàm lấy access token từ cookie ===== //
 function getLocalAccessToken() {
-  const accessToken = cookies.get('accessToken'); // Lấy token từ cookie có tên 'accessToken'
+  const accessToken = cookies.get("accessToken"); // Lấy token từ cookie có tên 'accessToken'
   return accessToken;
 }
 
 // ===== Khởi tạo instance axios mặc định ===== //
 const instance = axios.create({
   timeout: 3 * 60 * 1000, // Timeout 3 phút
-  baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1'}`, // Base URL từ biến môi trường hoặc fallback localhost
+  baseURL: `${import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1"}`, // Base URL từ biến môi trường hoặc fallback localhost
   headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
+    "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 
@@ -28,7 +28,7 @@ instance.interceptors.request.use(
   (config) => {
     const token = getLocalAccessToken();
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`; // Gắn token vào header Authorization
+      config.headers["Authorization"] = `Bearer ${token}`; // Gắn token vào header Authorization
     }
     return config; // Trả về config đã chỉnh sửa
   },
@@ -40,7 +40,7 @@ instance.interceptors.request.use(
 // ===== Hàm đăng xuất: xóa token và chuyển hướng về trang đăng nhập ===== //
 export function logout() {
   cookies.remove("accessToken"); // Xóa token khỏi cookie
-  localStorage?.clear();         // Xóa toàn bộ localStorage
+  localStorage?.clear(); // Xóa toàn bộ localStorage
 
   if (location.pathname !== "/auth/login") {
     window.location.replace("/auth/login"); // Chuyển hướng về trang login nếu chưa ở đó
@@ -61,7 +61,7 @@ export const sendPost = (url: string, params?: any, queryParams?: any) => {
 
   if (params instanceof FormData) {
     config.headers = {
-      'Content-Type': 'multipart/form-data', // Nếu là FormData thì đổi content-type
+      "Content-Type": "multipart/form-data", // Nếu là FormData thì đổi content-type
     };
   }
 
@@ -145,5 +145,3 @@ class ApiClient {
 // ===== Xuất một instance duy nhất của ApiClient ===== //
 // eslint-disable-next-line import/no-anonymous-default-export
 export default new ApiClient();
-
-

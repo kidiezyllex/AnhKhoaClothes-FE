@@ -1,6 +1,3 @@
-// import { IShippingAddress, IOrderItem } from "../request/order"; // Remove this line
-import { IVoucher } from "./voucher";
-
 export interface IOrderProduct {
   id: string;
   name: string;
@@ -57,12 +54,17 @@ export interface IOrder {
   is_cancelled: boolean;
   is_processing: boolean;
   is_outfit_purchase: boolean;
-  status: 'CHO_XAC_NHAN' | 'CHO_GIAO_HANG' | 'DANG_VAN_CHUYEN' | 'DA_GIAO_HANG' | 'HOAN_THANH' | 'DA_HUY';
+  status:
+    | "CHO_XAC_NHAN"
+    | "CHO_GIAO_HANG"
+    | "DANG_VAN_CHUYEN"
+    | "DA_GIAO_HANG"
+    | "HOAN_THANH"
+    | "DA_HUY";
   created_at: string;
   updated_at: string;
   items: IOrderItem[];
   shipping_address: IShippingAddress;
-  // Compatibility fields
   code?: string;
   createdAt?: string;
   total?: number;
@@ -80,7 +82,6 @@ export interface IOrdersResponse {
     pages: number;
     perPage: number;
     count: number;
-    // Compatibility pagination
     pagination?: {
       totalItems: number;
       totalPages: number;
@@ -100,4 +101,6 @@ export interface IActionResponse {
   status: string;
   message: string;
   data?: any;
-} 
+}
+
+export interface IPOSOrderCreateResponse extends IOrderResponse {}

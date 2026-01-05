@@ -1,9 +1,5 @@
-import React, { useState } from "react";
-import { Icon } from "@mdi/react";
-import { mdiHanger, mdiEye, mdiDelete, mdiAlertOctagon } from "@mdi/js";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
-import { toast } from "react-toastify";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,8 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -21,17 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useGetOutfits, useDeleteOutfit, IOutfit } from "@/hooks/outfit";
+import { useDeleteOutfit, useGetOutfits } from "@/hooks/outfit";
+import { IOutfit } from "@/interface/response/outfit";
 import { formatPriceVND } from "@/lib/utils";
+import { mdiAlertOctagon, mdiDelete, mdiEye, mdiHanger } from "@mdi/js";
+import { Icon } from "@mdi/react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 interface OutfitDetailDialogProps {
   outfit: IOutfit | null;
@@ -55,12 +55,9 @@ const OutfitDetailDialog: React.FC<OutfitDetailDialogProps> = ({
       { userId: outfit._id.split("-")[0], outfitId: outfit._id },
       {
         onSuccess: () => {
-          toast.success("Đã xóa bộ phối đồ thành công");
+          toast.success("Đã xóa Outfit thành công");
           onDelete?.();
           onOpenChange(false);
-        },
-        onError: (error) => {
-          toast.error("Đã xảy ra lỗi khi xóa bộ phối đồ");
         },
       }
     );
@@ -70,7 +67,7 @@ const OutfitDetailDialog: React.FC<OutfitDetailDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon path={mdiHanger} size={0.8} className="text-primary" />
@@ -85,49 +82,12 @@ const OutfitDetailDialog: React.FC<OutfitDetailDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Thông tin chung */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Thông tin bộ phối đồ</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Điểm tương thích:</span>
-                <Badge
-                  variant="outline"
-                  className={
-                    outfit.compatibilityScore >= 0.8
-                      ? "bg-green-100 text-green-700 border-green-200"
-                      : outfit.compatibilityScore >= 0.5
-                      ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                      : "bg-gray-100 text-gray-700 border-gray-200"
-                  }
-                >
-                  {(outfit.compatibilityScore * 100).toFixed(0)}%
-                </Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Giới tính:</span>
-                <span className="font-medium capitalize">{outfit.gender}</span>
-              </div>
-              <div className="flex justify-between items-center text-lg font-bold border-t pt-3">
-                <span>Tổng giá trị:</span>
-                <span className="text-primary">
-                  {formatPriceVND(outfit.totalPrice)}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Danh sách sản phẩm */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">
-                Sản phẩm trong bộ phối đồ
-              </CardTitle>
+              <CardTitle className="text-base">Sản phẩm trong Outfit</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {outfit.products.map((product, index) => {
                   const salePrice =
                     product.price * (1 - (product.sale || 0) / 100);
@@ -186,7 +146,7 @@ const OutfitDetailDialog: React.FC<OutfitDetailDialogProps> = ({
             ) : (
               <Icon path={mdiDelete} size={0.8} />
             )}
-            Xóa bộ phối đồ
+            Xóa Outfit
           </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Đóng
@@ -233,7 +193,7 @@ export const SavedOutfitsTab: React.FC<SavedOutfitsTabProps> = ({ userId }) => {
             <span>Bộ phối đồ đã lưu</span>
           </CardTitle>
           <CardDescription>
-            Danh sách các bộ phối đồ bạn đã lưu từ hệ thống gợi ý
+            Danh sách các Outfit bạn đã lưu từ hệ thống gợi ý
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -249,7 +209,7 @@ export const SavedOutfitsTab: React.FC<SavedOutfitsTabProps> = ({ userId }) => {
                 className="mx-auto text-red-500 mb-4"
               />
               <p className="text-red-500 mb-4">
-                Đã xảy ra lỗi khi tải danh sách bộ phối đồ.
+                Đã xảy ra lỗi khi tải danh sách Outfit.
               </p>
               <Button variant="outline" onClick={() => refetch()}>
                 Thử lại
@@ -266,7 +226,7 @@ export const SavedOutfitsTab: React.FC<SavedOutfitsTabProps> = ({ userId }) => {
                 className="mx-auto text-muted-foreground mb-4"
               />
               <p className="text-muted-foreground mb-4">
-                Bạn chưa lưu bộ phối đồ nào.
+                Bạn chưa lưu Outfit nào.
               </p>
               <Button variant="outline" asChild>
                 <a href="/products">Khám phá sản phẩm</a>
@@ -277,7 +237,7 @@ export const SavedOutfitsTab: React.FC<SavedOutfitsTabProps> = ({ userId }) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[200px]">Tên bộ phối đồ</TableHead>
+                    <TableHead className="w-[200px]">Tên Outfit</TableHead>
                     <TableHead>Ngày lưu</TableHead>
                     <TableHead>Số sản phẩm</TableHead>
                     <TableHead className="text-right">Tổng giá trị</TableHead>
@@ -329,7 +289,7 @@ export const SavedOutfitsTab: React.FC<SavedOutfitsTabProps> = ({ userId }) => {
         </CardContent>
       </Card>
 
-      {/* Dialog chi tiết bộ phối đồ */}
+      {/* Dialog chi tiết Outfit */}
       <OutfitDetailDialog
         outfit={selectedOutfit}
         open={detailOpen}

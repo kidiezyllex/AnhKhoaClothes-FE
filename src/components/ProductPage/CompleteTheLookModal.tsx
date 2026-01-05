@@ -335,7 +335,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
   const handleSaveOutfit = async (outfit: any, outfitIndex: number) => {
     if (!userId) {
-      toast.warning("Vui lòng đăng nhập để lưu bộ phối đồ");
+      toast.warning("Vui lòng đăng nhập để lưu Outfit");
       return;
     }
 
@@ -386,9 +386,9 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
 
       await saveOutfitMutation.mutateAsync({ userId, body: payload });
       setSavedOutfits((prev) => new Set(prev).add(outfitKey));
-      toast.success("Đã lưu bộ phối đồ thành công!");
+      toast.success("Đã lưu Outfit thành công!");
     } catch (err: any) {
-      toast.error(err?.message || "Không thể lưu bộ phối đồ");
+      toast.error(err?.message || "Không thể lưu Outfit");
     }
   };
 
@@ -735,7 +735,7 @@ const CompleteTheLookModal: React.FC<CompleteTheLookModalProps> = ({
                               colSpan={5}
                               className="text-center py-20 text-gray-400"
                             >
-                              Không tìm thấy bộ phối đồ nào
+                              Không tìm thấy Outfit nào
                             </TableCell>
                           </TableRow>
                         )}
