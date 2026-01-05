@@ -242,6 +242,8 @@ const OrderStepper = ({ currentStatus }: { currentStatus: string }) => {
             {orderSteps.map((_step, index) => {
               if (index === orderSteps.length - 1) return null;
               const lineProgressClass =
+                index < currentStepIdx
+                  ? orderSteps[index].colors.progressFillClass
                   : "bg-gray-300 dark:bg-gray-600";
               return (
                 <div

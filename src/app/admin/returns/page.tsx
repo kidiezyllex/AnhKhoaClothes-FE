@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import SearchReturnModal from "@/components/admin/returns/SearchReturnModal";
-import StatusUpdateModal from "@/components/admin/returns/StatusUpdateModal";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -49,6 +47,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useDeleteReturn,
+  useReturnDetail,
   useReturns,
   useReturnStats,
   useUpdateReturnStatus,
@@ -100,18 +99,6 @@ export default function ReturnsPage() {
     currentStatus: string;
   }>({ isOpen: false, returnId: "", currentStatus: "" });
   const [searchModal, setSearchModal] = useState(false);
-
-  useEffect(() => {
-    const debounce = setTimeout(() => {
-      if (searchQuery.trim()) {
-        setFilters((prev) => ({ ...prev, page: 1 }));
-      } else {
-        setFilters({ ...filters, page: 1 });
-      }
-    }, 500);
-
-    return () => clearTimeout(debounce);
-  }, [searchQuery]);
 
   useEffect(() => {
     const newStatus = mapTabToStatus(selectedTab);
@@ -789,33 +776,9 @@ export default function ReturnsPage() {
           />
         </DialogContent>
       </Dialog>
-
-      {/* Status Update Modal */}
-      <StatusUpdateModal
-        isOpen={statusUpdateModal.isOpen}
-        onClose={() =>
-          setStatusUpdateModal({
-            isOpen: false,
-            returnId: "",
-            currentStatus: "",
-          })
-        }
-        onConfirm={handleUpdateStatus}
-        returnId={statusUpdateModal.returnId}
-        currentStatus={statusUpdateModal.currentStatus}
-        isLoading={updateStatus.isPending}
-      />
-
-      {/* Search Modal */}
-      <SearchReturnModal
-        isOpen={searchModal}
-        onClose={() => setSearchModal(false)}
-      />
     </div>
   );
 }
-
-import { useReturnDetail } from "@/hooks/return";
 
 function ReturnDetailContent({
   returnId,
