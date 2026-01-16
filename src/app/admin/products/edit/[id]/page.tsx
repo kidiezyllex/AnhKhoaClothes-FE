@@ -37,6 +37,7 @@ import {
   useUpdateProductImages,
   useUpdateProductStatus,
   useUpdateProductStock,
+  useFilterOptions,
 } from "@/hooks/product";
 import { useUploadImage } from "@/hooks/upload";
 import {
@@ -72,22 +73,33 @@ export default function EditProductPage() {
   const updateProductStock = useUpdateProductStock();
   const updateProductImages = useUpdateProductImages();
   const uploadImage = useUploadImage();
+  const { data: filterOptions } = useFilterOptions();
 
   const [productUpdate, setProductUpdate] = useState<IProductUpdate>({});
 
   useEffect(() => {
-    if (productData && productData.data) {
-      const product = productData.data;
+    if (productData && productData.data?.product) {
+      const product = productData.data.product;
 
       setProductUpdate({
-        name: (product as any)?.name,
+        name: product.name || product.productDisplayName,
         category:
-          typeof (product as any)?.category === "string"
-            ? (product as any)?.category
-            : (product as any)?.category.name,
-        description: (product as any)?.description,
-        weight: (product as any)?.weight,
-        status: (product as any)?.status,
+          typeof product.category === "string"
+            ? product.category
+            : (product.category as any)?.name || product.subCategory,
+        description: product.description,
+        weight: product.weight,
+        status: (product.status as any) || "ACTIVE",
+        gender: product.gender,
+        masterCategory: product.masterCategory,
+        subCategory: product.subCategory,
+        articleType: product.articleType,
+        baseColour: product.baseColour,
+        season: product.season,
+        year: product.year,
+        usage: product.usage,
+        productDisplayName: product.productDisplayName,
+        images: product.images || [],
       });
     }
   }, [productData]);
@@ -134,7 +146,7 @@ export default function EditProductPage() {
 
     try {
       await updateProductStock.mutateAsync(
-        { productId: id, payload },
+        { productId: String(id), payload },
         {
           onSuccess: () => {
             toast.success("Cập nhật số lượng tồn kho thành công");
@@ -151,8 +163,8 @@ export default function EditProductPage() {
       setUploading(true);
       const formData = createFormData(file);
       const result = await uploadImage.mutateAsync(formData);
-      const variant = productData?.data.variants.find(
-        (v) => v.id === variantId
+      const variant = productData?.data?.product.variants.find(
+        (v: any) => (v._id || (v as any).id) === variantId
       );
       if (!variant) {
         toast.error("Không tìm thấy biến thể");
@@ -167,7 +179,7 @@ export default function EditProductPage() {
       };
 
       await updateProductImages.mutateAsync(
-        { productId: id, payload },
+        { productId: String(id), payload },
         {
           onSuccess: () => {
             toast.success("Cập nhật hình ảnh thành công");
@@ -185,7 +197,7 @@ export default function EditProductPage() {
     try {
       // Xác định biến thể cần cập nhật ảnh
       const variant = productData?.data.variants.find(
-        (v) => v.id === variantId
+        (v) => (v as any)?.id === variantId
       );
       if (!variant) {
         toast.error("Không tìm thấy biến thể");
@@ -200,7 +212,7 @@ export default function EditProductPage() {
       };
 
       await updateProductImages.mutateAsync(
-        { productId: id, payload },
+        { productId: String(id), payload },
         {
           onSuccess: () => {
             toast.success("Cập nhật hình ảnh thành công");
@@ -212,12 +224,55 @@ export default function EditProductPage() {
     }
   };
 
+  const handleProductImageUpload = async (file: File) => {
+    try {
+      setUploading(true);
+      const formData = createFormData(file);
+      const result = await uploadImage.mutateAsync(formData);
+      const imageUrl = result?.data?.imageUrl;
+
+      if (imageUrl) {
+        const newImages = [...(productUpdate.images || []), imageUrl];
+        setProductUpdate({ ...productUpdate, images: newImages });
+
+        // Cập nhật luôn lên server
+        await updateProduct.mutateAsync({
+          productId: String(id),
+          payload: { ...productUpdate, images: newImages },
+        });
+        toast.success("Tải ảnh lên thành công");
+      }
+    } catch (error) {
+      toast.error("Tải ảnh lên thất bại");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveProductImage = (index: number) => {
+    const newImages = (productUpdate.images || []).filter(
+      (_, i) => i !== index
+    );
+    setProductUpdate({ ...productUpdate, images: newImages });
+
+    // Cập nhật luôn lên server
+    updateProduct.mutate(
+      {
+        productId: String(id),
+        payload: { ...productUpdate, images: newImages },
+      },
+      {
+        onSuccess: () => toast.success("Xóa ảnh thành công"),
+      }
+    );
+  };
+
   const handleUpdateInfo = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       await updateProduct.mutateAsync(
-        { productId: id, payload: productUpdate },
+        { productId: String(id), payload: productUpdate },
         {
           onSuccess: () => {
             toast.success("Cập nhật thông tin thành công");
@@ -269,7 +324,7 @@ export default function EditProductPage() {
     );
   }
 
-  if (isError || !productData?.data) {
+  if (isError || !productData?.data?.product) {
     return (
       <div className="space-y-4">
         <Breadcrumb>
@@ -314,7 +369,7 @@ export default function EditProductPage() {
     );
   }
 
-  const product = productData.data;
+  const product = productData.data.product;
 
   return (
     <div className="space-y-4">
@@ -352,8 +407,9 @@ export default function EditProductPage() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid w-full md:w-[500px] grid-cols-3">
+        <TabsList className="grid w-full md:w-[600px] grid-cols-4">
           <TabsTrigger value="info">Thông tin cơ bản</TabsTrigger>
+          <TabsTrigger value="media">Hình ảnh</TabsTrigger>
           <TabsTrigger value="variants">Biến thể</TabsTrigger>
           <TabsTrigger value="status">Trạng thái</TabsTrigger>
         </TabsList>
@@ -364,7 +420,40 @@ export default function EditProductPage() {
               <CardTitle>Thông tin cơ bản</CardTitle>
             </CardHeader>
             <form onSubmit={handleUpdateInfo}>
-              <CardContent className="space-y-4 text-gray-700">
+              <CardContent className="space-y-6 text-gray-700">
+                {/* Image Preview Quick Access */}
+                {(productUpdate.images || []).length > 0 && (
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {(productUpdate.images || []).map((img, i) => (
+                      <div
+                        key={i}
+                        className="relative flex-shrink-0 w-24 h-24 rounded-md overflow-hidden border"
+                      >
+                        <img
+                          src={
+                            typeof img === "string"
+                              ? img
+                              : (img as any).imageUrl
+                          }
+                          alt="preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-24 h-24 flex-shrink-0 border-dashed"
+                      onClick={() => setActiveTab("media")}
+                    >
+                      <div className="flex flex-col items-center">
+                        <Icon path={mdiUpload} size={0.6} />
+                        <span className="text-[10px] mt-1">Thêm ảnh</span>
+                      </div>
+                    </Button>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Tên sản phẩm</Label>
@@ -415,6 +504,189 @@ export default function EditProductPage() {
                       placeholder="Nhập trọng lượng"
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Giới tính</Label>
+                    <Select
+                      value={productUpdate.gender || ""}
+                      onValueChange={(value) =>
+                        setProductUpdate({ ...productUpdate, gender: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giới tính" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions?.data?.genders?.map((gender) => (
+                          <SelectItem key={gender} value={gender}>
+                            {gender}
+                          </SelectItem>
+                        )) || (
+                          <>
+                            <SelectItem value="Men">Men</SelectItem>
+                            <SelectItem value="Women">Women</SelectItem>
+                            <SelectItem value="Unisex">Unisex</SelectItem>
+                            <SelectItem value="Boys">Boys</SelectItem>
+                            <SelectItem value="Girls">Girls</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="masterCategory">Danh mục chính</Label>
+                    <Input
+                      id="masterCategory"
+                      name="masterCategory"
+                      value={productUpdate.masterCategory || ""}
+                      onChange={handleInputChange}
+                      placeholder="Nhập danh mục chính"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="subCategory">Danh mục phụ</Label>
+                    <Input
+                      id="subCategory"
+                      name="subCategory"
+                      value={productUpdate.subCategory || ""}
+                      onChange={handleInputChange}
+                      placeholder="Nhập danh mục phụ"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="articleType">Loại sản phẩm</Label>
+                    <Select
+                      value={productUpdate.articleType || ""}
+                      onValueChange={(value) =>
+                        setProductUpdate({
+                          ...productUpdate,
+                          articleType: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn loại sản phẩm" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions?.data?.articleTypes?.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        )) || (
+                          <SelectItem
+                            value={productUpdate.articleType || "None"}
+                          >
+                            {productUpdate.articleType}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="baseColour">Màu nền</Label>
+                    <Select
+                      value={productUpdate.baseColour || ""}
+                      onValueChange={(value) =>
+                        setProductUpdate({
+                          ...productUpdate,
+                          baseColour: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn màu nền" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions?.data?.baseColours?.map((color) => (
+                          <SelectItem key={color} value={color}>
+                            {color}
+                          </SelectItem>
+                        )) || (
+                          <SelectItem
+                            value={productUpdate.baseColour || "None"}
+                          >
+                            {productUpdate.baseColour}
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="season">Mùa</Label>
+                    <Select
+                      value={productUpdate.season || ""}
+                      onValueChange={(value) =>
+                        setProductUpdate({ ...productUpdate, season: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn mùa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions?.data?.seasons?.map((season) => (
+                          <SelectItem key={season} value={season}>
+                            {season}
+                          </SelectItem>
+                        )) || (
+                          <>
+                            <SelectItem value="Summer">Summer</SelectItem>
+                            <SelectItem value="Fall">Fall</SelectItem>
+                            <SelectItem value="Winter">Winter</SelectItem>
+                            <SelectItem value="Spring">Spring</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Năm</Label>
+                    <Input
+                      id="year"
+                      name="year"
+                      type="number"
+                      value={productUpdate.year || ""}
+                      onChange={(e) =>
+                        setProductUpdate({
+                          ...productUpdate,
+                          year: parseInt(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="usage">Sử dụng</Label>
+                    <Select
+                      value={productUpdate.usage || ""}
+                      onValueChange={(value) =>
+                        setProductUpdate({ ...productUpdate, usage: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn mục đích sử dụng" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filterOptions?.data?.usages?.map((usage) => (
+                          <SelectItem key={usage} value={usage}>
+                            {usage}
+                          </SelectItem>
+                        )) || (
+                          <>
+                            <SelectItem value="Casual">Casual</SelectItem>
+                            <SelectItem value="Formal">Formal</SelectItem>
+                            <SelectItem value="Ethnic">Ethnic</SelectItem>
+                            <SelectItem value="Sports">Sports</SelectItem>
+                          </>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -453,6 +725,93 @@ export default function EditProductPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="media" className="space-y-4 text-gray-700">
+          <Card>
+            <CardHeader>
+              <CardTitle>Hình ảnh sản phẩm</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    id="product-image-upload"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        handleProductImageUpload(files[0]);
+                        e.target.value = "";
+                      }
+                    }}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      document.getElementById("product-image-upload")?.click()
+                    }
+                    disabled={uploading || updateProduct.isPending}
+                    className="flex items-center gap-2"
+                  >
+                    {uploading ? (
+                      <Icon
+                        path={mdiLoading}
+                        size={0.8}
+                        className="animate-spin"
+                      />
+                    ) : (
+                      <>
+                        <Icon path={mdiUpload} size={0.8} />
+                        Tải lên hình ảnh sản phẩm
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {(productUpdate.images || []).length > 0 ? (
+                    (productUpdate.images || []).map((image, index) => (
+                      <div
+                        key={index}
+                        className="relative group rounded-[6px] overflow-hidden border border-gray-200"
+                        style={{ aspectRatio: "1/1" }}
+                      >
+                        <img
+                          src={
+                            typeof image === "string"
+                              ? image
+                              : (image as any).imageUrl
+                          }
+                          alt={`Product image ${index + 1}`}
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleRemoveProductImage(index)}
+                          >
+                            <Icon path={mdiTrashCan} size={0.8} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-full py-10 border border-dashed rounded-[6px] flex flex-col items-center justify-center text-gray-500">
+                      <Icon path={mdiImageMultiple} size={2} />
+                      <p className="mt-2 text-sm">Chưa có hình ảnh sản phẩm</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="variants" className="space-y-4 text-gray-700">
           <Card className="mb-4">
             <CardHeader>
@@ -462,7 +821,7 @@ export default function EditProductPage() {
               <AnimatePresence>
                 {product.variants.map((variant) => (
                   <motion.div
-                    key={variant.id}
+                    key={variant._id || (variant as any).id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
@@ -471,7 +830,7 @@ export default function EditProductPage() {
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <h3 className="text-lg font-medium">
-                          {variant.colorId.name} - {variant.sizeId.name}
+                          {variant.color} - {variant.size}
                         </h3>
                         <p className="text-sm text-gray-700">
                           Giá:{" "}
@@ -494,7 +853,7 @@ export default function EditProductPage() {
                         </Label>
                         <div className="flex gap-2">
                           <Input
-                            id={`stock-${variant.id}`}
+                            id={`stock-${variant._id || (variant as any).id}`}
                             type="number"
                             min="0"
                             defaultValue={variant.stock}
@@ -506,7 +865,7 @@ export default function EditProductPage() {
                               const input = e.currentTarget
                                 .previousElementSibling as HTMLInputElement;
                               handleUpdateStock(
-                                variant.id,
+                                variant._id || (variant as any).id,
                                 parseInt(input.value) || 0
                               );
                             }}
@@ -514,7 +873,8 @@ export default function EditProductPage() {
                           >
                             {updateProductStock.isPending &&
                             updateProductStock.variables?.payload
-                              .variantUpdates[0]?.variantId === variant.id ? (
+                              .variantUpdates[0]?.variantId ===
+                              (variant._id || (variant as any).id) ? (
                               <Icon
                                 path={mdiLoading}
                                 size={0.8}
@@ -534,11 +894,16 @@ export default function EditProductPage() {
                         <div className="flex items-center gap-2">
                           <Input
                             type="file"
-                            id={`file-upload-${variant.id}`}
+                            id={`file-upload-${
+                              variant._id || (variant as any).id
+                            }`}
                             onChange={(e) => {
                               const files = e.target.files;
                               if (files && files.length > 0) {
-                                handleImageUpload(files[0], variant.id);
+                                handleImageUpload(
+                                  files[0],
+                                  variant._id || (variant as any).id
+                                );
                                 e.target.value = "";
                               }
                             }}
@@ -550,7 +915,11 @@ export default function EditProductPage() {
                             variant="outline"
                             onClick={() =>
                               document
-                                .getElementById(`file-upload-${variant.id}`)
+                                .getElementById(
+                                  `file-upload-${
+                                    variant._id || (variant as any).id
+                                  }`
+                                )
                                 ?.click()
                             }
                             disabled={
@@ -577,7 +946,7 @@ export default function EditProductPage() {
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                          {variant.images.length > 0 ? (
+                          {variant.images && variant.images.length > 0 ? (
                             variant.images.map((image, index) => (
                               <div
                                 key={index}
@@ -585,7 +954,11 @@ export default function EditProductPage() {
                                 style={{ aspectRatio: "1/1" }}
                               >
                                 <img
-                                  src={image.imageUrl as any}
+                                  src={
+                                    typeof image === "string"
+                                      ? image
+                                      : (image as any).imageUrl
+                                  }
                                   alt={`Variant image ${index + 1}`}
                                   className="object-cover w-full h-full"
                                 />
@@ -596,7 +969,10 @@ export default function EditProductPage() {
                                     size="icon"
                                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                                     onClick={() =>
-                                      handleRemoveImage(variant.id, index)
+                                      handleRemoveImage(
+                                        variant._id || (variant as any).id,
+                                        index
+                                      )
                                     }
                                     disabled={updateProductImages.isPending}
                                   >

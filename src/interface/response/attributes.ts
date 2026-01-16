@@ -35,9 +35,12 @@ export interface ICategoryResponse {
 }
 
 export interface ICategoriesResponse {
-  success: boolean;
+  status: string;
   message: string;
-  data: ICategory[];
+  data: {
+    categories: string[] | ICategory[];
+    count?: number;
+  };
 }
 
 // Material interfaces

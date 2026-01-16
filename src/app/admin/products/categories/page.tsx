@@ -67,10 +67,26 @@ export default function CategoriesPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const filteredCategories = useMemo(() => {
-    if (!data?.data || !searchQuery.trim()) return data?.data;
+    const categories = Array.isArray(data?.data)
+      ? data?.data
+      : (data?.data as any)?.categories || [];
+
+    // Chuẩn hóa dữ liệu: nếu là string[] thì chuyển thành object[]
+    const normalizedCategories = categories.map((cat: any) =>
+      typeof cat === "string"
+        ? {
+            id: cat,
+            name: cat,
+            status: "ACTIVE",
+            updatedAt: new Date().toISOString(),
+          }
+        : cat
+    );
+
+    if (!searchQuery.trim()) return normalizedCategories;
 
     const query = searchQuery.toLowerCase().trim();
-    return data.data.filter((category) =>
+    return normalizedCategories.filter((category: any) =>
       category.name.toLowerCase().includes(query)
     );
   }, [data?.data, searchQuery]);
@@ -188,16 +204,10 @@ export default function CategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
+                    STT
                   </TableHead>
                   <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên danh mục
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
                   </TableHead>
                   <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
                     Thao tác
@@ -208,16 +218,10 @@ export default function CategoriesPage() {
                 {[...Array(5)].map((_, index) => (
                   <TableRow key={index}>
                     <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-[80px]" />
+                      <Skeleton className="h-4 w-[50px]" />
                     </TableCell>
                     <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-[160px]" />
-                    </TableCell>
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-6 w-[100px] rounded-full" />
-                    </TableCell>
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-[100px]" />
+                      <Skeleton className="h-4 w-[250px]" />
                     </TableCell>
                     <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end space-x-2">
@@ -253,16 +257,10 @@ export default function CategoriesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
+                    STT
                   </TableHead>
                   <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
                     Tên danh mục
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
                   </TableHead>
                   <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
                     Thao tác
@@ -271,71 +269,23 @@ export default function CategoriesPage() {
               </TableHeader>
               <TableBody>
                 {filteredCategories?.length ? (
-                  filteredCategories.map((category) => (
+                  filteredCategories.map((category: any, index: number) => (
                     <TableRow
-                      key={(category as any)?.id}
+                      key={category.id || index}
                       className="hover:bg-gray-50"
                     >
                       <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {(category as any)?.id}
+                        {index + 1}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-700">
                           {category.name}
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            category.status === "ACTIVE"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {category.status === "ACTIVE"
-                            ? "Hoạt động"
-                            : "Không hoạt động"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {formatDate(category.updatedAt)}
-                      </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end space-x-2">
-                          <Dialog
-                            open={
-                              isEditDialogOpen &&
-                              categoryToEdit === (category as any)?.id
-                            }
-                            onOpenChange={(open) => {
-                              setIsEditDialogOpen(open);
-                              if (!open) setCategoryToEdit(null);
-                            }}
-                          >
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                title="Sửa"
-                                onClick={() => {
-                                  setCategoryToEdit((category as any)?.id);
-                                  setIsEditDialogOpen(true);
-                                }}
-                              >
-                                <Icon path={mdiPencilCircle} size={0.8} />
-                              </Button>
-                            </DialogTrigger>
-                            {categoryToEdit === (category as any)?.id && (
-                              <EditCategoryDialog
-                                categoryId={(category as any)?.id}
-                                isOpen={isEditDialogOpen}
-                                onClose={() => {
-                                  setIsEditDialogOpen(false);
-                                  setCategoryToEdit(null);
-                                }}
-                              />
-                            )}
-                          </Dialog>
+                          {/* Edit button hidden as per request */}
+
                           <Dialog
                             open={
                               isDeleteDialogOpen &&

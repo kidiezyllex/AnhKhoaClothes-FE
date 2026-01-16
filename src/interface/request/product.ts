@@ -41,6 +41,16 @@ export interface IProductUpdate {
   weight?: number;
   variants?: IProductVariant[];
   status?: "ACTIVE" | "INACTIVE";
+  gender?: string;
+  masterCategory?: string;
+  subCategory?: string;
+  articleType?: string;
+  baseColour?: string;
+  season?: string;
+  year?: number;
+  usage?: string;
+  productDisplayName?: string;
+  images?: string[];
 }
 
 export interface IProductStatusUpdate {
