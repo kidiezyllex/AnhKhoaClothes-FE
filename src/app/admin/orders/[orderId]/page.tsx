@@ -330,7 +330,20 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
   return <Badge className={config.className}>{config.label}</Badge>;
 };
 
-const getProductInfo = (item: OrderItem): ProductInfo => {
+const getProductInfo = (item: any): ProductInfo => {
+  // Support for new API format (IOrderItem)
+  if (item.product_id) {
+    return {
+      name: item.name || "Tên sản phẩm chưa cập nhật",
+      code: String(item.product_id),
+      colorName: item.color_selected || "N/A",
+      colorCode: "#000000", // Color code not provided in items list
+      sizeName: item.size_selected || "N/A",
+      images: item.images || [],
+    };
+  }
+
+  // Support for old/POS format
   if (item.productVariant?.product) {
     return {
       name: item.productVariant.product.name || "Tên sản phẩm chưa cập nhật",
@@ -355,10 +368,18 @@ const getProductInfo = (item: OrderItem): ProductInfo => {
 };
 
 // Helper function to get variant image for both online and POS orders
-const getVariantImage = (item: OrderItem): string => {
+const getVariantImage = (item: any): string => {
+  // If item has images array directly (new API format)
+  if (item.images && item.images.length > 0) {
+    const firstImage = item.images[0];
+    if (typeof firstImage === "string") return firstImage;
+    if (firstImage?.imageUrl) return firstImage.imageUrl;
+    if (firstImage?.url) return firstImage.url;
+  }
+
   const productInfo = getProductInfo(item);
 
-  // If we have images from the product variant, use the first one
+  // If we have images from the product info, use the first one
   if (productInfo.images && productInfo.images.length > 0) {
     const firstImage = productInfo.images[0];
     if (typeof firstImage === "string") {
@@ -379,7 +400,7 @@ const getVariantImage = (item: OrderItem): string => {
     return matchingVariant?.images?.[0] || "/images/white-image.png";
   }
 
-  // For online orders: item doesn't have variant field, use first variant with image
+  // For older online orders
   if (item.product?.variants) {
     const variantWithImage = item.product.variants.find(
       (v: any) => v.images && v.images.length > 0
@@ -529,7 +550,7 @@ export default function OrderDetailPage() {
 
       pdf.addImage(canvas, "PNG", 0, 0, pageWidth, imgHeight);
       pdf.save(
-        `HoaDon_${generateInvoiceCode((orderDetail.data as any).code).replace(
+        `HoaDon_${generateInvoiceCode(order.code).replace(
           /[^a-zA-Z0-9]/g,
           "_"
         )}.pdf`
@@ -756,7 +777,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (isError || !orderDetail) {
+  if (isError || !orderDetail || !orderDetail.data?.order) {
     return (
       <div className="p-4">
         <div className="text-center py-10">
@@ -775,7 +796,47 @@ export default function OrderDetailPage() {
       </div>
     );
   }
-  const order = orderDetail.data as any;
+
+  const orderData = orderDetail.data.order;
+
+  // Normalize order data to match UI expectations
+  const order = {
+    ...orderData,
+    orderStatus: orderData.status,
+    paymentStatus: orderData.is_paid ? "PAID" : "PENDING",
+    paymentMethod: orderData.payment_method,
+    code: orderData.id,
+    createdAt: orderData.created_at || orderData.createdAt,
+    total: orderData.total_price || orderData.total,
+    subTotal: orderData.total_price
+      ? orderData.total_price -
+        (orderData.shipping_price || 0) -
+        (orderData.tax_price || 0)
+      : orderData.subTotal || 0,
+    discount: orderData.discount || 0,
+    shippingName: orderData.shipping_address?.address
+      ? "Người nhận"
+      : orderData.shippingName || "Khách hàng",
+    shippingPhoneNumber:
+      orderData.shipping_address?.recipient_phone_number ||
+      orderData.shippingPhoneNumber,
+    shippingSpecificAddress: orderData.shipping_address
+      ? `${orderData.shipping_address.address}, ${orderData.shipping_address.city}, ${orderData.shipping_address.country}`
+      : orderData.shippingSpecificAddress || "Tại quầy",
+    customer: orderData.user_id
+      ? {
+          fullName: `User ${orderData.user_id.substring(0, 8)}`,
+          email: "N/A",
+          phoneNumber:
+            orderData.shipping_address?.recipient_phone_number || "N/A",
+        }
+      : orderData.customer,
+    items: orderData.items.map((item: any) => ({
+      ...item,
+      quantity: item.qty ?? item.quantity,
+      price: item.price_sale ?? item.price,
+    })),
+  };
   return (
     <div className="space-y-4 text-gray-700">
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">

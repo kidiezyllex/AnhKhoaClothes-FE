@@ -94,7 +94,9 @@ export interface IOrdersResponse {
 export interface IOrderResponse {
   status: string;
   message: string;
-  data: IOrder;
+  data: {
+    order: IOrder;
+  };
 }
 
 export interface IActionResponse {
