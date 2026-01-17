@@ -63,6 +63,12 @@ import {
   mdiRuler,
   mdiTableLarge,
   mdiViewGrid,
+  mdiAccount,
+  mdiMinus,
+  mdiCash,
+  mdiCreditCard,
+  mdiTicketPercent,
+  mdiDelete,
 } from "@mdi/js";
 import { Icon } from "@mdi/react";
 import { motion } from "framer-motion";
@@ -261,6 +267,7 @@ export default function POSPage() {
     setActiveCart, // Function to switch active cart
     addItemToCart: addItemToPendingCart, // Add item to pending cart
     updateItemQuantityInCart: updateItemQuantityInPendingCart, // Update item quantity
+    removeItemFromCart: removeItemFromPendingCart, // ID
     clearCartItems: clearPendingCartItems, // Clear all items from cart
     getActiveCart, // Get currently active cart
   } = usePendingCartsStore();
@@ -1890,6 +1897,293 @@ export default function POSPage() {
                 )}
               </Tabs>
             )}
+          </div>
+        </div>
+
+        {/* Cột phải - Giỏ hàng và Thanh toán */}
+        <div className="lg:col-span-1 flex flex-col h-full gap-4">
+          <div className="bg-white rounded-[6px] shadow-sm border border-border flex flex-col h-full">
+            {/* Header Giỏ hàng & Khách hàng */}
+            <div className="p-4 border-b border-border space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <Icon path={mdiCart} size={1} className="text-primary" />
+                  {activeCart?.name || "Giỏ hàng hiện tại"}
+                </h3>
+                {cartItems.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 h-8 px-2"
+                    onClick={() => {
+                      if (activeCartId) {
+                        clearPendingCartItems(activeCartId);
+                      } else {
+                        clearCartStore();
+                      }
+                      setSelectedProduct(null);
+                      setSelectedApiVariant(null);
+                      toast.success("Đã xóa giỏ hàng");
+                    }}
+                  >
+                    <Icon path={mdiDelete} size={0.8} className="mr-1" />
+                    Xóa tất cả
+                  </Button>
+                )}
+              </div>
+
+              {/* Chọn khách hàng */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="customer-select"
+                  className="text-sm font-medium"
+                >
+                  Khách hàng
+                </Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedUserId}
+                    onValueChange={(value) => {
+                      setSelectedUserId(value);
+                      const user = usersData?.data?.users?.find(
+                        (u: any) => u._id === value,
+                      );
+                      if (user) {
+                        setCustomerName(user.fullName || "");
+                        setCustomerPhone(user.phoneNumber || "");
+                      } else {
+                        setCustomerName(
+                          value === "guest" ? "Khách lẻ" : customerName,
+                        );
+                        setCustomerPhone("");
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="customer-select" className="w-full">
+                      <div className="flex items-center gap-2">
+                        <Icon path={mdiAccount} size={0.8} />
+                        <SelectValue placeholder="Chọn khách hàng" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="guest">Khách lẻ</SelectItem>
+                      {usersData?.data?.users?.map((user: any) => (
+                        <SelectItem key={user._id} value={user._id}>
+                          {user.fullName} - {user.phoneNumber}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Danh sách sản phẩm trong giỏ */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[300px]">
+              {cartItems.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-gray-400 gap-2">
+                  <Icon path={mdiCart} size={2} className="opacity-20" />
+                  <p>Chưa có sản phẩm nào trong giỏ</p>
+                </div>
+              ) : (
+                cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-3 bg-gray-50 p-3 rounded-[6px] group relative border border-transparent hover:border-primary/20 transition-all"
+                  >
+                    <div className="h-16 w-16 bg-white rounded-[4px] overflow-hidden flex-shrink-0 border border-gray-100">
+                      <img
+                        src={checkImageUrl(item.image)}
+                        alt={item.name}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm text-gray-800 truncate pr-6">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                          <span
+                            className="inline-block w-3 h-3 rounded-full border"
+                            style={{ backgroundColor: item.colorCode }}
+                          />
+                          <span>{item.colorName}</span>
+                          <span>|</span>
+                          <span className="font-medium bg-gray-200 px-1 rounded">
+                            {item.sizeName}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2 bg-white rounded border border-gray-200 h-7">
+                          <button
+                            className="w-7 h-full flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 text-gray-600"
+                            onClick={() => {
+                              if (activeCartId) {
+                                if (item.quantity > 1) {
+                                  updateItemQuantityInPendingCart(
+                                    activeCartId,
+                                    item.id,
+                                    -1,
+                                  );
+                                } else {
+                                  removeItemFromPendingCart(
+                                    activeCartId,
+                                    item.id,
+                                  );
+                                }
+                              } else {
+                                // Fallback logic for basic store if needed
+                              }
+                            }}
+                          >
+                            <Icon path={mdiMinus} size={0.6} />
+                          </button>
+                          <span className="w-8 text-center text-sm font-medium">
+                            {item.quantity}
+                          </span>
+                          <button
+                            className="w-7 h-full flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 text-gray-600"
+                            onClick={() => {
+                              if (item.quantity < item.stock) {
+                                if (activeCartId) {
+                                  updateItemQuantityInPendingCart(
+                                    activeCartId,
+                                    item.id,
+                                    1,
+                                  );
+                                }
+                              } else {
+                                toast.warn("Đã đạt giới hạn tồn kho");
+                              }
+                            }}
+                            disabled={item.quantity >= item.stock}
+                          >
+                            <Icon path={mdiPlus} size={0.6} />
+                          </button>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-primary text-sm">
+                            {formatCurrency(item.price * item.quantity)}
+                          </div>
+                          {item.hasDiscount && item.originalPrice && (
+                            <div className="text-xs text-gray-400 line-through">
+                              {formatCurrency(
+                                item.originalPrice * item.quantity,
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        if (activeCartId) {
+                          removeItemFromPendingCart(activeCartId, item.id);
+                        }
+                      }}
+                    >
+                      <Icon path={mdiClose} size={0.7} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Thông tin thanh toán */}
+            <div className="p-4 bg-gray-50 border-t border-border space-y-3">
+              {/* Mã giảm giá */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Icon
+                    path={mdiTicketPercent}
+                    size={0.8}
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  />
+                  <Input
+                    placeholder="Mã giảm giá/Voucher"
+                    className="pl-9 h-10 bg-white"
+                    disabled={true} // Tạm thời disabled vì logic voucher chưa tích hợp full
+                    value={activeCart?.couponCode || ""}
+                  />
+                </div>
+                <Button variant="outline" className="px-3" disabled>
+                  Áp dụng
+                </Button>
+              </div>
+
+              <div className="space-y-2 pt-2 text-sm">
+                <div className="flex justify-between text-gray-600">
+                  <span>Tạm tính</span>
+                  <span>
+                    {formatCurrency(
+                      cartItems.reduce(
+                        (sum, item) => sum + item.price * item.quantity,
+                        0,
+                      ),
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Giảm giá</span>
+                  <span>
+                    {formatCurrency(activeCart?.appliedDiscount || 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                  <span>Tổng tiền</span>
+                  <span className="text-primary">
+                    {formatCurrency(
+                      cartItems.reduce(
+                        (sum, item) => sum + item.price * item.quantity,
+                        0,
+                      ) - (activeCart?.appliedDiscount || 0),
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Phương thức thanh toán */}
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <Button
+                  variant={paymentMethod === "cash" ? "default" : "outline"}
+                  className={cn(
+                    "flex flex-col h-auto py-2 gap-1",
+                    paymentMethod === "cash"
+                      ? "bg-primary text-white"
+                      : "bg-white",
+                  )}
+                  onClick={() => setPaymentMethod("cash")}
+                >
+                  <Icon path={mdiCash} size={1} />
+                  <span className="text-xs">Tiền mặt</span>
+                </Button>
+                <Button
+                  variant={paymentMethod === "transfer" ? "default" : "outline"}
+                  className={cn(
+                    "flex flex-col h-auto py-2 gap-1",
+                    paymentMethod === "transfer"
+                      ? "bg-primary text-white"
+                      : "bg-white",
+                  )}
+                  onClick={() => setPaymentMethod("transfer")}
+                >
+                  <Icon path={mdiCreditCard} size={1} />
+                  <span className="text-xs">Chuyển khoản</span>
+                </Button>
+              </div>
+
+              <Button
+                className="w-full h-12 text-lg font-semibold shadow-md mt-2"
+                size="lg"
+                onClick={handleProceedToCheckout}
+                disabled={cartItems.length === 0}
+              >
+                Thanh toán
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -78,12 +78,13 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
 
   // Map API fields to component expected fields
   const mapVoucherData = (voucher: any) => {
+    const discountValue = voucher.value ? Number(voucher.value) : 0;
     return {
       ...voucher,
       discountType: voucher.type, // Map 'type' to 'discountType'
-      discountValue: parseFloat(voucher.value), // Convert string to number
-      maxValue: voucher.maxDiscount ? parseFloat(voucher.maxDiscount) : null, // Convert string to number
-      minOrderValue: parseFloat(voucher.minOrderValue), // Convert string to number
+      discountValue: isNaN(discountValue) ? 0 : discountValue, // Handle possible NaN
+      maxValue: voucher.maxDiscount ? Number(voucher.maxDiscount) : null, // Convert string to number
+      minOrderValue: voucher.minOrderValue ? Number(voucher.minOrderValue) : 0, // Convert string to number
     };
   };
 
@@ -174,7 +175,7 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                     <span className="font-semibold text-green-600 text-lg">
                       {
                         vouchersData.data.vouchers.filter(
-                          (v) => !isVoucherDisabled(mapVoucherData(v))
+                          (v: any) => !isVoucherDisabled(mapVoucherData(v)),
                         ).length
                       }
                     </span>{" "}
@@ -183,8 +184,8 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                   <div className="text-sm text-gray-700">
                     <span className="font-semibold text-red-600 text-lg">
                       {
-                        vouchersData.data.vouchers.filter((v) =>
-                          isVoucherDisabled(mapVoucherData(v))
+                        vouchersData.data.vouchers.filter((v: any) =>
+                          isVoucherDisabled(mapVoucherData(v)),
                         ).length
                       }
                     </span>{" "}
@@ -224,201 +225,218 @@ const VouchersDialog: React.FC<VouchersDialogProps> = ({
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {vouchersData.data.vouchers.map((voucherRaw, index) => {
-                        const voucher = mapVoucherData(voucherRaw);
-                        const isExpired = isVoucherExpired(voucher.endDate);
-                        const isOutOfStock = isVoucherOutOfStock(voucher);
-                        const isDisabled = isVoucherDisabled(voucher);
-                        const remainingQuantity =
-                          voucher.quantity - voucher.usedCount;
+                      {vouchersData.data.vouchers.map(
+                        (voucherRaw: any, index: number) => {
+                          const voucher = mapVoucherData(voucherRaw);
+                          const isExpired = isVoucherExpired(voucher.endDate);
+                          const isOutOfStock = isVoucherOutOfStock(voucher);
+                          const isDisabled = isVoucherDisabled(voucher);
+                          const remainingQuantity =
+                            voucher.quantity - voucher.usedCount;
 
-                        return (
-                          <motion.tr
-                            key={voucher.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, delay: index * 0.05 }}
-                            className={cn(
-                              "transition-all duration-200 hover:bg-gray-50/50",
-                              isDisabled && "bg-gray-50/30 opacity-75"
-                            )}
-                          >
-                            {/* Voucher Code */}
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={cn(
-                                    "h-2 w-2 rounded-full",
-                                    isDisabled ? "bg-red-400" : "bg-green-400"
-                                  )}
-                                />
-                                <div>
+                          return (
+                            <motion.tr
+                              key={voucher.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                duration: 0.2,
+                                delay: index * 0.05,
+                              }}
+                              className={cn(
+                                "transition-all duration-200 hover:bg-gray-50/50",
+                                isDisabled && "bg-gray-50/30 opacity-75",
+                              )}
+                            >
+                              {/* Voucher Code */}
+                              <TableCell>
+                                <div className="flex items-center gap-2">
                                   <div
                                     className={cn(
-                                      "font-mono font-bold text-sm tracking-wider",
+                                      "h-2 w-2 rounded-full",
                                       isDisabled
-                                        ? "text-gray-700"
-                                        : "text-primary"
+                                        ? "bg-red-400"
+                                        : "bg-green-400",
                                     )}
-                                  >
-                                    {voucher.code}
-                                  </div>
-                                  <div className="text-xs text-gray-700">
-                                    ID: {String(voucher.id).slice(-6)}
-                                  </div>
-                                </div>
-                              </div>
-                            </TableCell>
-
-                            {/* Program Name */}
-                            <TableCell>
-                              <div
-                                className={cn(
-                                  "font-medium text-sm leading-tight",
-                                  isDisabled ? "text-gray-700" : "text-gray-700"
-                                )}
-                              >
-                                {voucher.name}
-                              </div>
-                              <div className="text-xs text-gray-700 mt-1">
-                                Đã dùng: {voucher.usedCount}/{voucher.quantity}
-                              </div>
-                            </TableCell>
-
-                            {/* Type */}
-                            <TableCell className="text-center">
-                              <Badge
-                                variant={
-                                  voucher.discountType === "PERCENTAGE"
-                                    ? "default"
-                                    : "secondary"
-                                }
-                                className={cn(
-                                  "text-xs",
-                                  voucher.discountType === "PERCENTAGE"
-                                    ? "bg-blue-100 text-blue-700 border-blue-200"
-                                    : "bg-purple-100 text-purple-700 border-purple-200"
-                                )}
-                              >
-                                {voucher.discountType === "PERCENTAGE"
-                                  ? "%"
-                                  : "VNĐ"}
-                              </Badge>
-                            </TableCell>
-
-                            {/* Value */}
-                            <TableCell className="text-right">
-                              <div
-                                className={cn(
-                                  "font-bold text-sm",
-                                  isDisabled ? "text-gray-700" : "text-primary"
-                                )}
-                              >
-                                {voucher.discountType === "PERCENTAGE"
-                                  ? `${voucher.discountValue}%`
-                                  : formatCurrency(voucher.discountValue)}
-                              </div>
-                              {voucher.discountType === "PERCENTAGE" &&
-                                voucher.maxValue && (
-                                  <div className="text-xs text-gray-700">
-                                    Max: {formatCurrency(voucher.maxValue)}
-                                  </div>
-                                )}
-                            </TableCell>
-
-                            {/* Min Order */}
-                            <TableCell className="text-right">
-                              <div className="font-semibold text-sm text-gray-700">
-                                {formatCurrency(voucher.minOrderValue)}
-                              </div>
-                            </TableCell>
-
-                            {/* Remaining */}
-                            <TableCell className="text-center">
-                              <Badge
-                                variant={
-                                  remainingQuantity <= 5
-                                    ? "destructive"
-                                    : remainingQuantity <= 20
-                                    ? "outline"
-                                    : "secondary"
-                                }
-                                className={cn(
-                                  "text-xs font-semibold",
-                                  remainingQuantity <= 5
-                                    ? "bg-red-100 text-red-700 border-red-200"
-                                    : remainingQuantity <= 20
-                                    ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                                    : "bg-green-100 text-green-700 border-green-200"
-                                )}
-                              >
-                                {remainingQuantity}
-                              </Badge>
-                            </TableCell>
-
-                            {/* Expiry */}
-                            <TableCell className="text-center">
-                              <div
-                                className={cn(
-                                  "text-xs font-medium",
-                                  isExpired ? "text-red-600" : "text-gray-700"
-                                )}
-                              >
-                                {formatDate(voucher.endDate)}
-                              </div>
-                              {isExpired && (
-                                <Badge
-                                  variant="destructive"
-                                  className="text-xs mt-1"
-                                >
-                                  Hết hạn
-                                </Badge>
-                              )}
-                            </TableCell>
-
-                            {/* Actions */}
-                            <TableCell className="text-center">
-                              <motion.div
-                                whileHover={!isDisabled ? { scale: 1.05 } : {}}
-                                whileTap={!isDisabled ? { scale: 0.95 } : {}}
-                              >
-                                <Button
-                                  size="sm"
-                                  className={cn(
-                                    "px-4 py-2 text-xs font-semibold transition-all duration-200",
-                                    isDisabled
-                                      ? "bg-gray-200 text-gray-700 cursor-not-allowed hover:bg-gray-200"
-                                      : "bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white shadow-sm hover:shadow-sm"
-                                  )}
-                                  onClick={() =>
-                                    !isDisabled && handleCopyCode(voucher.code)
-                                  }
-                                  disabled={isDisabled}
-                                >
-                                  <Icon
-                                    path={mdiContentCopy}
-                                    size={0.6}
-                                    className="mr-1.5"
                                   />
-                                  {isExpired
-                                    ? "Hết hạn"
-                                    : isOutOfStock
-                                    ? "Hết lượt"
-                                    : "Chọn mã"}
-                                </Button>
-                              </motion.div>
-
-                              {isDisabled && (
-                                <div className="text-xs text-red-500 mt-1 font-medium">
-                                  {isExpired
-                                    ? "Đã hết hạn"
-                                    : "Hết lượt sử dụng"}
+                                  <div>
+                                    <div
+                                      className={cn(
+                                        "font-mono font-bold text-sm tracking-wider",
+                                        isDisabled
+                                          ? "text-gray-700"
+                                          : "text-primary",
+                                      )}
+                                    >
+                                      {voucher.code}
+                                    </div>
+                                    <div className="text-xs text-gray-700">
+                                      ID: {String(voucher.id).slice(-6)}
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                            </TableCell>
-                          </motion.tr>
-                        );
-                      })}
+                              </TableCell>
+
+                              {/* Program Name */}
+                              <TableCell>
+                                <div
+                                  className={cn(
+                                    "font-medium text-sm leading-tight",
+                                    isDisabled
+                                      ? "text-gray-700"
+                                      : "text-gray-700",
+                                  )}
+                                >
+                                  {voucher.name}
+                                </div>
+                                <div className="text-xs text-gray-700 mt-1">
+                                  Đã dùng: {voucher.usedCount}/
+                                  {voucher.quantity}
+                                </div>
+                              </TableCell>
+
+                              {/* Type */}
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant={
+                                    voucher.discountType === "PERCENTAGE"
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                  className={cn(
+                                    "text-xs",
+                                    voucher.discountType === "PERCENTAGE"
+                                      ? "bg-blue-100 text-blue-700 border-blue-200"
+                                      : "bg-purple-100 text-purple-700 border-purple-200",
+                                  )}
+                                >
+                                  {voucher.discountType === "PERCENTAGE"
+                                    ? "%"
+                                    : "VNĐ"}
+                                </Badge>
+                              </TableCell>
+
+                              {/* Value */}
+                              <TableCell className="text-right">
+                                <div
+                                  className={cn(
+                                    "font-bold text-sm",
+                                    isDisabled
+                                      ? "text-gray-700"
+                                      : "text-primary",
+                                  )}
+                                >
+                                  {voucher.discountType === "PERCENTAGE"
+                                    ? `${voucher.discountValue}%`
+                                    : formatCurrency(voucher.discountValue)}
+                                </div>
+                                {voucher.discountType === "PERCENTAGE" &&
+                                  voucher.maxValue && (
+                                    <div className="text-xs text-gray-700">
+                                      Max: {formatCurrency(voucher.maxValue)}
+                                    </div>
+                                  )}
+                              </TableCell>
+
+                              {/* Min Order */}
+                              <TableCell className="text-right">
+                                <div className="font-semibold text-sm text-gray-700">
+                                  {formatCurrency(voucher.minOrderValue)}
+                                </div>
+                              </TableCell>
+
+                              {/* Remaining */}
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant={
+                                    remainingQuantity <= 5
+                                      ? "destructive"
+                                      : remainingQuantity <= 20
+                                        ? "outline"
+                                        : "secondary"
+                                  }
+                                  className={cn(
+                                    "text-xs font-semibold",
+                                    remainingQuantity <= 5
+                                      ? "bg-red-100 text-red-700 border-red-200"
+                                      : remainingQuantity <= 20
+                                        ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                        : "bg-green-100 text-green-700 border-green-200",
+                                  )}
+                                >
+                                  {remainingQuantity}
+                                </Badge>
+                              </TableCell>
+
+                              {/* Expiry */}
+                              <TableCell className="text-center">
+                                <div
+                                  className={cn(
+                                    "text-xs font-medium",
+                                    isExpired
+                                      ? "text-red-600"
+                                      : "text-gray-700",
+                                  )}
+                                >
+                                  {formatDate(voucher.endDate)}
+                                </div>
+                                {isExpired && (
+                                  <Badge
+                                    variant="destructive"
+                                    className="text-xs mt-1"
+                                  >
+                                    Hết hạn
+                                  </Badge>
+                                )}
+                              </TableCell>
+
+                              {/* Actions */}
+                              <TableCell className="text-center">
+                                <motion.div
+                                  whileHover={
+                                    !isDisabled ? { scale: 1.05 } : {}
+                                  }
+                                  whileTap={!isDisabled ? { scale: 0.95 } : {}}
+                                >
+                                  <Button
+                                    size="sm"
+                                    className={cn(
+                                      "px-4 py-2 text-xs font-semibold transition-all duration-200",
+                                      isDisabled
+                                        ? "bg-gray-200 text-gray-700 cursor-not-allowed hover:bg-gray-200"
+                                        : "bg-gradient-to-r from-primary to-secondary hover:from-secondary hover:to-primary text-white shadow-sm hover:shadow-sm",
+                                    )}
+                                    onClick={() =>
+                                      !isDisabled &&
+                                      handleCopyCode(voucher.code)
+                                    }
+                                    disabled={isDisabled}
+                                  >
+                                    <Icon
+                                      path={mdiContentCopy}
+                                      size={0.6}
+                                      className="mr-1.5"
+                                    />
+                                    {isExpired
+                                      ? "Hết hạn"
+                                      : isOutOfStock
+                                        ? "Hết lượt"
+                                        : "Chọn mã"}
+                                  </Button>
+                                </motion.div>
+
+                                {isDisabled && (
+                                  <div className="text-xs text-red-500 mt-1 font-medium">
+                                    {isExpired
+                                      ? "Đã hết hạn"
+                                      : "Hết lượt sử dụng"}
+                                  </div>
+                                )}
+                              </TableCell>
+                            </motion.tr>
+                          );
+                        },
+                      )}
                     </TableBody>
                   </Table>
                 </ScrollArea>

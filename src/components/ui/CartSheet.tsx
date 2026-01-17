@@ -84,7 +84,16 @@ const VouchersListDialog = ({
       });
   };
 
-  const vouchers = vouchersData?.data?.vouchers;
+  const vouchers = vouchersData?.data?.vouchers?.map((voucher: any) => {
+    const discountValue = voucher.value ? Number(voucher.value) : 0;
+    return {
+      ...voucher,
+      discountType: voucher.type,
+      discountValue: isNaN(discountValue) ? 0 : discountValue,
+      maxDiscount: voucher.maxDiscount ? Number(voucher.maxDiscount) : null,
+      minOrderValue: voucher.minOrderValue ? Number(voucher.minOrderValue) : 0,
+    };
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -136,8 +145,8 @@ const VouchersListDialog = ({
                           {isExpired
                             ? "Đã hết hạn"
                             : isInactive
-                            ? "Ngừng hoạt động"
-                            : "Hết lượt"}
+                              ? "Ngừng hoạt động"
+                              : "Hết lượt"}
                         </Badge>
                       </div>
                     )}
@@ -163,7 +172,7 @@ const VouchersListDialog = ({
                           <span className="font-bold text-primary text-lg">
                             {formatDiscountValue(
                               voucher.discountType,
-                              voucher.discountValue
+                              voucher.discountValue,
                             )}
                           </span>
                         </div>
@@ -505,8 +514,8 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
                                 item.stock > 10
                                   ? "bg-green-100 text-green-700"
                                   : item.stock > 0
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-red-100 text-red-700"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
                               }`}
                             >
                               Tồn kho: {item.stock}
@@ -529,7 +538,7 @@ const CartSheet: React.FC<CartSheetProps> = ({ open, onOpenChange }) => {
                               onChange={(e) =>
                                 handleQuantityInputChange(
                                   item.id,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               onBlur={() => handleQuantityInputBlur(item.id)}
