@@ -171,7 +171,7 @@ export default function ShippingPage() {
         try {
           setLoadingDistricts(true);
           const response = await fetch(
-            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
+            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`,
           );
           const data = await response.json();
           setDistricts(data.districts || []);
@@ -202,7 +202,7 @@ export default function ShippingPage() {
         try {
           setLoadingWards(true);
           const response = await fetch(
-            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
+            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`,
           );
           const data = await response.json();
           setWards(data.wards || []);
@@ -274,7 +274,7 @@ export default function ShippingPage() {
   useEffect(() => {
     if (selectedProvince) {
       const found = provinces.find(
-        (p) => p.code.toString() === selectedProvince
+        (p) => p.code.toString() === selectedProvince,
       );
       setSelectedProvinceName(found ? found.name : "");
     } else {
@@ -286,7 +286,7 @@ export default function ShippingPage() {
   useEffect(() => {
     if (selectedDistrict) {
       const found = districts.find(
-        (d) => d.code.toString() === selectedDistrict
+        (d) => d.code.toString() === selectedDistrict,
       );
       setSelectedDistrictName(found ? found.name : "");
     } else {
@@ -307,7 +307,7 @@ export default function ShippingPage() {
   const sendOrderConfirmationEmail = async (
     orderId: string,
     orderData: any,
-    userEmail: string
+    userEmail: string,
   ) => {
     try {
       const itemsList = items
@@ -321,9 +321,9 @@ export default function ShippingPage() {
             item.quantity
           }</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${formatPrice(
-            item.price
+            item.price,
           )}</td>
-        </tr>`
+        </tr>`,
         )
         .join("");
 
@@ -336,7 +336,7 @@ export default function ShippingPage() {
           <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
             <p><strong>Mã đơn hàng:</strong> ${orderData.code || orderId}</p>
             <p><strong>Ngày đặt hàng:</strong> ${new Date().toLocaleDateString(
-              "vi-VN"
+              "vi-VN",
             )}</p>
             <p><strong>Phương thức thanh toán:</strong> ${
               orderData.paymentMethod === "COD"
@@ -361,7 +361,7 @@ export default function ShippingPage() {
               <tr>
                 <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Tạm tính:</td>
                 <td style="padding: 10px; text-align: right;">${formatPrice(
-                  subtotal + voucherDiscount
+                  subtotal + voucherDiscount,
                 )}</td>
               </tr>
               ${
@@ -372,7 +372,7 @@ export default function ShippingPage() {
                   appliedVoucher.code
                 }):</td>
                 <td style="padding: 10px; text-align: right; color: #16a34a;">-${formatPrice(
-                  voucherDiscount
+                  voucherDiscount,
                 )}</td>
               </tr>
               `
@@ -381,19 +381,19 @@ export default function ShippingPage() {
               <tr>
                 <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Thuế:</td>
                 <td style="padding: 10px; text-align: right;">${formatPrice(
-                  tax
+                  tax,
                 )}</td>
               </tr>
               <tr>
                 <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Phí vận chuyển:</td>
                 <td style="padding: 10px; text-align: right;">${formatPrice(
-                  shipping
+                  shipping,
                 )}</td>
               </tr>
               <tr style="background-color: #f9f9f9;">
                 <td colspan="2" style="padding: 10px; text-align: right; font-weight: bold;">Tổng cộng:</td>
                 <td style="padding: 10px; text-align: right; font-weight: bold;">${formatPrice(
-                  total
+                  total,
                 )}</td>
               </tr>
             </tfoot>
@@ -480,24 +480,24 @@ export default function ShippingPage() {
       };
 
       const response = await createOrderMutation.mutateAsync(orderData as any);
-      if (response && response.success && response.data) {
+      if (response && response.status === "success" && response.data?.order) {
         clearCart();
         if (appliedVoucher) {
           removeVoucher();
         }
-        toast.success("Đặt hàng thành công!");
+        toast.success(response.message);
 
         await sendOrderConfirmationEmail(
-          response.data.id,
-          response.data,
-          values.email
+          response.data.order.id,
+          response.data.order,
+          values.email,
         );
 
-        setOrderResult(response.data);
+        setOrderResult(response.data.order);
         setShowSuccessModal(true);
       } else {
         throw new Error(
-          (response as any)?.message || "Đã xảy ra lỗi khi tạo đơn hàng"
+          (response as any)?.message || "Đã xảy ra lỗi khi tạo đơn hàng",
         );
       }
     } catch (error: any) {
@@ -545,22 +545,22 @@ export default function ShippingPage() {
       };
 
       const response = await createOrderMutation.mutateAsync(orderData as any);
-      if (response && response.success && response.data) {
+      if (response && response.status === "success" && response.data?.order) {
         clearCart();
         if (appliedVoucher) {
           removeVoucher();
         }
-        toast.success("Thanh toán và đặt hàng thành công!");
+        toast.success(response.message);
         await sendOrderConfirmationEmail(
-          response.data.id,
-          response.data,
-          formValues.email
+          response.data.order.id,
+          response.data.order,
+          formValues.email,
         );
-        setOrderResult(response.data);
+        setOrderResult(response.data.order);
         setShowSuccessModal(true);
       } else {
         throw new Error(
-          (response as any)?.message || "Đã xảy ra lỗi khi tạo đơn hàng"
+          (response as any)?.message || "Đã xảy ra lỗi khi tạo đơn hàng",
         );
       }
     } catch (error: any) {
@@ -777,8 +777,8 @@ export default function ShippingPage() {
                                   !selectedProvince
                                     ? "Vui lòng chọn tỉnh/thành phố trước"
                                     : loadingDistricts
-                                    ? "Đang tải..."
-                                    : "Chọn quận/huyện"
+                                      ? "Đang tải..."
+                                      : "Chọn quận/huyện"
                                 }
                               />
                             </SelectTrigger>
@@ -823,8 +823,8 @@ export default function ShippingPage() {
                                   !selectedDistrict
                                     ? "Vui lòng chọn quận/huyện trước"
                                     : loadingWards
-                                    ? "Đang tải..."
-                                    : "Chọn phường/xã"
+                                      ? "Đang tải..."
+                                      : "Chọn phường/xã"
                                 }
                               />
                             </SelectTrigger>
