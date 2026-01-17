@@ -447,10 +447,7 @@ export default function PromotionsPage() {
                 const totalPages =
                   data.data.pagination?.totalPages || data.data.pages || 1;
                 const totalItems =
-                  data.data.pagination?.totalItems ||
-                  data.data.total ||
-                  data.data.count ||
-                  0;
+                  data.data.pagination?.totalItems || data.data.count || 0;
 
                 return (
                   <>

@@ -386,30 +386,14 @@ export default function VouchersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Mã
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Tên
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Loại
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Giá trị
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Sử dụng
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Thời gian
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>Mã</TableHead>
+                  <TableHead>Tên</TableHead>
+                  <TableHead>Loại</TableHead>
+                  <TableHead>Giá trị</TableHead>
+                  <TableHead>Sử dụng</TableHead>
+                  <TableHead>Thời gian</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -444,7 +428,7 @@ export default function VouchersPage() {
                       <Badge
                         variant={
                           voucher.status === "ACTIVE"
-                            ? "default"
+                            ? "success"
                             : "destructive"
                         }
                       >
@@ -494,24 +478,23 @@ export default function VouchersPage() {
             </Table>
           </div>
 
-          {data && data.data && data.data.pagination && (
+          {data && data.data && (
             <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
               <div className="text-sm text-gray-700 order-2 sm:order-1">
                 Hiển thị{" "}
                 <span className="font-medium">
-                  {(data.data.pagination.currentPage - 1) * filters.limit! + 1}
+                  {((data.data as any).page - 1) * (data.data as any).perPage +
+                    1}
                 </span>{" "}
                 đến{" "}
                 <span className="font-medium">
                   {Math.min(
-                    data.data.pagination.currentPage * filters.limit!,
-                    data.data.pagination.totalItems,
+                    (data.data as any).page * (data.data as any).perPage,
+                    (data.data as any).count,
                   )}
                 </span>{" "}
                 trong tổng số{" "}
-                <span className="font-medium">
-                  {data.data.pagination.totalItems}
-                </span>{" "}
+                <span className="font-medium">{(data.data as any).count}</span>{" "}
                 mã giảm giá
               </div>
 
@@ -521,20 +504,18 @@ export default function VouchersPage() {
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
-                        disabled={data.data.pagination.currentPage === 1}
+                        disabled={(data.data as any).page === 1}
                         onClick={(e) => {
                           e.preventDefault();
-                          if (data.data.pagination.currentPage > 1)
-                            handleChangePage(
-                              data.data.pagination.currentPage - 1,
-                            );
+                          if ((data.data as any).page > 1)
+                            handleChangePage((data.data as any).page - 1);
                         }}
                       />
                     </PaginationItem>
 
                     {(() => {
-                      const totalPages = data.data.pagination.totalPages;
-                      const currentPage = data.data.pagination.currentPage;
+                      const totalPages = (data.data as any).pages;
+                      const currentPage = (data.data as any).page;
                       const pages = [];
                       if (totalPages > 0) {
                         pages.push(
@@ -614,11 +595,15 @@ export default function VouchersPage() {
                     <PaginationItem>
                       <PaginationNext
                         href="#"
-                        disabled={currentPage === totalPages}
+                        disabled={
+                          (data.data as any).page === (data.data as any).pages
+                        }
                         onClick={(e) => {
                           e.preventDefault();
-                          if (currentPage < totalPages)
-                            handleChangePage(currentPage + 1);
+                          if (
+                            (data.data as any).page < (data.data as any).pages
+                          )
+                            handleChangePage((data.data as any).page + 1);
                         }}
                       />
                     </PaginationItem>
