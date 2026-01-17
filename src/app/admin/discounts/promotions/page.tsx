@@ -352,27 +352,12 @@ export default function PromotionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Mã
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Tên chiến dịch
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Giảm giá
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Sản phẩm
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Thời gian
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-center text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>Tên chiến dịch</TableHead>
+                  <TableHead>Giảm giá</TableHead>
+                  <TableHead>Sản phẩm</TableHead>
+                  <TableHead>Thời gian</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -380,15 +365,10 @@ export default function PromotionsPage() {
                   data.data.promotions.map((promotion) => (
                     <TableRow key={promotion.id}>
                       <TableCell className="px-4 py-4 text-sm">
-                        <span className="font-mono font-medium text-xs">
-                          {promotion.id}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 text-sm">
                         <div>
-                          <div className="font-medium">{promotion.name}</div>
+                          <div className="font-semibold">{promotion.name}</div>
                           {promotion.description && (
-                            <div className="text-xs text-gray-700 mt-1 line-clamp-2">
+                            <div className="text-sm text-gray-700 mt-1 line-clamp-2">
                               {promotion.description}
                             </div>
                           )}
@@ -414,7 +394,7 @@ export default function PromotionsPage() {
                         </span>
                       </TableCell>
                       <TableCell className="px-4 py-4 text-sm">
-                        <div className="text-xs">
+                        <div className="text-sm">
                           <div>{formatDate(promotion.startDate)}</div>
                           <div className="text-gray-700">
                             đến {formatDate(promotion.endDate)}
