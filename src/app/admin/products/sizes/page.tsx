@@ -8,6 +8,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +46,6 @@ import {
 } from "@/components/ui/table";
 import { useCreateSize, useDeleteSize, useSizes } from "@/hooks/attributes";
 import type { ISizeFilter } from "@/interface/request/attributes";
-import { getSizeLabel, getSizeValue, SIZE_MAPPINGS } from "@/utils/sizeMapping";
 import { mdiDeleteCircle, mdiPlus } from "@mdi/js";
 import { Icon } from "@mdi/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,27 +55,27 @@ import { toast } from "react-toastify";
 export default function SizesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ISizeFilter>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 5;
   const { data, isLoading, isError } = useSizes(filters);
   const deleteSizeMutation = useDeleteSize();
   const queryClient = useQueryClient();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const filteredSizes = useMemo(() => {
-    if (!data?.data || !searchQuery.trim()) return data?.data;
+    let sizes = data?.data?.sizes || [];
 
-    const query = searchQuery.toLowerCase().trim();
-    const numericQuery = Number(query);
-    return data.data.filter((size) => {
-      const sizeLabel = getSizeLabel(size.value);
-      // Search by both numeric value and size label
-      return (
-        (!isNaN(numericQuery)
-          ? size.value === numericQuery
-          : String(size.value).includes(query)) ||
-        sizeLabel.toLowerCase().includes(query)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      sizes = sizes.filter(
+        (size) =>
+          size.name.toLowerCase().includes(query) ||
+          size.code.toLowerCase().includes(query),
       );
-    });
-  }, [data?.data, searchQuery]);
+    }
+
+    return sizes;
+  }, [data?.data?.sizes, searchQuery]);
 
   const handleDeleteSize = async (sizeId: string) => {
     if (!sizeId) {
@@ -91,14 +99,6 @@ export default function SizesPage() {
       console.error("Delete error:", error);
       toast.error("Xóa kích cỡ thất bại");
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(new Date(dateString));
   };
 
   return (
@@ -125,43 +125,16 @@ export default function SizesPage() {
         </Breadcrumb>
       </div>
 
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogTrigger asChild>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Icon path={mdiPlus} size={0.8} />
-            Thêm kích cỡ mới
-          </Button>
-        </DialogTrigger>
-        <CreateSizeDialog
-          isOpen={isCreateDialogOpen}
-          onClose={() => setIsCreateDialogOpen(false)}
-        />
-      </Dialog>
-
       {isLoading ? (
         <div className="bg-white rounded-[6px] shadow-sm overflow-visible">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Kích cỡ
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Giá trị số
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Tên kích cỡ</TableHead>
+                  <TableHead>Mã kích cỡ</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -172,12 +145,6 @@ export default function SizesPage() {
                     </TableCell>
                     <TableCell className="px-4 py-4">
                       <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
-                    </TableCell>
-                    <TableCell className="px-4 py-4">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                    </TableCell>
-                    <TableCell className="px-4 py-4">
-                      <div className="h-6 w-16 bg-gray-200 rounded-full animate-pulse"></div>
                     </TableCell>
                     <TableCell className="px-4 py-4">
                       <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
@@ -201,11 +168,29 @@ export default function SizesPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <Input
-                  placeholder="Tìm kiếm theo kích cỡ (XS, S, M, L, XL, XXL) hoặc giá trị số..."
+                  placeholder="Tìm kiếm theo tên hoặc mã kích cỡ..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                 />
               </div>
+              <Dialog
+                open={isCreateDialogOpen}
+                onOpenChange={setIsCreateDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button onClick={() => setIsCreateDialogOpen(true)}>
+                    <Icon path={mdiPlus} size={0.8} />
+                    Thêm kích cỡ mới
+                  </Button>
+                </DialogTrigger>
+                <CreateSizeDialog
+                  isOpen={isCreateDialogOpen}
+                  onClose={() => setIsCreateDialogOpen(false)}
+                />
+              </Dialog>
             </div>
           </div>
 
@@ -213,81 +198,51 @@ export default function SizesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Kích cỡ
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Giá trị số
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Tên kích cỡ</TableHead>
+                  <TableHead>Mã kích cỡ</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSizes?.length ? (
-                  filteredSizes.map((size, index) => (
-                    <TableRow
-                      key={(size as any)?.id || `size-${index}`}
-                      className="hover:bg-gray-50"
-                    >
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {(size as any)?.id}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
+                  filteredSizes
+                    .slice((currentPage - 1) * perPage, currentPage * perPage)
+                    .map((size, index) => (
+                      <TableRow
+                        key={(size as any)?.id || `size-${index}`}
+                        className="hover:bg-gray-50"
+                      >
+                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {(currentPage - 1) * perPage + index + 1}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {size.name}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 whitespace-nowrap">
                           <div className="h-8 w-12 rounded-[6px] bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
                             <span className="text-sm font-bold">
-                              {getSizeLabel(size.value)}
+                              {size.code}
                             </span>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {size.value}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            size.status === "ACTIVE"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {size.status === "ACTIVE"
-                            ? "Hoạt động"
-                            : "Không hoạt động"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {formatDate(size.updatedAt)}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          <DeleteSizeDialog
-                            size={size}
-                            onDelete={() => {
-                              handleDeleteSize((size as any)?.id);
-                            }}
-                            isDeleting={deleteSizeMutation.isPending}
-                          />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        </TableCell>
+                        <TableCell className="px-4 py-4 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <DeleteSizeDialog
+                              size={size}
+                              onDelete={() => {
+                                handleDeleteSize((size as any)?.id);
+                              }}
+                              isDeleting={deleteSizeMutation.isPending}
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={4}
                       className="text-center py-8 text-gray-700"
                     >
                       Không có kích cỡ nào được tìm thấy.
@@ -297,6 +252,139 @@ export default function SizesPage() {
               </TableBody>
             </Table>
           </div>
+
+          {filteredSizes?.length > perPage && (
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+              <div className="text-sm text-gray-700 order-2 sm:order-1">
+                Hiển thị{" "}
+                <span className="font-medium">
+                  {(currentPage - 1) * perPage + 1}
+                </span>{" "}
+                đến{" "}
+                <span className="font-medium">
+                  {Math.min(currentPage * perPage, filteredSizes.length)}
+                </span>{" "}
+                trong tổng số{" "}
+                <span className="font-medium">{filteredSizes.length}</span> kích
+                cỡ
+              </div>
+
+              <div className="flex justify-center order-1 sm:order-2">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        disabled={currentPage === 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+
+                    {(() => {
+                      const totalPages = Math.ceil(
+                        filteredSizes.length / perPage,
+                      );
+                      const pages = [];
+                      if (totalPages > 0) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(1);
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (currentPage > 3) {
+                        pages.push(
+                          <PaginationItem key="start-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      for (
+                        let i = Math.max(2, currentPage - 1);
+                        i <= Math.min(totalPages - 1, currentPage + 1);
+                        i++
+                      ) {
+                        if (i !== 1 && i !== totalPages) {
+                          pages.push(
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === i}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCurrentPage(i);
+                                }}
+                              >
+                                {i}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+                      }
+
+                      if (currentPage < totalPages - 2) {
+                        pages.push(
+                          <PaginationItem key="end-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (totalPages > 1) {
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(totalPages);
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+                      return pages;
+                    })()}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredSizes.length / perPage)
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (
+                            currentPage <
+                            Math.ceil(filteredSizes.length / perPage)
+                          )
+                            setCurrentPage(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -334,7 +422,10 @@ function DeleteSizeDialog({
         </DialogHeader>
         <p>
           Bạn có chắc chắn muốn xóa kích cỡ{" "}
-          <strong>{getSizeLabel(size.value)}</strong> không?
+          <strong>
+            {size.name} ({size.code})
+          </strong>{" "}
+          không?
         </p>
         <DialogFooter>
           <DialogClose asChild>
@@ -365,21 +456,22 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
   const createSize = useCreateSize();
 
   const [formData, setFormData] = useState({
-    value: 0,
+    name: "",
+    code: "",
     status: "ACTIVE" as "ACTIVE" | "INACTIVE",
   });
 
   const [errors, setErrors] = useState({
-    value: "",
+    name: "",
+    code: "",
   });
 
-  const handleSizeChange = (sizeLabel: string) => {
-    const sizeValue = getSizeValue(sizeLabel);
-    if (sizeValue !== null) {
-      setFormData((prev) => ({ ...prev, value: sizeValue }));
-      if (errors.value) {
-        setErrors((prev) => ({ ...prev, value: "" }));
-      }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -394,8 +486,13 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
     let isValid = true;
     const newErrors = { ...errors };
 
-    if (formData.value <= 0) {
-      newErrors.value = "Vui lòng chọn kích cỡ";
+    if (!formData.name.trim()) {
+      newErrors.name = "Tên kích cỡ không được để trống";
+      isValid = false;
+    }
+
+    if (!formData.code.trim()) {
+      newErrors.code = "Mã kích cỡ không được để trống";
       isValid = false;
     }
 
@@ -414,7 +511,8 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
           toast.success("Thêm kích cỡ thành công");
           queryClient.invalidateQueries({ queryKey: ["sizes"] });
           setFormData({
-            value: 0,
+            name: "",
+            code: "",
             status: "ACTIVE",
           });
           onClose();
@@ -434,14 +532,6 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
     }
   };
 
-  // Get the currently selected size label
-  const getCurrentSizeLabel = () => {
-    if (formData.value > 0) {
-      return getSizeLabel(formData.value);
-    }
-    return "";
-  };
-
   return (
     <DialogContent className="sm:max-w-4xl">
       <DialogHeader>
@@ -449,28 +539,29 @@ function CreateSizeDialog({ isOpen, onClose }: CreateSizeDialogProps) {
       </DialogHeader>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="create-size">Kích cỡ</Label>
-          <Select
-            value={getCurrentSizeLabel()}
-            onValueChange={handleSizeChange}
-          >
-            <SelectTrigger
-              id="create-size"
-              className={errors.value ? "border-red-500" : ""}
-            >
-              <SelectValue placeholder="Chọn kích cỡ" />
-            </SelectTrigger>
-            <SelectContent>
-              {SIZE_MAPPINGS.map((size) => (
-                <SelectItem key={size.value} value={size.label}>
-                  {size.label} (Giá trị: {size.value})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.value && (
-            <p className="text-red-500 text-sm">{errors.value}</p>
-          )}
+          <Label htmlFor="create-name">Tên kích cỡ</Label>
+          <Input
+            id="create-name"
+            name="name"
+            placeholder="Nhập tên kích cỡ (ví dụ: Extra Large)"
+            value={formData.name}
+            onChange={handleInputChange}
+            className={errors.name ? "border-red-500" : ""}
+          />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="create-code">Mã kích cỡ</Label>
+          <Input
+            id="create-code"
+            name="code"
+            placeholder="Nhập mã kích cỡ (ví dụ: XL)"
+            value={formData.code}
+            onChange={handleInputChange}
+            className={errors.code ? "border-red-500" : ""}
+          />
+          {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
         </div>
 
         <div className="space-y-2">

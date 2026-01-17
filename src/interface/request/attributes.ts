@@ -50,13 +50,13 @@ export interface IColorFilter {
 
 export interface IColorCreate {
   name: string;
-  code: string;
+  hex_code: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface IColorUpdate {
   name?: string;
-  code?: string;
+  hex_code?: string;
   status?: 'ACTIVE' | 'INACTIVE';
 }
 
@@ -66,11 +66,13 @@ export interface ISizeFilter {
 }
 
 export interface ISizeCreate {
-  value: number;
+  name: string;
+  code: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 
 export interface ISizeUpdate {
-  value?: number;
+  name?: string;
+  code?: string;
   status?: 'ACTIVE' | 'INACTIVE';
 } 

@@ -30,6 +30,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -63,6 +72,8 @@ import "react-toastify/dist/ReactToastify.css";
 export default function ColorsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IColorFilter>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 5;
   const { data, isLoading, isError } = useColors(filters);
   const deleteColor = useDeleteColor();
   const queryClient = useQueryClient();
@@ -73,15 +84,21 @@ export default function ColorsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const filteredColors = useMemo(() => {
-    if (!data?.data || !searchQuery.trim()) return data?.data;
+    let colors = data?.data?.colors || [];
 
-    const query = searchQuery.toLowerCase().trim();
-    return data.data.filter(
-      (color) =>
-        color.name.toLowerCase().includes(query) ||
-        color.code.toLowerCase().includes(query)
-    );
-  }, [data?.data, searchQuery]);
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      colors = colors.filter(
+        (color) =>
+          color.name.toLowerCase().includes(query) ||
+          color.hex_code.toLowerCase().includes(query),
+      );
+    }
+
+    // Status filtering removed - API doesn't return status field
+
+    return colors;
+  }, [data?.data?.colors, searchQuery]);
 
   const handleFilterChange = (key: keyof IColorFilter, value: any) => {
     if (value === "all" || value === "") {
@@ -145,7 +162,7 @@ export default function ColorsPage() {
 
       <Card className="mb-4">
         <CardContent className="py-4">
-          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2 gap-2">
+          <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
             <div className="relative flex-1 max-w-4xl">
               <Icon
                 path={mdiMagnify}
@@ -157,23 +174,13 @@ export default function ColorsPage() {
                 placeholder="Tìm kiếm theo tên hoặc mã màu sắc..."
                 className="pl-10 pr-4 py-2 w-full border rounded-[6px]"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             <div className="flex items-center gap-2">
-              <Select
-                value={filters.status || "all"}
-                onValueChange={(value) => handleFilterChange("status", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Tất cả trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="ACTIVE">Hoạt động</SelectItem>
-                  <SelectItem value="INACTIVE">Không hoạt động</SelectItem>
-                </SelectContent>
-              </Select>
               <Dialog
                 open={isCreateDialogOpen}
                 onOpenChange={setIsCreateDialogOpen}
@@ -200,24 +207,10 @@ export default function ColorsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Màu sắc
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Mã màu
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Màu sắc</TableHead>
+                  <TableHead>Mã màu</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -234,12 +227,6 @@ export default function ColorsPage() {
                     </TableCell>
                     <TableCell className="px-4 py-4 whitespace-nowrap">
                       <Skeleton className="h-4 w-[80px]" />
-                    </TableCell>
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-6 w-[100px] rounded-full" />
-                    </TableCell>
-                    <TableCell className="px-4 py-4 whitespace-nowrap">
-                      <Skeleton className="h-4 w-[100px]" />
                     </TableCell>
                     <TableCell className="px-4 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end space-x-2">
@@ -274,171 +261,145 @@ export default function ColorsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    ID
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Màu sắc
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Mã màu
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Trạng thái
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Ngày cập nhật
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Màu sắc</TableHead>
+                  <TableHead>Mã màu</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredColors?.length ? (
-                  filteredColors.map((color, index) => {
-                    return (
-                      <TableRow
-                        key={(color as any)?.id || `color-${index}`}
-                        className="hover:bg-gray-50"
-                      >
-                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {(color as any)?.id}
-                        </TableCell>
-                        <TableCell className="px-4 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div
-                              className="w-6 h-6 rounded-full mr-2 border border-gray-200"
-                              style={{ backgroundColor: color.code }}
-                            />
-                            <div className="text-sm font-medium text-gray-700">
-                              {color.name}
+                  filteredColors
+                    .slice((currentPage - 1) * perPage, currentPage * perPage)
+                    .map((color, index) => {
+                      return (
+                        <TableRow
+                          key={(color as any)?.id || `color-${index}`}
+                          className="hover:bg-gray-50"
+                        >
+                          <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {(currentPage - 1) * perPage + index + 1}
+                          </TableCell>
+                          <TableCell className="px-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div
+                                className="w-6 h-6 rounded-full mr-2 border border-gray-200"
+                                style={{ backgroundColor: color.hex_code }}
+                              />
+                              <div className="text-sm font-medium text-gray-700">
+                                {color.name}
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {color.code}
-                        </TableCell>
-                        <TableCell className="px-4 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              color.status === "ACTIVE"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {color.status === "ACTIVE"
-                              ? "Hoạt động"
-                              : "Không hoạt động"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                          {formatDate(color.updatedAt)}
-                        </TableCell>
-                        <TableCell className="px-4 py-4 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Dialog
-                              open={
-                                isEditDialogOpen &&
-                                colorToEdit === (color as any)?.id
-                              }
-                              onOpenChange={(open) => {
-                                setIsEditDialogOpen(open);
-                                if (!open) setColorToEdit(null);
-                              }}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  title="Sửa"
-                                  onClick={() => {
-                                    setColorToEdit((color as any)?.id);
-                                    setIsEditDialogOpen(true);
-                                  }}
-                                >
-                                  <Icon path={mdiPencilCircle} size={0.8} />
-                                </Button>
-                              </DialogTrigger>
-                              {colorToEdit === (color as any)?.id && (
-                                <EditColorDialog
-                                  colorId={(color as any)?.id}
-                                  isOpen={isEditDialogOpen}
-                                  onClose={() => {
-                                    setIsEditDialogOpen(false);
-                                    setColorToEdit(null);
-                                  }}
-                                />
-                              )}
-                            </Dialog>
-                            <Dialog
-                              open={
-                                isDeleteDialogOpen &&
-                                colorToDelete === (color as any)?.id
-                              }
-                              onOpenChange={(open) => {
-                                setIsDeleteDialogOpen(open);
-                                if (!open) setColorToDelete(null);
-                              }}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => {
-                                    setColorToDelete((color as any)?.id);
-                                    setIsDeleteDialogOpen(true);
-                                  }}
-                                  title="Xóa"
-                                >
-                                  <Icon path={mdiDeleteCircle} size={0.8} />
-                                </Button>
-                              </DialogTrigger>
-                              {colorToDelete === (color as any)?.id && (
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>
-                                      Xác nhận xóa màu sắc
-                                    </DialogTitle>
-                                  </DialogHeader>
-                                  <p>
-                                    Bạn có chắc chắn muốn xóa màu sắc này không?
-                                  </p>
-                                  <DialogFooter>
-                                    <DialogClose asChild>
+                          </TableCell>
+                          <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {color.hex_code}
+                          </TableCell>
+                          <TableCell className="px-4 py-4 whitespace-nowrap text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              {/* Edit and Delete dialogs remain the same */}
+                              <Dialog
+                                open={
+                                  isEditDialogOpen &&
+                                  colorToEdit === (color as any)?.id
+                                }
+                                onOpenChange={(open) => {
+                                  setIsEditDialogOpen(open);
+                                  if (!open) setColorToEdit(null);
+                                }}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    title="Sửa"
+                                    onClick={() => {
+                                      setColorToEdit((color as any)?.id);
+                                      setIsEditDialogOpen(true);
+                                    }}
+                                  >
+                                    <Icon path={mdiPencilCircle} size={0.8} />
+                                  </Button>
+                                </DialogTrigger>
+                                {colorToEdit === (color as any)?.id && (
+                                  <EditColorDialog
+                                    colorId={(color as any)?.id}
+                                    isOpen={isEditDialogOpen}
+                                    onClose={() => {
+                                      setIsEditDialogOpen(false);
+                                      setColorToEdit(null);
+                                    }}
+                                  />
+                                )}
+                              </Dialog>
+                              <Dialog
+                                open={
+                                  isDeleteDialogOpen &&
+                                  colorToDelete === (color as any)?.id
+                                }
+                                onOpenChange={(open) => {
+                                  setIsDeleteDialogOpen(open);
+                                  if (!open) setColorToDelete(null);
+                                }}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => {
+                                      setColorToDelete((color as any)?.id);
+                                      setIsDeleteDialogOpen(true);
+                                    }}
+                                    title="Xóa"
+                                  >
+                                    <Icon path={mdiDeleteCircle} size={0.8} />
+                                  </Button>
+                                </DialogTrigger>
+                                {colorToDelete === (color as any)?.id && (
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>
+                                        Xác nhận xóa màu sắc
+                                      </DialogTitle>
+                                    </DialogHeader>
+                                    <p>
+                                      Bạn có chắc chắn muốn xóa màu sắc này
+                                      không?
+                                    </p>
+                                    <DialogFooter>
+                                      <DialogClose asChild>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                            setIsDeleteDialogOpen(false);
+                                            setColorToDelete(null);
+                                          }}
+                                        >
+                                          Hủy
+                                        </Button>
+                                      </DialogClose>
                                       <Button
-                                        variant="outline"
+                                        variant="destructive"
                                         onClick={() => {
+                                          handleDeleteColor((color as any)?.id);
                                           setIsDeleteDialogOpen(false);
                                           setColorToDelete(null);
                                         }}
                                       >
-                                        Hủy
+                                        Xóa
                                       </Button>
-                                    </DialogClose>
-                                    <Button
-                                      variant="destructive"
-                                      onClick={() => {
-                                        handleDeleteColor((color as any)?.id);
-                                        setIsDeleteDialogOpen(false);
-                                        setColorToDelete(null);
-                                      }}
-                                    >
-                                      Xóa
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              )}
-                            </Dialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                                    </DialogFooter>
+                                  </DialogContent>
+                                )}
+                              </Dialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={6}
+                      colSpan={4}
                       className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy màu sắc nào
@@ -448,6 +409,139 @@ export default function ColorsPage() {
               </TableBody>
             </Table>
           </div>
+
+          {filteredColors?.length > perPage && (
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+              <div className="text-sm text-gray-700 order-2 sm:order-1">
+                Hiển thị{" "}
+                <span className="font-medium">
+                  {(currentPage - 1) * perPage + 1}
+                </span>{" "}
+                đến{" "}
+                <span className="font-medium">
+                  {Math.min(currentPage * perPage, filteredColors.length)}
+                </span>{" "}
+                trong tổng số{" "}
+                <span className="font-medium">{filteredColors.length}</span> màu
+                sắc
+              </div>
+
+              <div className="flex justify-center order-1 sm:order-2">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        disabled={currentPage === 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+
+                    {(() => {
+                      const totalPages = Math.ceil(
+                        filteredColors.length / perPage,
+                      );
+                      const pages = [];
+                      if (totalPages > 0) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(1);
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (currentPage > 3) {
+                        pages.push(
+                          <PaginationItem key="start-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      for (
+                        let i = Math.max(2, currentPage - 1);
+                        i <= Math.min(totalPages - 1, currentPage + 1);
+                        i++
+                      ) {
+                        if (i !== 1 && i !== totalPages) {
+                          pages.push(
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === i}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCurrentPage(i);
+                                }}
+                              >
+                                {i}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+                      }
+
+                      if (currentPage < totalPages - 2) {
+                        pages.push(
+                          <PaginationItem key="end-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (totalPages > 1) {
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(totalPages);
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+                      return pages;
+                    })()}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredColors.length / perPage)
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (
+                            currentPage <
+                            Math.ceil(filteredColors.length / perPage)
+                          )
+                            setCurrentPage(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -467,21 +561,21 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
 
   const [formData, setFormData] = useState({
     name: "",
-    code: "",
+    hex_code: "",
     status: "ACTIVE" as "ACTIVE" | "INACTIVE",
   });
 
   const [errors, setErrors] = useState({
     name: "",
-    code: "",
+    hex_code: "",
   });
 
   useEffect(() => {
     if (colorData?.data) {
       setFormData({
         name: colorData.data.name,
-        code: colorData.data.code,
-        status: colorData.data.status,
+        hex_code: colorData.data.hex_code,
+        status: colorData.data.status || "ACTIVE",
       });
     }
   }, [colorData]);
@@ -511,8 +605,8 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
       isValid = false;
     }
 
-    if (!formData.code.trim()) {
-      newErrors.code = "Mã màu không được để trống";
+    if (!formData.hex_code.trim()) {
+      newErrors.hex_code = "Mã màu không được để trống";
       isValid = false;
     }
 
@@ -531,12 +625,12 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
     setFormData((prev) => ({
       ...prev,
       name: colorName,
-      code: randomColor,
+      hex_code: randomColor,
     }));
 
     setErrors({
       name: "",
-      code: "",
+      hex_code: "",
     });
   };
 
@@ -561,7 +655,7 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
           onError: (error) => {
             toast.error("Cập nhật màu sắc thất bại: " + error.message);
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("Đã xảy ra lỗi khi cập nhật màu sắc");
@@ -644,20 +738,20 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
           {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="code">Mã màu</Label>
+          <Label htmlFor="hex_code">Mã màu</Label>
           <div className="flex gap-2 items-center">
             <Input
-              id="code"
-              name="code"
+              id="hex_code"
+              name="hex_code"
               type="text"
               placeholder="#000000"
-              value={formData.code}
+              value={formData.hex_code}
               onChange={handleInputChange}
-              className={errors.code ? "border-red-500" : ""}
+              className={errors.hex_code ? "border-red-500" : ""}
             />
             <div
               className="w-10 h-10 rounded-[6px] border border-gray-200"
-              style={{ backgroundColor: formData.code }}
+              style={{ backgroundColor: formData.hex_code }}
             />
           </div>
           <Button
@@ -669,7 +763,9 @@ function EditColorDialog({ colorId, isOpen, onClose }: EditColorDialogProps) {
             <Icon path={mdiRefresh} size={0.8} className="mr-2" />
             Random Color
           </Button>
-          {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+          {errors.hex_code && (
+            <p className="text-red-500 text-sm">{errors.hex_code}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="status">Trạng thái</Label>
@@ -708,13 +804,13 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
 
   const [formData, setFormData] = useState({
     name: "",
-    code: "",
+    hex_code: "",
     status: "ACTIVE" as "ACTIVE" | "INACTIVE",
   });
 
   const [errors, setErrors] = useState({
     name: "",
-    code: "",
+    hex_code: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -742,8 +838,8 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
       isValid = false;
     }
 
-    if (!formData.code.trim()) {
-      newErrors.code = "Mã màu không được để trống";
+    if (!formData.hex_code.trim()) {
+      newErrors.hex_code = "Mã màu không được để trống";
       isValid = false;
     }
 
@@ -762,13 +858,13 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
     setFormData((prev) => ({
       ...prev,
       name: colorName,
-      code: randomColor,
+      hex_code: randomColor,
     }));
 
     // Clear any errors
     setErrors({
       name: "",
-      code: "",
+      hex_code: "",
     });
   };
 
@@ -785,7 +881,7 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
           // Reset form
           setFormData({
             name: "",
-            code: "",
+            hex_code: "",
             status: "ACTIVE",
           });
           onClose();
@@ -824,20 +920,20 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="create-code">Mã màu</Label>
+          <Label htmlFor="create-hex_code">Mã màu</Label>
           <div className="flex gap-2 items-center">
             <Input
-              id="create-code"
-              name="code"
+              id="create-hex_code"
+              name="hex_code"
               type="text"
               placeholder="#000000"
-              value={formData.code}
+              value={formData.hex_code}
               onChange={handleInputChange}
-              className={errors.code ? "border-red-500" : ""}
+              className={errors.hex_code ? "border-red-500" : ""}
             />
             <div
               className="w-10 h-10 rounded-[6px] border border-gray-200"
-              style={{ backgroundColor: formData.code }}
+              style={{ backgroundColor: formData.hex_code }}
             />
           </div>
           <Button
@@ -849,7 +945,9 @@ function CreateColorDialog({ isOpen, onClose }: CreateColorDialogProps) {
             <Icon path={mdiRefresh} size={0.8} className="mr-2" />
             Random Color
           </Button>
-          {errors.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+          {errors.hex_code && (
+            <p className="text-red-500 text-sm">{errors.hex_code}</p>
+          )}
         </div>
 
         <div className="space-y-2">

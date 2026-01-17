@@ -30,6 +30,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -56,6 +65,8 @@ import "react-toastify/dist/ReactToastify.css";
 export default function CategoriesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ICategoryFilter>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 5;
   const [showFilters, setShowFilters] = useState(false);
   const { data, isLoading, isError } = useCategories(filters);
   const deleteCategory = useDeleteCategory();
@@ -72,7 +83,7 @@ export default function CategoriesPage() {
       : (data?.data as any)?.categories || [];
 
     // Chuẩn hóa dữ liệu: nếu là string[] thì chuyển thành object[]
-    const normalizedCategories = categories.map((cat: any) =>
+    let normalizedCategories = categories.map((cat: any) =>
       typeof cat === "string"
         ? {
             id: cat,
@@ -80,16 +91,24 @@ export default function CategoriesPage() {
             status: "ACTIVE",
             updatedAt: new Date().toISOString(),
           }
-        : cat
+        : cat,
     );
 
-    if (!searchQuery.trim()) return normalizedCategories;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      normalizedCategories = normalizedCategories.filter((category: any) =>
+        category.name.toLowerCase().includes(query),
+      );
+    }
 
-    const query = searchQuery.toLowerCase().trim();
-    return normalizedCategories.filter((category: any) =>
-      category.name.toLowerCase().includes(query)
-    );
-  }, [data?.data, searchQuery]);
+    if (filters.status && (filters.status as string) !== "all") {
+      normalizedCategories = normalizedCategories.filter(
+        (category: any) => category.status === filters.status,
+      );
+    }
+
+    return normalizedCategories;
+  }, [data?.data, searchQuery, filters.status]);
 
   const handleFilterChange = (key: keyof ICategoryFilter, value: any) => {
     if (value === "all" || value === "") {
@@ -160,13 +179,19 @@ export default function CategoriesPage() {
                 placeholder="Tìm kiếm theo tên danh mục..."
                 className="pl-10 pr-4 py-2 w-full border rounded-[6px]"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
             <div className="flex items-center gap-2">
               <Select
                 value={filters.status || "all"}
-                onValueChange={(value) => handleFilterChange("status", value)}
+                onValueChange={(value) => {
+                  handleFilterChange("status", value);
+                  setCurrentPage(1);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tất cả trạng thái" />
@@ -203,15 +228,9 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    STT
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Tên danh mục
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Tên danh mục</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -256,94 +275,132 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    STT
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-left text-sm font-medium text-gray-700">
-                    Tên danh mục
-                  </TableHead>
-                  <TableHead className="px-4 py-4 text-right text-sm font-medium text-gray-700">
-                    Thao tác
-                  </TableHead>
+                  <TableHead>STT</TableHead>
+                  <TableHead>Tên danh mục</TableHead>
+                  <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCategories?.length ? (
-                  filteredCategories.map((category: any, index: number) => (
-                    <TableRow
-                      key={category.id || index}
-                      className="hover:bg-gray-50"
-                    >
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-700">
-                          {category.name}
-                        </div>
-                      </TableCell>
-                      <TableCell className="px-4 py-4 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          {/* Edit button hidden as per request */}
-
-                          <Dialog
-                            open={
-                              isDeleteDialogOpen &&
-                              categoryToDelete === (category as any)?.id
-                            }
-                            onOpenChange={setIsDeleteDialogOpen}
-                          >
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => {
-                                  setCategoryToDelete((category as any)?.id);
-                                  setIsDeleteDialogOpen(true);
-                                }}
-                                title="Xóa"
-                              >
-                                <Icon path={mdiDeleteCircle} size={0.8} />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Xác nhận xóa danh mục</DialogTitle>
-                              </DialogHeader>
-                              <p>
-                                Bạn có chắc chắn muốn xóa danh mục này không?
-                              </p>
-                              <DialogFooter>
-                                <DialogClose asChild>
-                                  <Button
-                                    variant="outline"
-                                    onClick={() => setIsDeleteDialogOpen(false)}
-                                  >
-                                    Hủy
-                                  </Button>
-                                </DialogClose>
+                  filteredCategories
+                    .slice((currentPage - 1) * perPage, currentPage * perPage)
+                    .map((category: any, index: number) => (
+                      <TableRow
+                        key={category.id || index}
+                        className="hover:bg-gray-50"
+                      >
+                        <TableCell className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                          {(currentPage - 1) * perPage + index + 1}
+                        </TableCell>
+                        <TableCell className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-700">
+                            {category.name}
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-4 py-4 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <Dialog
+                              open={
+                                isEditDialogOpen &&
+                                categoryToEdit === (category as any)?.id
+                              }
+                              onOpenChange={(open) => {
+                                setIsEditDialogOpen(open);
+                                if (!open) setCategoryToEdit(null);
+                              }}
+                            >
+                              <DialogTrigger asChild>
                                 <Button
-                                  variant="destructive"
+                                  variant="outline"
+                                  size="icon"
                                   onClick={() => {
-                                    if (categoryToDelete) {
-                                      handleDeleteCategory(categoryToDelete);
-                                      setIsDeleteDialogOpen(false);
-                                    }
+                                    setCategoryToEdit((category as any)?.id);
+                                    setIsEditDialogOpen(true);
                                   }}
+                                  title="Sửa"
                                 >
-                                  Xóa
+                                  <Icon path={mdiPencilCircle} size={0.8} />
                                 </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                              </DialogTrigger>
+                              {categoryToEdit === (category as any)?.id && (
+                                <EditCategoryDialog
+                                  categoryId={(category as any)?.id}
+                                  isOpen={isEditDialogOpen}
+                                  onClose={() => {
+                                    setIsEditDialogOpen(false);
+                                    setCategoryToEdit(null);
+                                  }}
+                                />
+                              )}
+                            </Dialog>
+
+                            <Dialog
+                              open={
+                                isDeleteDialogOpen &&
+                                categoryToDelete === (category as any)?.id
+                              }
+                              onOpenChange={(open) => {
+                                setIsDeleteDialogOpen(open);
+                                if (!open) setCategoryToDelete(null);
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => {
+                                    setCategoryToDelete((category as any)?.id);
+                                    setIsDeleteDialogOpen(true);
+                                  }}
+                                  title="Xóa"
+                                >
+                                  <Icon path={mdiDeleteCircle} size={0.8} />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>
+                                    Xác nhận xóa danh mục
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <p>
+                                  Bạn có chắc chắn muốn xóa danh mục này không?
+                                </p>
+                                <DialogFooter>
+                                  <DialogClose asChild>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() => {
+                                        setIsDeleteDialogOpen(false);
+                                        setCategoryToDelete(null);
+                                      }}
+                                    >
+                                      Hủy
+                                    </Button>
+                                  </DialogClose>
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                      if (categoryToDelete) {
+                                        handleDeleteCategory(categoryToDelete);
+                                        setIsDeleteDialogOpen(false);
+                                        setCategoryToDelete(null);
+                                      }
+                                    }}
+                                  >
+                                    Xóa
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={3}
                       className="px-4 py-8 text-center text-gray-700"
                     >
                       Không tìm thấy danh mục nào
@@ -353,6 +410,139 @@ export default function CategoriesPage() {
               </TableBody>
             </Table>
           </div>
+
+          {filteredCategories.length > perPage && (
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+              <div className="text-sm text-gray-700 order-2 sm:order-1">
+                Hiển thị{" "}
+                <span className="font-medium">
+                  {(currentPage - 1) * perPage + 1}
+                </span>{" "}
+                đến{" "}
+                <span className="font-medium">
+                  {Math.min(currentPage * perPage, filteredCategories.length)}
+                </span>{" "}
+                trong tổng số{" "}
+                <span className="font-medium">{filteredCategories.length}</span>{" "}
+                danh mục
+              </div>
+
+              <div className="flex justify-center order-1 sm:order-2">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        disabled={currentPage === 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+
+                    {(() => {
+                      const totalPages = Math.ceil(
+                        filteredCategories.length / perPage,
+                      );
+                      const pages = [];
+                      if (totalPages > 0) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(1);
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (currentPage > 3) {
+                        pages.push(
+                          <PaginationItem key="start-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      for (
+                        let i = Math.max(2, currentPage - 1);
+                        i <= Math.min(totalPages - 1, currentPage + 1);
+                        i++
+                      ) {
+                        if (i !== 1 && i !== totalPages) {
+                          pages.push(
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === i}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCurrentPage(i);
+                                }}
+                              >
+                                {i}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+                      }
+
+                      if (currentPage < totalPages - 2) {
+                        pages.push(
+                          <PaginationItem key="end-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (totalPages > 1) {
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage(totalPages);
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+                      return pages;
+                    })()}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        disabled={
+                          currentPage ===
+                          Math.ceil(filteredCategories.length / perPage)
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (
+                            currentPage <
+                            Math.ceil(filteredCategories.length / perPage)
+                          )
+                            setCurrentPage(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -450,7 +640,7 @@ function EditCategoryDialog({
           onError: (error) => {
             toast.error("Cập nhật danh mục thất bại: " + error.message);
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("Đã xảy ra lỗi khi cập nhật danh mục");
@@ -625,8 +815,9 @@ function CreateCategoryDialog({ isOpen, onClose }: CreateCategoryDialogProps) {
           if (
             error.message === "Duplicate entry. This record already exists."
           ) {
-          } else {
             toast.error("Thêm danh mục thất bại: Danh mục đã tồn tại");
+          } else {
+            toast.error("Thêm danh mục thất bại: " + error.message);
           }
         },
       });

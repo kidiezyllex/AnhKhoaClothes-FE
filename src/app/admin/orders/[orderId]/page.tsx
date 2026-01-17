@@ -261,73 +261,43 @@ const OrderStepper = ({ currentStatus }: { currentStatus: string }) => {
 };
 
 const OrderStatusBadge = ({ status }: { status: string }) => {
-  const getStatusConfig = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case "CHO_XAC_NHAN":
-        return {
-          label: "Chờ xác nhận",
-          className: "!bg-amber-50 !text-amber-500 !border-amber-500",
-        };
+        return "Chờ xác nhận";
       case "CHO_GIAO_HANG":
-        return {
-          label: "Chờ giao hàng",
-          className: "!bg-blue-50 !text-blue-500 !border-blue-500",
-        };
+        return "Chờ giao hàng";
       case "DANG_VAN_CHUYEN":
-        return {
-          label: "Đang vận chuyển",
-          className: "!bg-orange-50 !text-orange-500 !border-orange-500",
-        };
+        return "Đang vận chuyển";
       case "DA_GIAO_HANG":
-        return {
-          label: "Đã giao hàng",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
+        return "Đã giao hàng";
       case "HOAN_THANH":
-        return {
-          label: "Hoàn thành",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
+        return "Hoàn thành";
       case "DA_HUY":
-        return {
-          label: "Đã hủy",
-          className: "!bg-red-50 !text-red-500 !border-red-500",
-        };
+        return "Đã hủy";
       default:
-        return {
-          label: "Không xác định",
-          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
-        };
+        return "Không xác định";
     }
   };
 
-  const config = getStatusConfig(status);
-  return <Badge className={config.className}>{config.label}</Badge>;
+  return <Badge variant={status as any}>{getStatusLabel(status)}</Badge>;
 };
 
 const PaymentStatusBadge = ({ status }: { status: string }) => {
-  const getStatusConfig = (status: string) => {
+  const getStatusLabel = (status: string) => {
     switch (status) {
       case "PENDING":
-        return {
-          label: "Chưa thanh toán",
-          className: "!bg-amber-50 !text-amber-500 !border-amber-500",
-        };
+        return "Chưa thanh toán";
       case "PAID":
-        return {
-          label: "Đã thanh toán",
-          className: "!bg-[#EAEBF2] !text-green-500 !border-green-500",
-        };
+        return "Đã thanh toán";
       default:
-        return {
-          label: "Không xác định",
-          className: "!bg-gray-50 !text-gray-700 !border-gray-500",
-        };
+        return "Không xác định";
     }
   };
 
-  const config = getStatusConfig(status);
-  return <Badge className={config.className}>{config.label}</Badge>;
+  const variant = status === "PENDING" ? "UNPAID" : status;
+
+  return <Badge variant={variant as any}>{getStatusLabel(status)}</Badge>;
 };
 
 const getProductInfo = (item: any): ProductInfo => {
@@ -391,19 +361,17 @@ const getVariantImage = (item: any): string => {
     }
   }
 
-  // For POS orders: item has variant field with colorId and sizeId
   if (item.variant && item.variant.colorId && item.variant.sizeId) {
     const matchingVariant = item.product?.variants?.find(
       (v: any) =>
-        v.colorId === item.variant.colorId && v.sizeId === item.variant.sizeId
+        v.colorId === item.variant.colorId && v.sizeId === item.variant.sizeId,
     );
     return matchingVariant?.images?.[0] || "/images/white-image.png";
   }
 
-  // For older online orders
   if (item.product?.variants) {
     const variantWithImage = item.product.variants.find(
-      (v: any) => v.images && v.images.length > 0
+      (v: any) => v.images && v.images.length > 0,
     );
     return variantWithImage?.images?.[0] || "/images/white-image.png";
   }
@@ -411,7 +379,6 @@ const getVariantImage = (item: any): string => {
   return "/images/white-image.png";
 };
 
-// Helper function to format phone number display
 const formatPhoneDisplay = (phone: string | undefined | null): string => {
   if (!phone || phone === "0000000000") {
     return "Chưa có SĐT";
@@ -419,7 +386,6 @@ const formatPhoneDisplay = (phone: string | undefined | null): string => {
   return phone;
 };
 
-// Helper function to format email display
 const formatEmailDisplay = (email: string | undefined | null): string => {
   if (!email || email === "guest@pos.local") {
     return "Chưa có email";
@@ -496,7 +462,7 @@ export default function OrderDetailPage() {
             queryClient.invalidateQueries({ queryKey: ["order", orderId] });
             setIsStatusDialogOpen(false);
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("Cập nhật trạng thái đơn hàng thất bại");
@@ -552,8 +518,8 @@ export default function OrderDetailPage() {
       pdf.save(
         `HoaDon_${generateInvoiceCode(order.code).replace(
           /[^a-zA-Z0-9]/g,
-          "_"
-        )}.pdf`
+          "_",
+        )}.pdf`,
       );
 
       toast.success("Đã lưu hoá đơn PDF thành công!");
@@ -800,7 +766,7 @@ export default function OrderDetailPage() {
   const orderData = orderDetail.data.order;
 
   // Normalize order data to match UI expectations
-  const order = {
+  const order: any = {
     ...orderData,
     orderStatus: orderData.status,
     paymentStatus: orderData.is_paid ? "PAID" : "PENDING",
@@ -1155,7 +1121,7 @@ export default function OrderDetailPage() {
                         {status === "DA_GIAO_HANG" && "Đã giao hàng"}
                         {status === "HOAN_THANH" && "Hoàn thành"}
                       </SelectItem>
-                    )
+                    ),
                   )}
                 </SelectContent>
               </Select>

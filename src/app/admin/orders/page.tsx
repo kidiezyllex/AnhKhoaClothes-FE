@@ -40,6 +40,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -84,7 +93,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IOrderFilter>({
     page: 1,
-    limit: 10,
+    limit: 5,
   });
   const [selectedTab, setSelectedTab] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
@@ -124,7 +133,7 @@ export default function OrdersPage() {
     const currentDay = today.getDay();
     const startOfWeek = new Date(today);
     startOfWeek.setDate(
-      today.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
+      today.getDate() - currentDay + (currentDay === 0 ? -6 : 1),
     );
     startOfWeek.setHours(0, 0, 0, 0);
 
@@ -177,7 +186,7 @@ export default function OrdersPage() {
 
   const handleFilterChange = (
     key: keyof IOrderFilter,
-    value: string | undefined
+    value: string | undefined,
   ) => {
     if (value === "" || value === "all") {
       const newFilters = { ...filters };
@@ -210,7 +219,7 @@ export default function OrdersPage() {
             });
             setIsStatusDialogOpen(false);
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("Cập nhật trạng thái đơn hàng thất bại");
@@ -473,7 +482,7 @@ export default function OrdersPage() {
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal text-primary",
-                        !dateRange && "text-muted-foreground"
+                        !dateRange && "text-muted-foreground",
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-primary" />
@@ -763,6 +772,16 @@ export default function OrdersPage() {
       );
     }
 
+    const currentPage =
+      data.data.page || data.data.pagination?.currentPage || 1;
+    const totalPages = data.data.pages || data.data.pagination?.totalPages || 1;
+    const totalItems =
+      data.data.count ||
+      data.data.pagination?.totalItems ||
+      data.data.orders.length;
+    const perPage =
+      filters.limit || data.data.perPage || data.data.pagination?.limit || 5;
+
     return (
       <>
         <div className="overflow-hidden">
@@ -793,11 +812,9 @@ export default function OrdersPage() {
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">
-                        Khách hàng (
+                      <div className="font-medium text-gray-700">
                         {order.shipping_address?.recipient_phone_number ||
-                          "N/A"}
-                        )
+                          "Khách lẻ"}
                       </div>
                       <div className="text-sm text-gray-700 italic">
                         {order.shipping_address?.recipient_phone_number ||
@@ -851,69 +868,129 @@ export default function OrdersPage() {
           </Table>
         </div>
 
-        {data.data.pages > 1 && (
-          <div className="flex justify-center mt-6">
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleChangePage(Math.max(1, data.data.page - 1))
-                }
-                disabled={data.data.page === 1}
-              >
-                Trước
-              </Button>
-              {Array.from({ length: data.data.pages }, (_, i) => i + 1)
-                .filter(
-                  (page) =>
-                    page === 1 ||
-                    page === data.data.page ||
-                    Math.abs(page - data.data.page) <= 1
-                )
-                .reduce((acc: (number | string)[], page, idx, arr) => {
-                  if (idx > 0 && page - arr[idx - 1] > 1) {
-                    acc.push("...");
-                  }
-                  acc.push(page);
-                  return acc;
-                }, [])
-                .map((page, index) =>
-                  page === "..." ? (
-                    <Button
-                      key={`ellipsis-${index}`}
-                      variant="outline"
-                      size="sm"
-                      disabled
-                    >
-                      ...
-                    </Button>
-                  ) : (
-                    <Button
-                      key={`page-${page}`}
-                      variant={data.data.page === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleChangePage(page as number)}
-                    >
-                      {page}
-                    </Button>
-                  )
-                )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleChangePage(
-                    Math.min(data.data.pages, data.data.page + 1)
-                  )
-                }
-                disabled={data.data.page === data.data.pages}
-              >
-                Sau
-              </Button>
-            </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-sm text-gray-700 order-2 sm:order-1">
+            Hiển thị{" "}
+            <span className="font-medium">
+              {(currentPage - 1) * perPage + 1}
+            </span>{" "}
+            đến{" "}
+            <span className="font-medium">
+              {Math.min(currentPage * perPage, totalItems)}
+            </span>{" "}
+            trong tổng số <span className="font-medium">{totalItems}</span> đơn
+            hàng
           </div>
-        )}
+
+          {totalPages > 1 && (
+            <div className="flex justify-center order-1 sm:order-2">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      disabled={currentPage <= 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) handleChangePage(currentPage - 1);
+                      }}
+                    />
+                  </PaginationItem>
+
+                  {(() => {
+                    const pages = [];
+                    if (totalPages > 0) {
+                      pages.push(
+                        <PaginationItem key={1}>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === 1}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleChangePage(1);
+                            }}
+                          >
+                            1
+                          </PaginationLink>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    if (currentPage > 3) {
+                      pages.push(
+                        <PaginationItem key="start-ellipsis">
+                          <PaginationEllipsis />
+                        </PaginationItem>,
+                      );
+                    }
+
+                    for (
+                      let i = Math.max(2, currentPage - 1);
+                      i <= Math.min(totalPages - 1, currentPage + 1);
+                      i++
+                    ) {
+                      if (i !== 1 && i !== totalPages) {
+                        pages.push(
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === i}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleChangePage(i);
+                              }}
+                            >
+                              {i}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+                    }
+
+                    if (currentPage < totalPages - 2) {
+                      pages.push(
+                        <PaginationItem key="end-ellipsis">
+                          <PaginationEllipsis />
+                        </PaginationItem>,
+                      );
+                    }
+
+                    if (totalPages > 1) {
+                      pages.push(
+                        <PaginationItem key={totalPages}>
+                          <PaginationLink
+                            href="#"
+                            isActive={currentPage === totalPages}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleChangePage(totalPages);
+                            }}
+                          >
+                            {totalPages}
+                          </PaginationLink>
+                        </PaginationItem>,
+                      );
+                    }
+
+                    return pages;
+                  })()}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      disabled={currentPage >= totalPages}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages)
+                          handleChangePage(currentPage + 1);
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </div>
       </>
     );
   }
@@ -1181,7 +1258,7 @@ const OrderDetailDialog = ({
                   <Button
                     className="w-full"
                     disabled={["DA_HUY", "HOAN_THANH"].includes(
-                      orderDetail.status
+                      orderDetail.status,
                     )}
                     onClick={() => onUpdateStatus(orderId, orderDetail.status)}
                   >
@@ -1191,7 +1268,7 @@ const OrderDetailDialog = ({
                     variant="outline"
                     className="w-full"
                     disabled={["DA_HUY", "HOAN_THANH"].includes(
-                      orderDetail.status
+                      orderDetail.status,
                     )}
                     onClick={() => onCancelOrder(orderId)}
                   >

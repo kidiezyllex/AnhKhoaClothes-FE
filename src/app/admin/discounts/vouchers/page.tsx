@@ -32,6 +32,15 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -66,7 +75,7 @@ export default function VouchersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IVoucherFilter>({
     page: 1,
-    limit: 10,
+    limit: 5,
   });
   const [showFilters, setShowFilters] = useState(false);
   const { data, isLoading, isError } = useVouchers(filters);
@@ -98,7 +107,7 @@ export default function VouchersPage() {
 
   const handleFilterChange = (
     key: keyof IVoucherFilter,
-    value: string | number | undefined
+    value: string | number | undefined,
   ) => {
     if (value === "") {
       const newFilters = { ...filters };
@@ -111,7 +120,7 @@ export default function VouchersPage() {
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setFilters({ page: 1, limit: 10 });
+    setFilters({ page: 1, limit: 5 });
   };
 
   const handleDeleteVoucher = async (id: string) => {
@@ -247,7 +256,7 @@ export default function VouchersPage() {
               {(showFilters ||
                 searchQuery ||
                 Object.keys(filters).filter(
-                  (k) => k !== "page" && k !== "limit"
+                  (k) => k !== "page" && k !== "limit",
                 ).length > 0) && (
                 <Button
                   variant="outline"
@@ -302,7 +311,7 @@ export default function VouchersPage() {
                       onValueChange={(value) =>
                         handleFilterChange(
                           "status",
-                          value === "all" ? undefined : value
+                          value === "all" ? undefined : value,
                         )
                       }
                     >
@@ -496,86 +505,136 @@ export default function VouchersPage() {
           </div>
 
           {data && data.data && data.data.pagination && (
-            <div className="flex justify-center items-center space-x-2 p-4 border-t">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => handleChangePage(1)}
-                disabled={data.data.pagination.currentPage === 1}
-              >
-                <span className="sr-only">Trang đầu</span>
-                <span>«</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  handleChangePage(data.data.pagination.currentPage - 1)
-                }
-                disabled={data.data.pagination.currentPage === 1}
-              >
-                <span className="sr-only">Trang trước</span>
-                <span>‹</span>
-              </Button>
-              {[...Array(data.data.pagination.totalPages)].map((_, index) => {
-                const page = index + 1;
-                // Hiển thị trang hiện tại, 2 trang trước và 2 trang sau
-                if (
-                  page === 1 ||
-                  page === data.data.pagination.totalPages ||
-                  (page >= data.data.pagination.currentPage - 2 &&
-                    page <= data.data.pagination.currentPage + 2)
-                ) {
-                  return (
-                    <Button
-                      key={page}
-                      variant={
-                        page === data.data.pagination.currentPage
-                          ? "default"
-                          : "outline"
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+              <div className="text-sm text-gray-700 order-2 sm:order-1">
+                Hiển thị{" "}
+                <span className="font-medium">
+                  {(data.data.pagination.currentPage - 1) * filters.limit! + 1}
+                </span>{" "}
+                đến{" "}
+                <span className="font-medium">
+                  {Math.min(
+                    data.data.pagination.currentPage * filters.limit!,
+                    data.data.pagination.totalItems,
+                  )}
+                </span>{" "}
+                trong tổng số{" "}
+                <span className="font-medium">
+                  {data.data.pagination.totalItems}
+                </span>{" "}
+                mã giảm giá
+              </div>
+
+              <div className="flex justify-center order-1 sm:order-2">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        disabled={data.data.pagination.currentPage === 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (data.data.pagination.currentPage > 1)
+                            handleChangePage(
+                              data.data.pagination.currentPage - 1,
+                            );
+                        }}
+                      />
+                    </PaginationItem>
+
+                    {(() => {
+                      const totalPages = data.data.pagination.totalPages;
+                      const currentPage = data.data.pagination.currentPage;
+                      const pages = [];
+                      if (totalPages > 0) {
+                        pages.push(
+                          <PaginationItem key={1}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === 1}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleChangePage(1);
+                              }}
+                            >
+                              1
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
                       }
-                      size="icon"
-                      onClick={() => handleChangePage(page)}
-                    >
-                      {page}
-                    </Button>
-                  );
-                } else if (
-                  page === data.data.pagination.currentPage - 3 ||
-                  page === data.data.pagination.currentPage + 3
-                ) {
-                  return <span key={page}>...</span>;
-                }
-                return null;
-              })}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  handleChangePage(data.data.pagination.currentPage + 1)
-                }
-                disabled={
-                  data.data.pagination.currentPage ===
-                  data.data.pagination.totalPages
-                }
-              >
-                <span className="sr-only">Trang sau</span>
-                <span>›</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  handleChangePage(data.data.pagination.totalPages)
-                }
-                disabled={
-                  data.data.pagination.currentPage ===
-                  data.data.pagination.totalPages
-                }
-              >
-                <span className="sr-only">Trang cuối</span>
-                <span>»</span>
-              </Button>
+
+                      if (currentPage > 3) {
+                        pages.push(
+                          <PaginationItem key="start-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      for (
+                        let i = Math.max(2, currentPage - 1);
+                        i <= Math.min(totalPages - 1, currentPage + 1);
+                        i++
+                      ) {
+                        if (i !== 1 && i !== totalPages) {
+                          pages.push(
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === i}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleChangePage(i);
+                                }}
+                              >
+                                {i}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+                      }
+
+                      if (currentPage < totalPages - 2) {
+                        pages.push(
+                          <PaginationItem key="end-ellipsis">
+                            <PaginationEllipsis />
+                          </PaginationItem>,
+                        );
+                      }
+
+                      if (totalPages > 1) {
+                        pages.push(
+                          <PaginationItem key={totalPages}>
+                            <PaginationLink
+                              href="#"
+                              isActive={currentPage === totalPages}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleChangePage(totalPages);
+                              }}
+                            >
+                              {totalPages}
+                            </PaginationLink>
+                          </PaginationItem>,
+                        );
+                      }
+                      return pages;
+                    })()}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        disabled={currentPage === totalPages}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (currentPage < totalPages)
+                            handleChangePage(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           )}
         </div>

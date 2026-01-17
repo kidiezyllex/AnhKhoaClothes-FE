@@ -61,38 +61,53 @@ export interface IMaterialsResponse {
 }
 
 // Color interfaces
-export interface IColor extends IAttributeBase {
+export interface IColor {
+  id: string;
   name: string;
-  code: string;
+  hex_code: string;
+  status?: 'ACTIVE' | 'INACTIVE';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IColorResponse {
-  success: boolean;
+  status: string;
   message: string;
   data: IColor;
 }
 
 export interface IColorsResponse {
-  success: boolean;
+  status: string;
   message: string;
-  data: IColor[];
+  data: {
+    colors: IColor[];
+    count: number;
+  };
 }
 
 // Size interfaces
-export interface ISize extends IAttributeBase {
-  value: number;
+export interface ISize {
+  id: string;
+  name: string;
+  code: string;
+  status?: 'ACTIVE' | 'INACTIVE';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ISizeResponse {
-  success: boolean;
+  status: string;
   message: string;
   data: ISize;
 }
 
 export interface ISizesResponse {
-  success: boolean;
+  status: string;
   message: string;
-  data: ISize[];
+  data: {
+    sizes: ISize[];
+    count: number;
+  };
 }
 
 // Action response interface

@@ -96,7 +96,7 @@ export default function StatisticsPage() {
       type: "MONTHLY",
       page: 1,
       limit: 10,
-    }
+    },
   );
   const [revenueFilters, setRevenueFilters] = useState<IRevenueReportFilter>({
     type: "MONTHLY",
@@ -110,7 +110,7 @@ export default function StatisticsPage() {
       startDate: new Date(
         new Date().getFullYear(),
         new Date().getMonth() - 2,
-        1
+        1,
       )
         .toISOString()
         .split("T")[0],
@@ -119,7 +119,7 @@ export default function StatisticsPage() {
     });
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [generateDate, setGenerateDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedStatisticsId, setSelectedStatisticsId] = useState<
@@ -160,14 +160,14 @@ export default function StatisticsPage() {
 
   const handleRevenueFilterChange = (
     key: keyof IRevenueReportFilter,
-    value: any
+    value: any,
   ) => {
     setRevenueFilters({ ...revenueFilters, [key]: value });
   };
 
   const handleTopProductsFilterChange = (
     key: keyof ITopProductsFilter,
-    value: any
+    value: any,
   ) => {
     setTopProductsFilters({ ...topProductsFilters, [key]: value });
   };
@@ -184,7 +184,7 @@ export default function StatisticsPage() {
             queryClient.invalidateQueries({ queryKey: ["topProducts"] });
             setIsGenerateDialogOpen(false);
           },
-        }
+        },
       );
     } catch (error) {
       toast.error("Tạo thống kê thất bại");
@@ -228,7 +228,7 @@ export default function StatisticsPage() {
     const isPositive = change >= 0;
     return (
       <Card className="h-full bg-white border border-gray-200 hover:shadow-md transition-all duration-300">
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex items-start gap-4">
             {/* Icon */}
             <div className={`${bgColor} p-3 rounded-xl flex-shrink-0`}>
@@ -240,7 +240,7 @@ export default function StatisticsPage() {
               <p className="text-sm text-gray-700 mb-1 font-semibold">
                 {title}
               </p>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">{value}</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{value}</h3>
             </div>
           </div>
           {/* Change indicator */}
@@ -545,7 +545,7 @@ export default function StatisticsPage() {
                               ? `${name.substring(0, maxLength)}...`
                               : name;
                           return `${truncatedName}: ${(percent * 100).toFixed(
-                            1
+                            1,
                           )}%`;
                         }}
                         labelLine={false}
@@ -563,7 +563,7 @@ export default function StatisticsPage() {
                         formatter={(
                           value: number,
                           name: string,
-                          props: any
+                          props: any,
                         ) => [
                           `${value} sản phẩm`,
                           props.payload.fullName || name,
@@ -797,7 +797,7 @@ export default function StatisticsPage() {
                             ? `${name.substring(0, maxLength)}...`
                             : name;
                         return `${truncatedName}: ${(percent * 100).toFixed(
-                          1
+                          1,
                         )}%`;
                       }}
                       labelLine={false}
@@ -841,7 +841,7 @@ export default function StatisticsPage() {
                   <p className="text-2xl font-bold text-blue-600">
                     {mockTopProductsData.reduce(
                       (sum: number, item: any) => sum + item.totalQuantity,
-                      0
+                      0,
                     )}{" "}
                     sản phẩm
                   </p>
@@ -854,8 +854,8 @@ export default function StatisticsPage() {
                     {formatCurrency(
                       mockTopProductsData.reduce(
                         (sum: number, item) => sum + item.totalRevenue,
-                        0
-                      )
+                        0,
+                      ),
                     )}
                   </p>
                 </div>
@@ -954,10 +954,10 @@ export default function StatisticsPage() {
                           {statisticsDetailData.data.type === "DAILY"
                             ? "Ngày"
                             : statisticsDetailData.data.type === "WEEKLY"
-                            ? "Tuần"
-                            : statisticsDetailData.data.type === "MONTHLY"
-                            ? "Tháng"
-                            : "Năm"}
+                              ? "Tuần"
+                              : statisticsDetailData.data.type === "MONTHLY"
+                                ? "Tháng"
+                                : "Năm"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">

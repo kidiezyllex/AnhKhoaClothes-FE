@@ -46,7 +46,6 @@ import {
 import { checkImageUrl, cn } from "@/lib/utils";
 import { POSCartItem, usePOSCartStore } from "@/stores/usePOSCartStore";
 import { usePendingCartsStore } from "@/stores/usePendingCartsStore";
-import { getSizeLabel } from "@/utils/sizeMapping";
 import {
   mdiCart,
   mdiCartPlus,
@@ -90,24 +89,37 @@ const CardSkeleton = () => (
 );
 
 interface ApiVariant {
-  id: string;
-  colorId?: { id: string; name: string; code: string; images?: string[] };
-  sizeId?: { id: string; name: string; value?: string };
-  price: number;
+  _id: string;
   stock: number;
-  images?: string[];
-  sku?: string;
-  actualSizeId?: string;
+  color: string; // Hex code like "#000000"
+  size: string; // Size code like "XL", "M", "S"
+  price: number;
 }
 
 interface ApiProduct {
-  id: string;
-  name: string;
-  category: { id: string; name: string } | string;
-  description?: string;
+  id: number;
+  gender: string;
+  masterCategory: string;
+  subCategory: string;
+  articleType: string;
+  baseColour: string;
+  season: string;
+  year: number;
+  usage: string;
+  productDisplayName: string;
+  images: string[];
+  rating: number;
+  sale: number;
+  reviews: any[];
   variants: ApiVariant[];
-  status?: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  // Promotion fields (added by frontend)
+  hasDiscount?: boolean;
+  discountedPrice?: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  appliedPromotion?: any;
 }
 
 interface InvoiceShopInfo {
@@ -147,23 +159,14 @@ interface InvoiceData {
   paymentMethod: string;
 }
 
-const getVariantImageUrl = (variant: any) => {
+const getVariantImageUrl = (product: any, variant?: any) => {
+  // New API: images are in product.images array
   if (
-    !variant?.images ||
-    !Array.isArray(variant.images) ||
-    variant.images.length === 0
+    product?.images &&
+    Array.isArray(product.images) &&
+    product.images.length > 0
   ) {
-    return "/images/white-image.png";
-  }
-
-  // Handle both string arrays and object arrays
-  const firstImage = variant.images[0];
-  if (typeof firstImage === "string") {
-    return firstImage;
-  } else if (typeof firstImage === "object" && firstImage?.imageUrl) {
-    return firstImage.imageUrl;
-  } else if (typeof firstImage === "object" && firstImage?.url) {
-    return firstImage.url;
+    return product.images[0];
   }
 
   return "/images/white-image.png";
@@ -173,112 +176,71 @@ const convertVariantToApiVariant = (variant: any): ApiVariant => {
   // Handle case where variant might be null or undefined
   if (!variant) {
     return {
-      id: "",
-      price: 0,
+      _id: "",
       stock: 0,
-      images: [],
+      color: "#000000",
+      size: "N/A",
+      price: 0,
     };
   }
 
-  // Handle color data - check for populated vs non-populated
-  let colorData = undefined;
-  if (variant.color) {
-    // Populated format - color data is directly available
-    colorData = {
-      id: variant.color.id?.toString() || "",
-      name: variant.color.name || "N/A",
-      code: variant.color.code || "#000000",
-      images: variant.color.images || [],
-    };
-  } else if (variant.colorId) {
-    // Non-populated format - colorId might be string or object
-    if (typeof variant.colorId === "object") {
-      colorData = {
-        id: variant.colorId.id?.toString() || "",
-        name: variant.colorId.name || "N/A",
-        code: variant.colorId.code || "#000000",
-        images: variant.colorId.images || [],
-      };
-    } else {
-      colorData = {
-        id: variant.colorId.toString(),
-        name: "N/A",
-        code: "#000000",
-        images: [],
-      };
-    }
-  }
-
-  // Handle size data - check for populated vs non-populated
-  let sizeData = undefined;
-  if (variant.size) {
-    // Populated format - size data is directly available
-    sizeData = {
-      id: variant.size.id?.toString() || "",
-      name:
-        variant.size.name ||
-        (variant.size.value ? getSizeLabel(Number(variant.size.value)) : "N/A"),
-      value: variant.size.value?.toString(),
-    };
-  } else if (variant.sizeId) {
-    // Non-populated format - sizeId might be string or object
-    if (typeof variant.sizeId === "object") {
-      sizeData = {
-        id: variant.sizeId.id?.toString() || "",
-        name:
-          variant.sizeId.name ||
-          (variant.sizeId.value
-            ? getSizeLabel(Number(variant.sizeId.value))
-            : "N/A"),
-        value: variant.sizeId.value?.toString(),
-      };
-    } else {
-      sizeData = {
-        id: variant.sizeId.toString(),
-        name: "N/A",
-        value: undefined,
-      };
-    }
-  }
-
-  // Return standardized variant data
+  // New API structure: variant has direct color (hex) and size (code) values
   return {
-    id: variant.id?.toString() || variant._id?.toString() || "",
-    colorId: colorData,
-    sizeId: sizeData,
-    price: parseFloat(variant.price?.toString() || "0"),
+    _id: variant._id?.toString() || variant.id?.toString() || "",
     stock: parseInt(variant.stock?.toString() || "0"),
-    images:
-      variant.images?.map((img: any) =>
-        typeof img === "string" ? img : img.imageUrl || img.url
-      ) || [],
-    sku: variant.sku || "",
-    actualSizeId: sizeData?.id || "",
+    color: variant.color || "#000000", // Hex code like "#FF0000"
+    size: variant.size || "N/A", // Size code like "XL", "M", "S"
+    price: parseFloat(variant.price?.toString() || "0"),
   };
 };
 
 const convertProductToApiProduct = (product: any): ApiProduct => {
   if (!product) {
     return {
-      id: "",
-      name: "Unknown Product",
-      category: "Unknown",
+      id: 0,
+      gender: "",
+      masterCategory: "",
+      subCategory: "",
+      articleType: "",
+      baseColour: "",
+      season: "",
+      year: 0,
+      usage: "",
+      productDisplayName: "Unknown Product",
+      images: [],
+      rating: 0,
+      sale: 0,
+      reviews: [],
       variants: [],
-      createdAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
   }
 
   return {
-    id:
-      (product as any)?.id?.toString() ||
-      (product as any)?._id?.toString() ||
-      "",
-    name: (product as any)?.name || "Unknown Product",
-    category: (product as any)?.category || "Unknown",
-    description: (product as any)?.description,
-    variants: (product as any)?.variants?.map(convertVariantToApiVariant) || [],
-    status: (product as any)?.status,
-    createdAt: (product as any)?.createdAt || new Date().toISOString(),
+    id: product.id || 0,
+    gender: product.gender || "",
+    masterCategory: product.masterCategory || "",
+    subCategory: product.subCategory || "",
+    articleType: product.articleType || "",
+    baseColour: product.baseColour || "",
+    season: product.season || "",
+    year: product.year || 0,
+    usage: product.usage || "",
+    productDisplayName: product.productDisplayName || "Unknown Product",
+    images: product.images || [],
+    rating: product.rating || 0,
+    sale: product.sale || 0,
+    reviews: product.reviews || [],
+    variants: (product.variants || []).map(convertVariantToApiVariant),
+    created_at: product.created_at || new Date().toISOString(),
+    updated_at: product.updated_at || new Date().toISOString(),
+    // Preserve promotion fields if they exist
+    hasDiscount: product.hasDiscount,
+    discountedPrice: product.discountedPrice,
+    originalPrice: product.originalPrice,
+    discountPercent: product.discountPercent,
+    appliedPromotion: product.appliedPromotion,
   };
 };
 
@@ -286,7 +248,7 @@ export default function POSPage() {
   // State for product selection and search
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<ApiProduct | null>(
-    null
+    null,
   );
   const [selectedApiVariant, setSelectedApiVariant] =
     useState<ApiVariant | null>(null);
@@ -346,7 +308,7 @@ export default function POSPage() {
   const [showCartItemsDialog, setShowCartItemsDialog] =
     useState<boolean>(false);
   const [selectedCartForView, setSelectedCartForView] = useState<string | null>(
-    null
+    null,
   );
 
   const [recentTransactions, setRecentTransactions] = useState([
@@ -381,7 +343,7 @@ export default function POSPage() {
       status: "ACTIVE" as const,
       limit: 100,
     }),
-    []
+    [],
   );
 
   const { data: usersData } = useAccounts(accountsParams);
@@ -424,7 +386,7 @@ export default function POSPage() {
       ...pagination,
       ...filters,
     }),
-    [pagination.page, pagination.limit, filters.status, filters.categories]
+    [pagination.page, pagination.limit, filters.status, filters.categories],
   );
 
   const productsQuery = useProducts(productsHookParams);
@@ -466,7 +428,7 @@ export default function POSPage() {
 
     if (promotionsData?.data?.promotions?.length > 0) {
       const activePromotions = filterActivePromotions(
-        promotionsData.data.promotions
+        promotionsData.data.promotions,
       );
       products = applyPromotionsToProducts([...products], activePromotions);
     }
@@ -572,7 +534,7 @@ export default function POSPage() {
     if (convertedProduct.variants && convertedProduct.variants.length > 0) {
       // Prioritize variants with stock, but still allow selection of out-of-stock variants
       const variantWithStock = convertedProduct.variants.find(
-        (v) => v.stock > 0
+        (v) => v.stock > 0,
       );
       const selectedVariant = variantWithStock || convertedProduct.variants[0];
       setSelectedApiVariant(selectedVariant);
@@ -586,12 +548,12 @@ export default function POSPage() {
     }
   };
 
-  const handleColorSelectFromDetail = (colorId: string) => {
+  const handleColorSelectFromDetail = (colorHex: string) => {
     if (!selectedProduct) return;
 
     // Find variants with the selected color
     const variantsWithThisColor = selectedProduct.variants.filter(
-      (v) => v.colorId?.id === colorId
+      (v) => v.color === colorHex,
     );
     if (variantsWithThisColor.length === 0) return;
 
@@ -606,14 +568,12 @@ export default function POSPage() {
     }
   };
 
-  const handleSizeSelectFromDetail = (sizeId: string) => {
-    if (!selectedProduct || !selectedApiVariant?.colorId) return;
+  const handleSizeSelectFromDetail = (sizeCode: string) => {
+    if (!selectedProduct || !selectedApiVariant?.color) return;
 
     // Find variant with selected color and size
     const variantWithThisSizeAndColor = selectedProduct.variants.find(
-      (v) =>
-        v.colorId?.id === selectedApiVariant.colorId?.id &&
-        v.sizeId?.id === sizeId
+      (v) => v.color === selectedApiVariant.color && v.size === sizeCode,
     );
 
     if (variantWithThisSizeAndColor) {
@@ -627,7 +587,7 @@ export default function POSPage() {
   const addItemToCorrectCart = (
     product: any,
     variant: any,
-    isAlreadyConverted = false
+    isAlreadyConverted = false,
   ) => {
     // Convert product and variant data to standard format if needed
     const convertedProduct = isAlreadyConverted
@@ -638,7 +598,7 @@ export default function POSPage() {
       : convertVariantToApiVariant(variant);
 
     // Create unique cart item identifier
-    const cartItemId = `${convertedProduct.id}-${convertedVariant.id}`;
+    const cartItemId = `${convertedProduct.id}-${convertedVariant._id}`;
 
     // Initialize pricing variables
     let finalPrice = convertedVariant.price;
@@ -656,11 +616,11 @@ export default function POSPage() {
     } else if (promotionsData?.data?.promotions?.length > 0) {
       // If no discount applied, check for active promotions
       const activePromotions = filterActivePromotions(
-        promotionsData.data.promotions
+        promotionsData.data.promotions,
       );
       const productWithPromotions = applyPromotionsToProducts(
         [convertedProduct],
-        activePromotions
+        activePromotions,
       );
       const promotedProduct = productWithPromotions[0];
 
@@ -672,24 +632,25 @@ export default function POSPage() {
       }
     }
 
-    // Create new cart item
+    // Create new cart item with new API structure
     const newItem: POSCartItem = {
       id: cartItemId,
-      productId: convertedProduct.id,
-      variantId: convertedVariant.id,
-      name: convertedProduct.name,
-      colorName: convertedVariant.colorId?.name || "N/A",
-      colorCode: convertedVariant.colorId?.code || "#000000",
-      sizeName: convertedVariant.sizeId?.name || "N/A",
+      productId: convertedProduct.id.toString(),
+      variantId: convertedVariant._id,
+      name: convertedProduct.productDisplayName,
+      colorName: convertedVariant.color, // Hex code
+      colorCode: convertedVariant.color, // Hex code
+      sizeName: convertedVariant.size, // Size code like "XL"
       price: finalPrice,
       originalPrice: originalPrice,
       discountPercent: discountPercent,
       hasDiscount: hasDiscount,
       quantity: 1,
-      image: getVariantImageUrl(convertedVariant) || "/placeholder.svg",
+      image:
+        getVariantImageUrl(product, convertedVariant) || "/placeholder.svg",
       stock: convertedVariant.stock,
-      actualColorId: convertedVariant.colorId?.id || "",
-      actualSizeId: convertedVariant.sizeId?.id || "",
+      actualColorId: convertedVariant.color, // Use hex code as ID
+      actualSizeId: convertedVariant.size, // Use size code as ID
     };
 
     if (activeCartId) {
@@ -702,7 +663,7 @@ export default function POSPage() {
         if (existingItem.quantity < convertedVariant.stock) {
           updateItemQuantityInPendingCart(activeCartId, cartItemId, 1);
           toast.success(
-            `Đã cập nhật số lượng sản phẩm trong ${activeCartName}.`
+            `Đã cập nhật số lượng sản phẩm trong ${activeCartName}.`,
           );
         } else {
           toast.warn("Số lượng sản phẩm trong kho không đủ.");
@@ -800,64 +761,46 @@ export default function POSPage() {
   // Optimize variant calculations with memoization
   const uniqueColorsForSelectedProduct = useMemo(() => {
     if (!selectedProduct?.variants?.length) return [];
-    const colorMap = new Map<string, ApiVariant["colorId"]>();
+    const colorMap = new Map<string, { hex: string }>();
 
     for (const variant of selectedProduct.variants) {
-      if (variant.colorId?.id && !colorMap.has(variant.colorId.id)) {
-        colorMap.set(variant.colorId.id, variant.colorId);
+      if (variant.color && !colorMap.has(variant.color)) {
+        colorMap.set(variant.color, { hex: variant.color });
       }
     }
 
-    return Array.from(colorMap.values()).filter(Boolean) as NonNullable<
-      ApiVariant["colorId"]
-    >[];
+    return Array.from(colorMap.values());
   }, [selectedProduct?.id, selectedProduct?.variants?.length]);
 
   const availableSizesForSelectedColor = useMemo(() => {
-    if (!selectedProduct?.variants?.length || !selectedApiVariant?.colorId?.id)
+    if (!selectedProduct?.variants?.length || !selectedApiVariant?.color)
       return [];
-    const sizeMap = new Map<string, ApiVariant["sizeId"]>();
+    const sizeMap = new Map<string, { code: string }>();
 
     for (const variant of selectedProduct.variants) {
       if (
-        variant.colorId?.id === selectedApiVariant.colorId.id &&
-        variant.sizeId?.id &&
-        !sizeMap.has(variant.sizeId.id)
+        variant.color === selectedApiVariant.color &&
+        variant.size &&
+        !sizeMap.has(variant.size)
       ) {
-        sizeMap.set(variant.sizeId.id, variant.sizeId);
+        sizeMap.set(variant.size, { code: variant.size });
       }
     }
 
-    return Array.from(sizeMap.values()).filter(Boolean) as NonNullable<
-      ApiVariant["sizeId"]
-    >[];
-  }, [selectedProduct?.id, selectedApiVariant?.colorId?.id]);
-  // Helper function to safely get color info from variants
-  const getColorInfo = useCallback((colorId: any) => {
-    if (!colorId) return null;
-    if (typeof colorId === "object" && colorId.id) {
-      return colorId;
-    }
-    return null;
+    return Array.from(sizeMap.values());
+  }, [selectedProduct?.id, selectedApiVariant?.color]);
+  const getUniqueColors = useCallback((variants: any[]) => {
+    if (!variants?.length) return [];
+    const colorMap = new Map();
+
+    variants.forEach((v) => {
+      if (v.color) {
+        colorMap.set(v.color, { hex: v.color });
+      }
+    });
+
+    return Array.from(colorMap.values());
   }, []);
-
-  // Helper function to safely get unique colors from variants
-  const getUniqueColors = useCallback(
-    (variants: any[]) => {
-      if (!variants?.length) return [];
-      const colorMap = new Map();
-
-      variants.forEach((v) => {
-        const colorInfo = getColorInfo(v.colorId);
-        if (colorInfo) {
-          colorMap.set(colorInfo.id, colorInfo);
-        }
-      });
-
-      return Array.from(colorMap.values());
-    },
-    [getColorInfo]
-  );
 
   const handleCreateNewCart = () => {
     const newCartId = createNewCart();
@@ -948,7 +891,7 @@ export default function POSPage() {
                   "relative flex items-center gap-2 p-2 rounded-sm border-2 transition-all duration-200 min-w-[140px] group",
                   activeCartId === cart.id
                     ? "border-primary bg-primary/5 text-primary shadow-sm"
-                    : "border-border bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5"
+                    : "border-border bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5",
                 )}
                 onClick={() => handleSwitchCart(cart.id)}
               >
@@ -957,7 +900,7 @@ export default function POSPage() {
                   <div
                     className={cn(
                       "w-2 h-2 rounded-full",
-                      cart.items.length > 0 ? "bg-[#EAEBF2]0" : "bg-gray-300"
+                      cart.items.length > 0 ? "bg-[#EAEBF2]0" : "bg-gray-300",
                     )}
                   />
                   <span className="text-sm font-medium truncate">
@@ -1012,7 +955,7 @@ export default function POSPage() {
                             "w-2 h-2 rounded-full",
                             cart.items.length > 0
                               ? "bg-[#EAEBF2]0"
-                              : "bg-gray-300"
+                              : "bg-gray-300",
                           )}
                         />
                         <span>{cart.name}</span>
@@ -1020,7 +963,7 @@ export default function POSPage() {
                           <Badge variant="secondary" className="text-xs">
                             {cart.items.reduce(
                               (sum, item) => sum + item.quantity,
-                              0
+                              0,
                             )}
                           </Badge>
                         )}
@@ -1080,7 +1023,7 @@ export default function POSPage() {
                     "whitespace-nowrap px-4 py-2 rounded-[6px] text-sm font-medium transition-all duration-200",
                     activeCategoryName === category.name
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-primary"
+                      : "bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-primary",
                   )}
                   onClick={() => {
                     setActiveCategoryName(category.name);
@@ -1128,10 +1071,16 @@ export default function POSPage() {
                     <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white border group">
                       <img
                         src={checkImageUrl(
-                          getVariantImageUrl(selectedApiVariant) ||
-                            getVariantImageUrl(selectedProduct.variants[0])
+                          getVariantImageUrl(
+                            selectedProduct,
+                            selectedApiVariant,
+                          ) ||
+                            getVariantImageUrl(
+                              selectedProduct,
+                              selectedProduct.variants[0],
+                            ),
                         )}
-                        alt={selectedProduct.name}
+                        alt={selectedProduct.productDisplayName}
                         className="object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                       />
 
@@ -1178,7 +1127,7 @@ export default function POSPage() {
                       </div>
 
                       <h2 className="text-2xl font-bold text-gray-700 leading-tight">
-                        {selectedProduct.name}
+                        {selectedProduct.productDisplayName}
                       </h2>
 
                       {(selectedProduct as any).hasDiscount &&
@@ -1200,14 +1149,14 @@ export default function POSPage() {
                           {formatCurrency(
                             (selectedProduct as any).hasDiscount
                               ? (selectedProduct as any).discountedPrice
-                              : selectedApiVariant.price
+                              : selectedApiVariant.price,
                           )}
                         </div>
                         {(selectedProduct as any).hasDiscount && (
                           <div className="flex items-center gap-2">
                             <span className="text-xl text-gray-700 line-through">
                               {formatCurrency(
-                                (selectedProduct as any).originalPrice
+                                (selectedProduct as any).originalPrice,
                               )}
                             </span>
                             <Badge
@@ -1237,39 +1186,39 @@ export default function POSPage() {
                           <h3 className="text-base font-semibold text-gray-700">
                             Màu sắc
                           </h3>
-                          {selectedApiVariant?.colorId && (
+                          {selectedApiVariant?.color && (
                             <Badge
                               variant="secondary"
                               className="bg-primary/10 text-primary border-primary/20"
                             >
-                              {selectedApiVariant.colorId.name}
+                              {selectedApiVariant.color}
                             </Badge>
                           )}
                         </div>
                         <div className="flex gap-4 flex-wrap">
                           {uniqueColorsForSelectedProduct.map((color) => (
                             <motion.button
-                              key={color.id}
+                              key={color.hex}
                               className={cn(
                                 "relative group flex items-center justify-center w-8 h-8 rounded-full transition-all duration-300 border-2",
-                                selectedApiVariant?.colorId?.id === color.id
+                                selectedApiVariant?.color === color.hex
                                   ? "border-primary ring-4 ring-primary/20 scale-110"
-                                  : "border-gray-200 hover:border-gray-300 hover:scale-105"
+                                  : "border-gray-200 hover:border-gray-300 hover:scale-105",
                               )}
-                              style={{ backgroundColor: color.code }}
+                              style={{ backgroundColor: color.hex }}
                               onClick={() =>
-                                handleColorSelectFromDetail(color.id)
+                                handleColorSelectFromDetail(color.hex)
                               }
-                              title={color.name}
+                              title={color.hex}
                               whileHover={{
                                 scale:
-                                  selectedApiVariant?.colorId?.id === color.id
+                                  selectedApiVariant?.color === color.hex
                                     ? 1.1
                                     : 1.05,
                               }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              {selectedApiVariant?.colorId?.id === color.id && (
+                              {selectedApiVariant?.color === color.hex && (
                                 <Icon
                                   path={mdiCheck}
                                   size={1}
@@ -1283,7 +1232,7 @@ export default function POSPage() {
                     )}
                     {/* Enhanced Size Selection */}
                     {availableSizesForSelectedColor.length > 0 &&
-                      selectedApiVariant?.colorId && (
+                      selectedApiVariant?.color && (
                         <div className="space-y-4">
                           <div className="flex items-center gap-2">
                             <Icon
@@ -1294,17 +1243,12 @@ export default function POSPage() {
                             <h3 className="text-base font-semibold text-gray-700">
                               Kích thước
                             </h3>
-                            {selectedApiVariant?.sizeId && (
+                            {selectedApiVariant?.size && (
                               <Badge
                                 variant="secondary"
                                 className="bg-primary/10 text-primary border-primary/20"
                               >
-                                {selectedApiVariant.sizeId.name ||
-                                  (selectedApiVariant.sizeId.value
-                                    ? getSizeLabel(
-                                        Number(selectedApiVariant.sizeId.value)
-                                      )
-                                    : "N/A")}
+                                {selectedApiVariant.size}
                               </Badge>
                             )}
                           </div>
@@ -1313,40 +1257,36 @@ export default function POSPage() {
                               const variantForThisSize =
                                 selectedProduct.variants.find(
                                   (v) =>
-                                    v.colorId?.id ===
-                                      selectedApiVariant.colorId?.id &&
-                                    v.sizeId?.id === size.id
+                                    v.color === selectedApiVariant.color &&
+                                    v.size === size.code,
                                 );
                               const stockForThisSize =
                                 variantForThisSize?.stock || 0;
                               const isSelected =
-                                selectedApiVariant?.sizeId?.id === size.id;
+                                selectedApiVariant?.size === size.code;
                               return (
                                 <Button
-                                  key={size.id}
+                                  key={size.code}
                                   variant={isSelected ? "outline" : "ghost"}
                                   className={cn(
                                     "transition-all duration-300 min-w-[60px] h-auto py-2 px-4 flex flex-col items-center border-2",
                                     stockForThisSize === 0 &&
-                                      "opacity-50 cursor-not-allowed"
+                                      "opacity-50 cursor-not-allowed",
                                   )}
                                   onClick={() =>
-                                    handleSizeSelectFromDetail(size.id)
+                                    handleSizeSelectFromDetail(size.code)
                                   }
                                   disabled={stockForThisSize === 0}
                                 >
                                   <span className="font-medium">
-                                    {size.name ||
-                                      (size.value
-                                        ? getSizeLabel(Number(size.value))
-                                        : "N/A")}
+                                    {size.code}
                                   </span>
                                   <span
                                     className={cn(
                                       "text-xs mt-1",
                                       stockForThisSize === 0
                                         ? "text-red-500"
-                                        : "text-gray-500"
+                                        : "text-gray-500",
                                     )}
                                   >
                                     {stockForThisSize === 0
@@ -1373,15 +1313,15 @@ export default function POSPage() {
                           selectedApiVariant.stock > 10
                             ? "secondary"
                             : selectedApiVariant.stock > 0
-                            ? "outline"
-                            : "destructive"
+                              ? "outline"
+                              : "destructive"
                         }
                         className={cn(
                           selectedApiVariant.stock > 10
                             ? "bg-green-100 text-green-700 border-green-200"
                             : selectedApiVariant.stock > 0
-                            ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                            : "bg-red-100 text-red-700 border-red-200"
+                              ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                              : "bg-red-100 text-red-700 border-red-200",
                         )}
                       >
                         {selectedApiVariant.stock > 0
@@ -1445,7 +1385,7 @@ export default function POSPage() {
                         {processedProducts.map((product) => {
                           const firstVariant = (product as any)?.variants?.[0];
                           const uniqueColors = getUniqueColors(
-                            (product as any)?.variants
+                            (product as any)?.variants,
                           );
                           return (
                             <motion.div
@@ -1461,9 +1401,9 @@ export default function POSPage() {
                               >
                                 <img
                                   src={checkImageUrl(
-                                    getVariantImageUrl(firstVariant)
+                                    getVariantImageUrl(product, firstVariant),
                                   )}
-                                  alt={product.name}
+                                  alt={product.productDisplayName}
                                   className="object-contain transition-transform duration-300 group-hover:scale-105"
                                 />
                                 <div className="absolute top-2 right-2 flex flex-col gap-1">
@@ -1482,7 +1422,7 @@ export default function POSPage() {
                                   className="font-medium text-gray-700 group-hover:text-primary transition-colors truncate cursor-pointer"
                                   onClick={() => handleProductSelect(product)}
                                 >
-                                  {product.name}
+                                  {product.productDisplayName}
                                 </h3>
                                 <div className="flex justify-between items-center">
                                   <div className="flex flex-col">
@@ -1498,14 +1438,14 @@ export default function POSPage() {
                                             (product as any)?.hasDiscount
                                               ? (product as any)
                                                   ?.discountedPrice
-                                              : firstVariant.price
+                                              : firstVariant.price,
                                           )
                                         : "N/A"}
                                     </p>
                                     {(product as any).hasDiscount && (
                                       <p className="text-xs text-gray-700 line-through">
                                         {formatCurrency(
-                                          (product as any)?.originalPrice
+                                          (product as any)?.originalPrice,
                                         )}
                                       </p>
                                     )}
@@ -1516,12 +1456,12 @@ export default function POSPage() {
                                         .slice(0, 3)
                                         .map((color, idx) => (
                                           <div
-                                            key={color.id || `color-${idx}`}
+                                            key={color.hex || `color-${idx}`}
                                             className="h-5 w-5 rounded-full border border-white"
                                             style={{
-                                              backgroundColor: color.code,
+                                              backgroundColor: color.hex,
                                             }}
-                                            title={color.name}
+                                            title={color.hex}
                                           />
                                         ))}
                                       {uniqueColors.length > 3 && (
@@ -1537,7 +1477,7 @@ export default function POSPage() {
                                   className="w-full mt-3 flex items-center justify-center gap-2"
                                   onClick={() => handleProductSelect(product)}
                                   disabled={product.variants.every(
-                                    (v) => v.stock === 0
+                                    (v) => v.stock === 0,
                                   )}
                                 >
                                   <Icon path={mdiEye} size={0.8} />
@@ -1582,8 +1522,8 @@ export default function POSPage() {
                               ).variants.reduce((sum, v) => sum + v.stock, 0);
                               const uniqueColorsCount = new Set(
                                 (product as any)?.variants.map(
-                                  (v) => (v as any)?.colorId?.id
-                                )
+                                  (v: any) => v.color,
+                                ),
                               ).size;
                               return (
                                 <tr
@@ -1598,14 +1538,17 @@ export default function POSPage() {
                                       <div className="relative h-10 w-10 rounded-[6px] overflow-hidden bg-gray-50">
                                         <img
                                           src={checkImageUrl(
-                                            getVariantImageUrl(firstVariant)
+                                            getVariantImageUrl(
+                                              product,
+                                              firstVariant,
+                                            ),
                                           )}
-                                          alt={product.name}
+                                          alt={product.productDisplayName}
                                           className="object-contain"
                                         />
                                       </div>
                                       <span className="font-medium text-gray-700 truncate max-w-[150px]">
-                                        {product.name}
+                                        {product.productDisplayName}
                                       </span>
                                     </div>
                                   </td>
@@ -1626,14 +1569,14 @@ export default function POSPage() {
                                               (product as any)?.hasDiscount
                                                 ? (product as any)
                                                     .discountedPrice
-                                                : firstVariant.price
+                                                : firstVariant.price,
                                             )
                                           : "N/A"}
                                       </span>
                                       {(product as any).hasDiscount && (
                                         <span className="text-xs text-gray-700 line-through">
                                           {formatCurrency(
-                                            (product as any)?.originalPrice
+                                            (product as any)?.originalPrice,
                                           )}
                                         </span>
                                       )}
@@ -1648,31 +1591,27 @@ export default function POSPage() {
                                         {Array.from(
                                           new Map(
                                             (product as any)?.variants.map(
-                                              (v) => [
-                                                (v as any)?.colorId?.id,
-                                                (v as any)?.colorId,
-                                              ]
-                                            )
-                                          ).values()
+                                              (v: any) => [v.color, v.color],
+                                            ),
+                                          ).values(),
                                         )
                                           .slice(0, 3)
                                           .map(
-                                            (color, idx) =>
-                                              color && (
+                                            (colorHex, idx) =>
+                                              colorHex && (
                                                 <div
                                                   key={
-                                                    (color as any).id ||
+                                                    (colorHex as string) ||
                                                     `table-color-${idx}`
                                                   }
                                                   className="h-5 w-5 rounded-full border"
                                                   style={{
-                                                    backgroundColor: (
-                                                      color as any
-                                                    ).code,
+                                                    backgroundColor:
+                                                      colorHex as string,
                                                   }}
-                                                  title={(color as any).name}
+                                                  title={colorHex as string}
                                                 />
-                                              )
+                                              ),
                                           )}
                                         {uniqueColorsCount > 3 && (
                                           <div className="h-5 w-5 rounded-full bg-gray-100 border border-white flex items-center justify-center text-xs text-gray-700">
@@ -1691,8 +1630,8 @@ export default function POSPage() {
                                         totalStock > 10
                                           ? "secondary"
                                           : totalStock > 0
-                                          ? "outline"
-                                          : "destructive"
+                                            ? "outline"
+                                            : "destructive"
                                       }
                                       className="text-xs !flex-shrink-0"
                                     >
@@ -1700,8 +1639,8 @@ export default function POSPage() {
                                         {totalStock > 10
                                           ? "Còn hàng"
                                           : totalStock > 0
-                                          ? "Sắp hết"
-                                          : "Hết hàng"}
+                                            ? "Sắp hết"
+                                            : "Hết hàng"}
                                       </span>
                                     </Badge>
                                   </td>
@@ -1740,7 +1679,7 @@ export default function POSPage() {
                                               size="sm"
                                               className="h-8 w-8 p-0"
                                               disabled={product.variants.every(
-                                                (v) => v.stock === 0
+                                                (v) => v.stock === 0,
                                               )}
                                               onClick={(e) => {
                                                 e.stopPropagation();
@@ -1748,17 +1687,17 @@ export default function POSPage() {
                                                 const firstAvailableVariant = (
                                                   product as any
                                                 ).variants.find(
-                                                  (v: any) => v.stock > 0
+                                                  (v: any) => v.stock > 0,
                                                 );
                                                 if (firstAvailableVariant) {
                                                   addItemToCorrectCart(
                                                     product,
                                                     firstAvailableVariant,
-                                                    false
+                                                    false,
                                                   );
                                                 } else {
                                                   toast.warn(
-                                                    "Sản phẩm này đã hết hàng."
+                                                    "Sản phẩm này đã hết hàng.",
                                                   );
                                                 }
                                               }}
@@ -1829,7 +1768,7 @@ export default function POSPage() {
                                         >
                                           {i}
                                         </PaginationLink>
-                                      </PaginationItem>
+                                      </PaginationItem>,
                                     );
                                   }
                                 } else {
@@ -1848,21 +1787,21 @@ export default function POSPage() {
                                       >
                                         1
                                       </PaginationLink>
-                                    </PaginationItem>
+                                    </PaginationItem>,
                                   );
 
                                   if (currentPage > 3) {
                                     pages.push(
                                       <PaginationItem key="start-ellipsis">
                                         <PaginationEllipsis />
-                                      </PaginationItem>
+                                      </PaginationItem>,
                                     );
                                   }
 
                                   let startPage = Math.max(2, currentPage - 1);
                                   let endPage = Math.min(
                                     totalPages - 1,
-                                    currentPage + 1
+                                    currentPage + 1,
                                   );
 
                                   if (currentPage <= 2) {
@@ -1888,7 +1827,7 @@ export default function POSPage() {
                                         >
                                           {i}
                                         </PaginationLink>
-                                      </PaginationItem>
+                                      </PaginationItem>,
                                     );
                                   }
 
@@ -1896,7 +1835,7 @@ export default function POSPage() {
                                     pages.push(
                                       <PaginationItem key="end-ellipsis">
                                         <PaginationEllipsis />
-                                      </PaginationItem>
+                                      </PaginationItem>,
                                     );
                                   }
 
@@ -1915,7 +1854,7 @@ export default function POSPage() {
                                       >
                                         {totalPages}
                                       </PaginationLink>
-                                    </PaginationItem>
+                                    </PaginationItem>,
                                   );
                                 }
                                 return pages;

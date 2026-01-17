@@ -47,6 +47,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   useAccounts,
   useDeleteAccount,
   useUpdateAccountStatus,
@@ -80,7 +89,7 @@ export default function AccountsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IAccountFilter>({
     page: 1,
-    limit: 10,
+    limit: 5,
   });
   const [showFilters, setShowFilters] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -93,7 +102,7 @@ export default function AccountsPage() {
   const { data, isLoading, error } = useAccounts(filters);
   const deleteAccount = useDeleteAccount();
   const updateAccountStatus = useUpdateAccountStatus(
-    accountToUpdateStatus?.id || ""
+    accountToUpdateStatus?.id || "",
   );
   const queryClient = useQueryClient();
 
@@ -112,7 +121,7 @@ export default function AccountsPage() {
 
   const handleFilterChange = (
     key: keyof IAccountFilter,
-    value: string | number | undefined
+    value: string | number | undefined,
   ) => {
     if (value === "") {
       const newFilters = { ...filters };
@@ -187,7 +196,7 @@ export default function AccountsPage() {
         },
         onError: (error) => {
           toast.error(
-            "Xóa tài khoản thất bại: " + (error.message || "Không xác định")
+            "Xóa tài khoản thất bại: " + (error.message || "Không xác định"),
           );
         },
       });
@@ -198,7 +207,7 @@ export default function AccountsPage() {
 
   const handleUpdateStatus = (
     account: IAccount,
-    status: "ACTIVE" | "INACTIVE"
+    status: "ACTIVE" | "INACTIVE",
   ) => {
     setAccountToUpdateStatus(account);
     setNewStatus(status);
@@ -222,7 +231,7 @@ export default function AccountsPage() {
         onError: (error) => {
           toast.error(
             "Cập nhật trạng thái tài khoản thất bại: " +
-              (error.message || "Không xác định")
+              (error.message || "Không xác định"),
           );
         },
       });
@@ -305,7 +314,7 @@ export default function AccountsPage() {
                       onValueChange={(value) =>
                         handleFilterChange(
                           "role",
-                          value === "all" ? undefined : value
+                          value === "all" ? undefined : value,
                         )
                       }
                     >
@@ -328,7 +337,7 @@ export default function AccountsPage() {
                       onValueChange={(value) =>
                         handleFilterChange(
                           "status",
-                          value === "all" ? undefined : value
+                          value === "all" ? undefined : value,
                         )
                       }
                     >
@@ -411,7 +420,7 @@ export default function AccountsPage() {
                                 />
                                 <AvatarFallback>
                                   {(account.name || account.fullName)?.charAt(
-                                    0
+                                    0,
                                   ) || "?"}
                                 </AvatarFallback>
                               </Avatar>
@@ -445,11 +454,11 @@ export default function AccountsPage() {
                           {getStatusBadge(
                             account.is_active
                               ? "ACTIVE"
-                              : account.status || "INACTIVE"
+                              : account.status || "INACTIVE",
                           )}
                         </TableCell>
                         <TableCell className="py-3 px-4 text-sm text-gray-700">
-                          {formatDate(account.created_at || account.createdAt)}
+                          {formatDate(account.created_at)}
                         </TableCell>
                         <TableCell className="py-3 px-4 text-right">
                           <DropdownMenu>
@@ -530,48 +539,131 @@ export default function AccountsPage() {
               </Table>
 
               {data?.data.pages && data.data.pages > 1 && (
-                <div className="flex items-center justify-between px-4 py-3 border-t">
-                  <div className="text-sm text-gray-700">
-                    Hiển thị {(data.data.page - 1) * (filters.limit || 10) + 1}{" "}
+                <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+                  <div className="text-sm text-gray-700 order-2 sm:order-1">
+                    Hiển thị{" "}
+                    <span className="font-medium">
+                      {(data.data.page - 1) * (filters.limit || 5) + 1}
+                    </span>{" "}
                     đến{" "}
-                    {Math.min(
-                      data.data.page * (filters.limit || 10),
-                      data.data.count
-                    )}{" "}
-                    trong tổng số {data.data.count} tài khoản
+                    <span className="font-medium">
+                      {Math.min(
+                        data.data.page * (filters.limit || 5),
+                        data.data.count,
+                      )}
+                    </span>{" "}
+                    trong tổng số{" "}
+                    <span className="font-medium">{data.data.count}</span> tài
+                    khoản
                   </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleChangePage(data.data.page - 1)}
-                      disabled={data.data.page === 1}
-                    >
-                      Trước
-                    </Button>
-                    {Array.from(
-                      { length: data.data.pages },
-                      (_, i) => i + 1
-                    ).map((page) => (
-                      <Button
-                        key={page}
-                        variant={
-                          page === data.data.page ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => handleChangePage(page)}
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleChangePage(data.data.page + 1)}
-                      disabled={data.data.page === data.data.pages}
-                    >
-                      Sau
-                    </Button>
+
+                  <div className="flex justify-center order-1 sm:order-2">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            href="#"
+                            disabled={data.data.page === 1}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (data.data.page > 1)
+                                handleChangePage(data.data.page - 1);
+                            }}
+                          />
+                        </PaginationItem>
+
+                        {(() => {
+                          const totalPages = data.data.pages;
+                          const currentPage = data.data.page;
+                          const pages = [];
+                          if (totalPages > 0) {
+                            pages.push(
+                              <PaginationItem key={1}>
+                                <PaginationLink
+                                  href="#"
+                                  isActive={currentPage === 1}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleChangePage(1);
+                                  }}
+                                >
+                                  1
+                                </PaginationLink>
+                              </PaginationItem>,
+                            );
+                          }
+
+                          if (currentPage > 3) {
+                            pages.push(
+                              <PaginationItem key="start-ellipsis">
+                                <PaginationEllipsis />
+                              </PaginationItem>,
+                            );
+                          }
+
+                          for (
+                            let i = Math.max(2, currentPage - 1);
+                            i <= Math.min(totalPages - 1, currentPage + 1);
+                            i++
+                          ) {
+                            if (i !== 1 && i !== totalPages) {
+                              pages.push(
+                                <PaginationItem key={i}>
+                                  <PaginationLink
+                                    href="#"
+                                    isActive={currentPage === i}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleChangePage(i);
+                                    }}
+                                  >
+                                    {i}
+                                  </PaginationLink>
+                                </PaginationItem>,
+                              );
+                            }
+                          }
+
+                          if (currentPage < totalPages - 2) {
+                            pages.push(
+                              <PaginationItem key="end-ellipsis">
+                                <PaginationEllipsis />
+                              </PaginationItem>,
+                            );
+                          }
+
+                          if (totalPages > 1) {
+                            pages.push(
+                              <PaginationItem key={totalPages}>
+                                <PaginationLink
+                                  href="#"
+                                  isActive={currentPage === totalPages}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleChangePage(totalPages);
+                                  }}
+                                >
+                                  {totalPages}
+                                </PaginationLink>
+                              </PaginationItem>,
+                            );
+                          }
+                          return pages;
+                        })()}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            href="#"
+                            disabled={data.data.page === data.data.pages}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              if (data.data.page < data.data.pages)
+                                handleChangePage(data.data.page + 1);
+                            }}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   </div>
                 </div>
               )}

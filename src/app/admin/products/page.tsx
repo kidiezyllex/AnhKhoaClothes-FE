@@ -21,6 +21,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -59,7 +68,7 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<IProductFilter>({
     page: 1,
-    limit: 10,
+    limit: 5,
   });
   const { data: promotionsData } = usePromotions();
   const [showFilters, setShowFilters] = useState(false);
@@ -82,7 +91,7 @@ export default function ProductsPage() {
     if (promotionsData?.data?.promotions) {
       products = applyPromotionsToProducts(
         products,
-        promotionsData.data.promotions
+        promotionsData.data.promotions,
       );
     }
 
@@ -108,7 +117,7 @@ export default function ProductsPage() {
               error?.response?.data?.message ||
               error.message ||
               "Đã có lỗi xảy ra"
-            }`
+            }`,
           );
         },
       });
@@ -116,7 +125,7 @@ export default function ProductsPage() {
       toast.error(
         `Xóa sản phẩm thất bại: ${
           error?.response?.data?.message || error.message || "Đã có lỗi xảy ra"
-        }`
+        }`,
       );
     }
   };
@@ -145,7 +154,7 @@ export default function ProductsPage() {
   const handleOpenLightbox = (
     product: any,
     _variantIndex: number = 0,
-    imageIndex: number = 0
+    imageIndex: number = 0,
   ) => {
     // Check if images are at product level (new API structure)
     const productImages = (product as any)?.images || [];
@@ -172,7 +181,7 @@ export default function ProductsPage() {
             (product as any)?.productDisplayName ||
             "Product Image",
           download: checkImageUrl(typeof img === "string" ? img : img.imageUrl),
-        }))
+        })),
       );
     }
 
@@ -309,7 +318,7 @@ export default function ProductsPage() {
                               (product as any)?.images?.[0] ||
                                 (product as any)?.variants[0]?.images?.[0]
                                   ?.imageUrl ||
-                                (product as any)?.variants[0]?.images?.[0]
+                                (product as any)?.variants[0]?.images?.[0],
                             )}
                             alt={
                               product.name ||
@@ -345,7 +354,7 @@ export default function ProductsPage() {
                             ? calculateProductDiscount(
                                 (product as any)?.id,
                                 basePrice,
-                                promotionsData.data.promotions
+                                promotionsData.data.promotions,
                               )
                             : {
                                 originalPrice: basePrice,
@@ -398,7 +407,7 @@ export default function ProductsPage() {
                       <TableCell className="px-4 py-4 whitespace-nowrap text-base text-gray-700">
                         {formatDate(
                           (product as any)?.updated_at ||
-                            (product as any)?.updatedAt
+                            (product as any)?.updatedAt,
                         )}
                       </TableCell>
                       <TableCell className="px-4 py-4 whitespace-nowrap text-right">
@@ -480,157 +489,172 @@ export default function ProductsPage() {
 
           {data?.data &&
             (data.data.pages > 1 || data.data.pagination?.totalPages > 1) && (
-              <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200">
-                <div className="hidden sm:block">
-                  <p className="text-sm text-gray-700">
-                    Hiển thị{" "}
-                    <span className="font-medium">
-                      {((data.data.page ||
+              <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 gap-4">
+                <div className="text-sm text-gray-700 order-2 sm:order-1">
+                  Hiển thị{" "}
+                  <span className="font-medium">
+                    {((data.data.page ||
+                      data.data.pagination?.currentPage ||
+                      1) -
+                      1) *
+                      (data.data.perPage || data.data.pagination?.limit || 5) +
+                      1}
+                  </span>{" "}
+                  đến{" "}
+                  <span className="font-medium">
+                    {Math.min(
+                      (data.data.page ||
                         data.data.pagination?.currentPage ||
-                        1) -
                         1) *
-                        (data.data.perPage ||
-                          data.data.pagination?.limit ||
-                          10) +
-                        1}
-                    </span>{" "}
-                    đến{" "}
-                    <span className="font-medium">
-                      {Math.min(
-                        (data.data.page ||
-                          data.data.pagination?.currentPage ||
-                          1) *
-                          (data.data.perPage ||
-                            data.data.pagination?.limit ||
-                            10),
-                        data.data.count || data.data.pagination?.totalItems || 0
-                      )}
-                    </span>{" "}
-                    của{" "}
-                    <span className="font-medium">
-                      {data.data.count || data.data.pagination?.totalItems || 0}
-                    </span>{" "}
-                    sản phẩm
-                  </p>
+                        (data.data.perPage || data.data.pagination?.limit || 5),
+                      data.data.count || data.data.pagination?.totalItems || 0,
+                    )}
+                  </span>{" "}
+                  trong tổng số{" "}
+                  <span className="font-medium">
+                    {data.data.count || data.data.pagination?.totalItems || 0}
+                  </span>{" "}
+                  sản phẩm
                 </div>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleChangePage(
-                        (data.data.page ||
-                          data.data.pagination?.currentPage ||
-                          1) - 1
-                      )
-                    }
-                    disabled={
-                      (data.data.page ||
-                        data.data.pagination?.currentPage ||
-                        1) === 1
-                    }
-                  >
-                    Trước
-                  </Button>
-                  {(() => {
-                    const totalPages =
-                      data.data.pages || data.data.pagination?.totalPages || 1;
-                    const currentPage =
-                      data.data.page || data.data.pagination?.currentPage || 1;
-                    const pageButtons = [];
 
-                    // Always show first page
-                    if (totalPages > 0) {
-                      pageButtons.push(
-                        <Button
-                          key={1}
-                          variant={currentPage === 1 ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => handleChangePage(1)}
-                        >
-                          1
-                        </Button>
-                      );
-                    }
-
-                    // Show ellipsis if needed
-                    if (currentPage > 3) {
-                      pageButtons.push(
-                        <span
-                          key="ellipsis-start"
-                          className="px-2 text-gray-500"
-                        >
-                          ...
-                        </span>
-                      );
-                    }
-
-                    // Show pages around current page
-                    for (
-                      let i = Math.max(2, currentPage - 1);
-                      i <= Math.min(totalPages - 1, currentPage + 1);
-                      i++
-                    ) {
-                      if (i !== 1 && i !== totalPages) {
-                        pageButtons.push(
-                          <Button
-                            key={i}
-                            variant={currentPage === i ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handleChangePage(i)}
-                          >
-                            {i}
-                          </Button>
-                        );
-                      }
-                    }
-
-                    // Show ellipsis if needed
-                    if (currentPage < totalPages - 2) {
-                      pageButtons.push(
-                        <span key="ellipsis-end" className="px-2 text-gray-500">
-                          ...
-                        </span>
-                      );
-                    }
-
-                    // Always show last page if there's more than 1 page
-                    if (totalPages > 1) {
-                      pageButtons.push(
-                        <Button
-                          key={totalPages}
-                          variant={
-                            currentPage === totalPages ? "default" : "outline"
+                <div className="flex justify-center order-1 sm:order-2">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          disabled={
+                            (data.data.page ||
+                              data.data.pagination?.currentPage ||
+                              1) <= 1
                           }
-                          size="sm"
-                          onClick={() => handleChangePage(totalPages)}
-                        >
-                          {totalPages}
-                        </Button>
-                      );
-                    }
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const currentPage =
+                              data.data.page ||
+                              data.data.pagination?.currentPage ||
+                              1;
+                            if (currentPage > 1)
+                              handleChangePage(currentPage - 1);
+                          }}
+                        />
+                      </PaginationItem>
 
-                    return pageButtons;
-                  })()}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleChangePage(
-                        (data.data.page ||
+                      {(() => {
+                        const pages = [];
+                        const totalPages =
+                          data.data.pages ||
+                          data.data.pagination?.totalPages ||
+                          1;
+                        const currentPage =
+                          data.data.page ||
                           data.data.pagination?.currentPage ||
-                          1) + 1
-                      )
-                    }
-                    disabled={
-                      (data.data.page ||
-                        data.data.pagination?.currentPage ||
-                        1) >=
-                      (data.data.pages || data.data.pagination?.totalPages || 1)
-                    }
-                  >
-                    Sau
-                  </Button>
+                          1;
+
+                        if (totalPages > 0) {
+                          pages.push(
+                            <PaginationItem key={1}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === 1}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleChangePage(1);
+                                }}
+                              >
+                                1
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+
+                        if (currentPage > 3) {
+                          pages.push(
+                            <PaginationItem key="start-ellipsis">
+                              <PaginationEllipsis />
+                            </PaginationItem>,
+                          );
+                        }
+
+                        for (
+                          let i = Math.max(2, currentPage - 1);
+                          i <= Math.min(totalPages - 1, currentPage + 1);
+                          i++
+                        ) {
+                          if (i !== 1 && i !== totalPages) {
+                            pages.push(
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  href="#"
+                                  isActive={currentPage === i}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleChangePage(i);
+                                  }}
+                                >
+                                  {i}
+                                </PaginationLink>
+                              </PaginationItem>,
+                            );
+                          }
+                        }
+
+                        if (currentPage < totalPages - 2) {
+                          pages.push(
+                            <PaginationItem key="end-ellipsis">
+                              <PaginationEllipsis />
+                            </PaginationItem>,
+                          );
+                        }
+
+                        if (totalPages > 1) {
+                          pages.push(
+                            <PaginationItem key={totalPages}>
+                              <PaginationLink
+                                href="#"
+                                isActive={currentPage === totalPages}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleChangePage(totalPages);
+                                }}
+                              >
+                                {totalPages}
+                              </PaginationLink>
+                            </PaginationItem>,
+                          );
+                        }
+
+                        return pages;
+                      })()}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          disabled={
+                            (data.data.page ||
+                              data.data.pagination?.currentPage ||
+                              1) >=
+                            (data.data.pages ||
+                              data.data.pagination?.totalPages ||
+                              1)
+                          }
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const totalPages =
+                              data.data.pages ||
+                              data.data.pagination?.totalPages ||
+                              1;
+                            const currentPage =
+                              data.data.page ||
+                              data.data.pagination?.currentPage ||
+                              1;
+                            if (currentPage < totalPages)
+                              handleChangePage(currentPage + 1);
+                          }}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
               </div>
             )}
