@@ -193,19 +193,7 @@ export default function PromotionsPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex space-x-2">
-          <a
-            href="/admin/discounts/promotions/create"
-            className="flex items-center gap-2"
-          >
-            <Button className="flex items-center gap-2">
-              <Icon path={mdiPlus} size={0.8} />
-              Thêm chiến dịch khuyến mãi
-            </Button>
-          </a>
-        </div>
       </div>
-
       <Card className="mb-4">
         <CardContent className="py-4">
           <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:justify-between md:items-center gap-2">
@@ -247,6 +235,15 @@ export default function PromotionsPage() {
                 {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>
+            <a
+              href="/admin/discounts/promotions/create"
+              className="flex items-center gap-2"
+            >
+              <Button className="flex items-center gap-2">
+                <Icon path={mdiPlus} size={0.8} />
+                Thêm chiến dịch khuyến mãi
+              </Button>
+            </a>
           </div>
 
           <AnimatePresence>

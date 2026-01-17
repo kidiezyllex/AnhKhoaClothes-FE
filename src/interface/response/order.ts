@@ -68,9 +68,18 @@ export interface IOrder {
   code?: string;
   createdAt?: string;
   total?: number;
+  subTotal?: number;
   paymentMethod?: string;
   paymentStatus?: string;
   orderStatus?: string;
+  shippingPhoneNumber?: string;
+  shippingName?: string;
+  shippingSpecificAddress?: string;
+  discount?: number;
+  customer?: any;
+  voucher?: {
+    code: string;
+  };
 }
 
 export interface IOrdersResponse {

@@ -77,7 +77,14 @@ interface OrderItem {
   orderId: number;
   variantId: number;
   quantity: number;
-  price: string | number;
+  price: number;
+  product_id?: number | string;
+  name?: string;
+  color_selected?: string;
+  size_selected?: string;
+  images?: (string | { imageUrl?: string; url?: string })[];
+  qty?: number;
+  price_sale?: number;
   productVariant?: {
     product: {
       name: string;
@@ -95,6 +102,34 @@ interface OrderItem {
   variant?: {
     colorId: string;
     sizeId: string;
+  };
+}
+
+interface MappedOrder {
+  code: string;
+  orderStatus: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  createdAt: string;
+  total: number;
+  subTotal: number;
+  discount: number;
+  shippingName: string;
+  shippingPhoneNumber: string;
+  shippingSpecificAddress: string;
+  customer:
+    | {
+        fullName: string;
+        email: string | null;
+        phoneNumber: string | null;
+      }
+    | string;
+  items: OrderItem[];
+  staff?: {
+    fullName: string;
+  };
+  voucher?: {
+    code: string;
   };
 }
 
@@ -300,7 +335,7 @@ const PaymentStatusBadge = ({ status }: { status: string }) => {
   return <Badge variant={variant as any}>{getStatusLabel(status)}</Badge>;
 };
 
-const getProductInfo = (item: any): ProductInfo => {
+const getProductInfo = (item: OrderItem): ProductInfo => {
   // Support for new API format (IOrderItem)
   if (item.product_id) {
     return {
@@ -338,7 +373,7 @@ const getProductInfo = (item: any): ProductInfo => {
 };
 
 // Helper function to get variant image for both online and POS orders
-const getVariantImage = (item: any): string => {
+const getVariantImage = (item: OrderItem): string => {
   // If item has images array directly (new API format)
   if (item.images && item.images.length > 0) {
     const firstImage = item.images[0];
@@ -766,7 +801,7 @@ export default function OrderDetailPage() {
   const orderData = orderDetail.data.order;
 
   // Normalize order data to match UI expectations
-  const order: any = {
+  const order: MappedOrder = {
     ...orderData,
     orderStatus: orderData.status,
     paymentStatus: orderData.is_paid ? "PAID" : "PENDING",

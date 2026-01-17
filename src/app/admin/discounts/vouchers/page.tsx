@@ -214,25 +214,6 @@ export default function VouchersPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="flex space-x-2">
-          {/* <Button
-            variant="outline"
-            onClick={() => setIsValidateDialogOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Icon path={mdiTagCheckOutline} size={0.8} />
-            Kiểm tra mã
-          </Button> */}
-          <a
-            href="/admin/discounts/vouchers/create"
-            className="flex items-center gap-2"
-          >
-            <Button className="flex items-center gap-2">
-              <Icon path={mdiPlus} size={0.8} />
-              Thêm mã giảm giá mới
-            </Button>
-          </a>
-        </div>
       </div>
 
       <Card className="mb-4">
@@ -276,6 +257,15 @@ export default function VouchersPage() {
                 {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
               </Button>
             </div>
+            <a
+              href="/admin/discounts/vouchers/create"
+              className="flex items-center gap-2"
+            >
+              <Button className="flex items-center gap-2">
+                <Icon path={mdiPlus} size={0.8} />
+                Thêm mã giảm giá mới
+              </Button>
+            </a>
           </div>
 
           <AnimatePresence>
